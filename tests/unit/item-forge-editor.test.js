@@ -88,3 +88,39 @@ test("ItemForgeEditor preview and reroll stay side-effect free and expose the ca
   const rerolled = await editor.reroll();
   assert.notEqual(rerolled.request.seed, "fixed");
 });
+
+test("dependent treasure-type rerender preserves the parameter-panel scroll position", async () => {
+  const editor = new ItemForgeEditor({ api: apiFixture(), request: { mode: "treasure", category: "treasure", seed: "scroll-test" } });
+  editor.rendered = true;
+
+  const panel = { scrollTop: 187, scrollLeft: 0 };
+  const input = {
+    name: "treasure.type",
+    value: "any",
+    addEventListener: (_event, callback) => { input.onChange = callback; }
+  };
+  const root = {
+    ownerDocument: { activeElement: null },
+    contains: () => false,
+    querySelectorAll: (selector) => {
+      if (selector === "input, select") return [input];
+      if (selector === "details") return [];
+      if (selector.includes(':checked')) return [];
+      return [];
+    },
+    querySelector: (selector) => {
+      if (selector === ".item-forge-parameters") return panel;
+      if (selector === '[name="treasure.type"]') return input;
+      return null;
+    }
+  };
+  editor.element = root;
+  editor.render = async () => {
+    panel.scrollTop = 0;
+    return editor;
+  };
+
+  editor._onRender({}, {});
+  await input.onChange();
+  assert.equal(panel.scrollTop, 187);
+});

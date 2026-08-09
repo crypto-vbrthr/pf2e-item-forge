@@ -103,7 +103,8 @@
       "Value": "Wert",
       "TreasureType": "Schatzart",
       "SolverAttempts": "ValueSolver-Versuche",
-      "Components": "Besondere Bestandteile"
+      "Components": "Besondere Bestandteile",
+      "Details": "Details"
     },
     "Notifications": {
       "GenerationFailed": "Für diese Parameter konnte kein Gegenstand erzeugt werden.",

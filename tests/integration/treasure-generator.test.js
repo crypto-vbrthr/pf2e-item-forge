@@ -310,3 +310,171 @@ test("German tapestry names avoid the known adjective-case regression", async ()
   }));
   assert.equal(result.itemSource.name.includes("mit religiöses Motiv"), false);
 });
+
+test("deepened core treasure library exposes broad content registries", () => {
+  const { treasure } = setup();
+  const diagnostics = treasure.getDiagnostics();
+  assert.ok(diagnostics.types >= 70, `expected at least 70 treasure types, got ${diagnostics.types}`);
+  assert.ok(diagnostics.materials >= 40, `expected at least 40 materials, got ${diagnostics.materials}`);
+  assert.ok(diagnostics.conditions >= 14, `expected at least 14 conditions, got ${diagnostics.conditions}`);
+  assert.ok(diagnostics.motifs >= 16, `expected at least 16 motifs, got ${diagnostics.motifs}`);
+  assert.ok(diagnostics.styles >= 12, `expected at least 12 styles, got ${diagnostics.styles}`);
+});
+
+test("generated treasure stores reproducible forge metadata and a detailed valuation breakdown", async () => {
+  const { generator } = setup();
+  const result = await generator.generate(request({
+    category: "treasure.jewelry",
+    treasure: {
+      type: "core.type.jewelry.diadem",
+      material: "core.material.gold",
+      condition: "core.condition.good",
+      craftsmanship: "core.craftsmanship.fine",
+      motif: "core.motif.heraldry",
+      style: "core.style.noble"
+    },
+    seed: "metadata-diadem"
+  }));
+  const flag = result.itemSource.flags?.["pf2e-item-forge"];
+  assert.equal(flag.generated, true);
+  assert.equal(flag.seed, "metadata-diadem");
+  assert.equal(flag.treasure.type.id, "core.type.jewelry.diadem");
+  assert.ok(Number.isFinite(result.plan.valuation.materialFactor));
+  assert.ok(Number.isFinite(result.plan.valuation.craftsmanshipFactor));
+  assert.equal(result.plan.valuation.finalValue, result.metadata.value);
+});
+
+test("book treasure now carries edition and completeness details", async () => {
+  const { generator } = setup();
+  const result = await generator.generate(request({
+    category: "treasure.book",
+    treasure: {
+      type: "core.type.book.genealogy",
+      material: "any",
+      condition: "core.condition.worn",
+      craftsmanship: "any",
+      motif: "any",
+      style: "core.style.scholarly"
+    },
+    seed: "deep-book"
+  }));
+  assert.ok(result.plan.attributes.subject);
+  assert.ok(result.plan.attributes.edition);
+  assert.ok(result.plan.attributes.completeness);
+  assert.ok(result.itemSource.system.description.value.includes(result.plan.attributes.edition.label));
+});
+
+test("beverage treasure carries origin, quality, vessel, and age details", async () => {
+  const { generator } = setup();
+  const result = await generator.generate(request({
+    category: "treasure.beverage.wine",
+    seed: "deep-wine"
+  }));
+  for (const field of ["kind", "vessel", "age", "quality", "origin"]) {
+    assert.ok(result.plan.attributes[field], `missing beverage attribute ${field}`);
+  }
+});
+
+test("material-aware conditions accept water damage for books but reject it for gemstones", async () => {
+  const { generator } = setup();
+  const book = await generator.generate(request({
+    category: "treasure.book",
+    treasure: {
+      type: "core.type.book.history",
+      material: "core.material.parchment",
+      condition: "core.condition.water-stained",
+      craftsmanship: "core.craftsmanship.solid",
+      motif: "any",
+      style: "core.style.scholarly"
+    },
+    seed: "water-book"
+  }));
+  assert.equal(book.plan.condition.id, "core.condition.water-stained");
+
+  await assert.rejects(
+    () => generator.generate(request({
+      category: "treasure.gemstone",
+      treasure: {
+        type: "core.type.gem.cut",
+        material: "core.material.ruby",
+        condition: "core.condition.water-stained",
+        craftsmanship: "core.craftsmanship.fine",
+        motif: "any",
+        style: "core.style.noble"
+      },
+      solver: { maxAttempts: 3 },
+      seed: "water-gem"
+    })),
+    (error) => error?.code === "NO_TREASURE_CANDIDATE"
+  );
+});
+
+test("treasure type condition weights materially influence condition selection", async () => {
+  const { categories, treasure } = setup();
+  treasure.conditions.register({ id: "test.condition.a", label: { de: "A", en: "A" }, sentence: { de: "A.", en: "A." }, valueFactor: 1, weight: 1 });
+  treasure.conditions.register({ id: "test.condition.b", label: { de: "B", en: "B" }, sentence: { de: "B.", en: "B." }, valueFactor: 1, weight: 1 });
+  treasure.types.register({
+    id: "test.type.condition-weighted",
+    categories: ["treasure", "treasure.luxury"],
+    label: { de: "Teststück", en: "test piece" },
+    tags: ["luxury"],
+    baseValue: [10, 10],
+    materialTags: [],
+    supportsMotif: false,
+    usesCraftsmanship: false,
+    components: [],
+    conditionWeights: { "test.condition.a": 1000, "test.condition.b": 0 }
+  });
+  const generator = new TreasureGenerator({ categories, treasure, localeProvider: () => "de" });
+  let selectedA = 0;
+  for (let index = 0; index < 60; index += 1) {
+    const result = await generator.generate(request({
+      category: "treasure.luxury",
+      treasure: {
+        type: "test.type.condition-weighted",
+        material: "any",
+        condition: "any",
+        craftsmanship: "any",
+        motif: "any",
+        style: "core.style.merchant"
+      },
+      value: { mode: "target", target: 10, tolerance: 1 },
+      solver: { maxAttempts: 1 },
+      seed: `condition-weight-${index}`
+    }));
+    if (result.plan.condition.id === "test.condition.a") selectedA += 1;
+  }
+  assert.ok(selectedA >= 50, `preferred condition selected only ${selectedA}/60 times`);
+});
+
+test("large sculpture treasure preserves type-specific bulk", async () => {
+  const { generator } = setup();
+  const result = await generator.generate(request({
+    category: "treasure.art.sculpture",
+    treasure: {
+      type: "core.type.art.statue",
+      material: "core.material.marble",
+      condition: "core.condition.good",
+      craftsmanship: "core.craftsmanship.solid",
+      motif: "core.motif.ancestral",
+      style: "core.style.ancient"
+    },
+    seed: "heavy-statue"
+  }));
+  assert.equal(result.itemSource.system.bulk.value, 4);
+});
+
+test("core book and beverage treasure types expose distinct selector labels", () => {
+  const { treasure } = setup();
+  const label = (entry) => entry.label?.de ?? entry.label;
+
+  const books = treasure.types.getAll().filter((entry) => entry.id.startsWith("core.type.book."));
+  const beverages = treasure.types.getAll().filter((entry) => entry.id.startsWith("core.type.beverage."));
+
+  assert.equal(new Set(books.map(label)).size, books.length);
+  assert.equal(new Set(beverages.map(label)).size, beverages.length);
+  assert.ok(books.some((entry) => label(entry) === "Chronik"));
+  assert.ok(books.some((entry) => label(entry) === "Bestiarium"));
+  assert.ok(beverages.some((entry) => label(entry) === "Wein"));
+  assert.ok(beverages.some((entry) => label(entry) === "Met"));
+});

@@ -103,7 +103,8 @@
       "Value": "Value",
       "TreasureType": "Treasure type",
       "SolverAttempts": "ValueSolver attempts",
-      "Components": "Special components"
+      "Components": "Special components",
+      "Details": "Details"
     },
     "Notifications": {
       "GenerationFailed": "No item could be generated for these parameters.",

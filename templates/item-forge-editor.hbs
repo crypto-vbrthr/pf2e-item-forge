@@ -272,6 +272,12 @@
               <dt>{{localize "PF2E_ITEM_FORGE.Fields.Condition"}}</dt><dd>{{preview.treasure.condition.label}}</dd>
               <dt>{{localize "PF2E_ITEM_FORGE.Fields.Style"}}</dt><dd>{{preview.treasure.style.label}}</dd>
               {{#if preview.treasure.motif}}<dt>{{localize "PF2E_ITEM_FORGE.Fields.Motif"}}</dt><dd>{{preview.treasure.motif.label}}</dd>{{/if}}
+              {{#if preview.treasure.attributeEntries.length}}
+                <dt>{{localize "PF2E_ITEM_FORGE.Preview.Details"}}</dt>
+                <dd>
+                  {{#each preview.treasure.attributeEntries}}<span class="property-rune-chip">{{label}}</span>{{/each}}
+                </dd>
+              {{/if}}
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.Value"}}</dt><dd>{{preview.value}} GM</dd>
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.SolverAttempts"}}</dt><dd>{{preview.solverAttempts}}</dd>
               {{#if preview.treasure.components.length}}

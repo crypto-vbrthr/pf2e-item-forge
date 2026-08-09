@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.0.11
+
+- Fixed treasure-type labels for books: the selector now shows concrete types such as Chronik, Atlas, Bestiarium, Kochbuch, and Manuskript instead of repeated "Buch" entries.
+- Fixed beverage treasure-type labels: Wein, Bier, Met, Spirituose, and Obstwein are now shown explicitly instead of repeated "alkoholisches Getränk" entries.
+- Embedded editor re-renders now preserve parameter/preview scroll positions, expanded details sections, and focus where possible. Selecting a treasure type no longer jumps the parameter panel back to the top.
+- Added regression coverage for distinct core book/beverage labels and scroll-preserving dependent-field re-renders.
+
+## 0.0.10
+
+- Deepens the TreasureGenerator content library and valuation behavior while keeping one treasure per engine request.
+- Expands the built-in library to 82 treasure types, 45 materials, 17 reusable components, 18 motifs, 16 conditions, 6 craftsmanship levels, and 12 styles.
+- Adds new art objects, textiles, jewelry, tableware, ceremonial objects, luxury goods, book subjects, cider, and additional beverage variants.
+- Adds additional precious/decorative materials including electrum, rosewood, vellum, mother-of-pearl, amber, turquoise, moonstone, topaz, aquamarine, and diamond.
+- Adds material-aware conditions including patina, fading, smoke/water staining, cracking, worm damage, and restoration.
+- Adds more reusable treasure components such as inlay, filigree, enamel, lacquer, embroidery, book clasps, inscriptions, signatures, and maker marks.
+- Adds type-specific condition/craftsmanship/motif weighting and style-level condition weighting for more coherent treasure families.
+- Makes candidate construction mildly target-aware so value solving preferentially explores treasure types/materials/workmanship and component density appropriate to the requested value while retaining bounded random generation.
+- Expands book generation with edition and completeness, and beverage generation with origin, quality, vessel, age, and broader variety.
+- Adds type-specific Bulk for large art objects and other treasure instead of treating every generated treasure as light Bulk.
+- Adds reproducible Item Forge flags and a full valuation breakdown to generated treasure Item sources.
+- Preview now surfaces generated treasure detail attributes such as edition, completeness, vessel, age, quality, and origin.
+- Improves German treasure-name/description grammar and singular gemstone-setting text.
+- Extends registration validation for treasure type weight maps and Bulk.
+- Automated suite now contains 78 passing tests, including new depth, condition compatibility, metadata, weighting, and Bulk regressions.
+
 ## 0.0.9
 
 - Hardens the public request contract: `normalize()`, `validate()`, `generate()`, and the embedded editor now share one canonical hydration/default path.

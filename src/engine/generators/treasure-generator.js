@@ -114,7 +114,13 @@ export class TreasureGenerator {
       target: target.target,
       tolerance: target.tolerance,
       maxAttempts: request.solver.maxAttempts,
-      generateCandidate: (attempt) => this.#generateCandidate(request, matchingTypes, new SeededRng(`${request.seed}:treasure:${attempt}`), locale),
+      generateCandidate: (attempt) => this.#generateCandidate(
+        request,
+        matchingTypes,
+        new SeededRng(`${request.seed}:treasure:${attempt}`),
+        locale,
+        target.target
+      ),
       calculateValue: (candidate) => candidate?.value ?? Number.NaN
     });
 
@@ -127,7 +133,7 @@ export class TreasureGenerator {
 
     const candidate = solveResult.candidate;
     const warnings = solveResult.warning ? [solveResult.warning] : [];
-    const itemSource = this.#toItemSource(candidate, locale);
+    const itemSource = this.#toItemSource(candidate, locale, request);
 
     return {
       request,
@@ -189,23 +195,28 @@ export class TreasureGenerator {
     });
   }
 
-  #generateCandidate(request, types, rng, locale) {
+  #generateCandidate(request, types, rng, locale, targetValue = null) {
     const style = this.#pickRegistryEntry(this.treasure.styles, request.treasure.style, rng);
     if (!style) return null;
 
-    const type = weightedPick(rng, withWeights(types, (entry) => this.#styleTagMultiplier(style, entry.tags, "typeTags")));
+    const type = weightedPick(rng, withWeights(types, (entry) => {
+      const styleWeight = this.#styleTagMultiplier(style, entry.tags, "typeTags");
+      const midpoint = this.#rangeMidpoint(entry.baseValue ?? [1, 10]) * Number(style.valueFactor ?? 1);
+      return styleWeight * this.#targetFitness(midpoint, targetValue, 0.35);
+    }));
     if (!type) return null;
 
-    const material = this.#pickMaterial(request, type, style, rng);
+    const typeMidpoint = this.#rangeMidpoint(type.baseValue ?? [1, 10]) * Number(style.valueFactor ?? 1);
+    const material = this.#pickMaterial(request, type, style, rng, targetValue, typeMidpoint);
     if ((type.materialTags ?? []).length && !material) return null;
 
-    const condition = this.#pickCondition(request, type, material, rng);
+    const condition = this.#pickCondition(request, type, material, style, rng);
     if (!condition) return null;
     const craftsmanship = type.usesCraftsmanship === false
       ? { id: null, label: { de: "", en: "" }, sentence: { de: "", en: "" }, valueFactor: 1 }
-      : this.#pickCraftsmanship(request, style, rng);
+      : this.#pickCraftsmanship(request, type, style, rng, targetValue, typeMidpoint * Number(material?.valueFactor ?? 1));
     if (!craftsmanship) return null;
-    const motif = type.supportsMotif ? this.#pickMotif(request, style, rng) : null;
+    const motif = type.supportsMotif ? this.#pickMotif(request, type, style, rng) : null;
     if (type.supportsMotif && request.treasure.motif !== "any" && !motif) return null;
 
     const attributes = {};
@@ -220,9 +231,14 @@ export class TreasureGenerator {
     }
 
     const components = [];
+    const approximateBeforeComponents = typeMidpoint
+      * Number(material?.valueFactor ?? 1)
+      * Number(craftsmanship.valueFactor ?? 1)
+      * Number(condition.valueFactor ?? 1);
     for (const reference of type.components ?? []) {
       const styleChanceFactor = Number(style.weights?.components?.[reference.id] ?? 1);
-      const chance = Math.max(0, Math.min(1, Number(reference.chance ?? 1) * styleChanceFactor));
+      const targetChanceFactor = this.#componentTargetFactor(targetValue, approximateBeforeComponents);
+      const chance = Math.max(0, Math.min(1, Number(reference.chance ?? 1) * styleChanceFactor * targetChanceFactor));
       if (rng.random() > chance) continue;
       const component = this.treasure.components.get(reference.id);
       if (!component) continue;
@@ -232,12 +248,16 @@ export class TreasureGenerator {
 
     const baseValue = randomBetween(rng, type.baseValue ?? [1, 10]);
     const componentValue = components.reduce((sum, component) => sum + component.value, 0);
+    const materialFactor = Number(material?.valueFactor ?? 1);
+    const craftsmanshipFactor = Number(craftsmanship.valueFactor ?? 1);
+    const conditionFactor = Number(condition.valueFactor ?? 1);
+    const styleFactor = Number(style.valueFactor ?? 1);
     const value = Math.max(0.1, Math.round((
       baseValue
-      * Number(material?.valueFactor ?? 1)
-      * Number(craftsmanship.valueFactor ?? 1)
-      * Number(condition.valueFactor ?? 1)
-      * Number(style.valueFactor ?? 1)
+      * materialFactor
+      * craftsmanshipFactor
+      * conditionFactor
+      * styleFactor
       * attributeFactor
       + attributeAddition
       + componentValue
@@ -255,6 +275,17 @@ export class TreasureGenerator {
       baseValue,
       componentValue,
       value,
+      valuation: {
+        baseValue,
+        materialFactor,
+        craftsmanshipFactor,
+        conditionFactor,
+        styleFactor,
+        attributeFactor,
+        attributeAddition,
+        componentValue,
+        finalValue: value
+      },
       locale
     };
   }
@@ -272,31 +303,74 @@ export class TreasureGenerator {
     return matched ? multiplier : 1;
   }
 
-  #pickMaterial(request, type, style, rng) {
+  #rangeMidpoint(range) {
+    const [min, max] = Array.isArray(range) ? range : [range ?? 0, range ?? 0];
+    return (Number(min ?? 0) + Number(max ?? min ?? 0)) / 2;
+  }
+
+  #targetFitness(projectedValue, targetValue, strength = 0.25) {
+    const target = Number(targetValue);
+    const projected = Number(projectedValue);
+    if (!Number.isFinite(target) || target <= 0 || !Number.isFinite(projected) || projected <= 0) return 1;
+    const distance = Math.abs(Math.log(projected / target));
+    return Math.max(0.12, Math.exp(-distance * Math.max(0, Number(strength) || 0)));
+  }
+
+  #componentTargetFactor(targetValue, projectedValue) {
+    const target = Number(targetValue);
+    const projected = Number(projectedValue);
+    if (!Number.isFinite(target) || target <= 0 || !Number.isFinite(projected) || projected <= 0) return 1;
+    const ratio = target / projected;
+    if (ratio >= 2) return 1.35;
+    if (ratio >= 1.25) return 1.15;
+    if (ratio <= 0.5) return 0.7;
+    if (ratio <= 0.8) return 0.85;
+    return 1;
+  }
+
+  #pickMaterial(request, type, style, rng, targetValue = null, approximateBase = null) {
     if (!(type.materialTags ?? []).length) return null;
     const selected = selectedOrAny(this.treasure.materials, request.treasure.material);
     if (selected) return hasAnyTag(selected, type.materialTags) ? selected : null;
     const candidates = this.treasure.materials.getAll().filter((material) => hasAnyTag(material, type.materialTags));
-    return weightedPick(rng, withWeights(candidates, (material) => this.#styleTagMultiplier(style, material.tags, "materialTags")));
+    return weightedPick(rng, withWeights(candidates, (material) => {
+      const styleWeight = this.#styleTagMultiplier(style, material.tags, "materialTags");
+      const projected = Number(approximateBase ?? 1) * Number(material.valueFactor ?? 1);
+      return styleWeight * this.#targetFitness(projected, targetValue, 0.22);
+    }));
   }
 
-  #pickCondition(request, type, material, rng) {
+  #pickCondition(request, type, material, style, rng) {
     const tags = [...new Set([...(type.tags ?? []), ...(material?.tags ?? [])])];
     const selected = selectedOrAny(this.treasure.conditions, request.treasure.condition);
     if (selected) return conditionCompatible(selected, tags) ? selected : null;
-    return weightedPick(rng, this.treasure.conditions.getAll().filter((condition) => conditionCompatible(condition, tags)));
+    const candidates = this.treasure.conditions.getAll().filter((condition) => conditionCompatible(condition, tags));
+    return weightedPick(rng, withWeights(candidates, (entry) => {
+      const typeWeight = Number(type.conditionWeights?.[entry.id] ?? 1);
+      const styleWeight = Number(style?.weights?.conditions?.[entry.id] ?? 1);
+      return typeWeight * styleWeight;
+    }));
   }
 
-  #pickCraftsmanship(request, style, rng) {
+  #pickCraftsmanship(request, type, style, rng, targetValue = null, approximateBase = null) {
     const selected = selectedOrAny(this.treasure.craftsmanship, request.treasure.craftsmanship);
     if (selected) return selected;
-    return weightedPick(rng, withWeights(this.treasure.craftsmanship.getAll(), (entry) => style?.weights?.craftsmanship?.[entry.id] ?? 1));
+    return weightedPick(rng, withWeights(this.treasure.craftsmanship.getAll(), (entry) => {
+      const styleWeight = Number(style?.weights?.craftsmanship?.[entry.id] ?? 1);
+      const typeWeight = Number(type.craftsmanshipWeights?.[entry.id] ?? 1);
+      const projected = Number(approximateBase ?? 1) * Number(entry.valueFactor ?? 1);
+      return styleWeight * typeWeight * this.#targetFitness(projected, targetValue, 0.18);
+    }));
   }
 
-  #pickMotif(request, style, rng) {
+  #pickMotif(request, type, style, rng) {
     const selected = selectedOrAny(this.treasure.motifs, request.treasure.motif);
     if (selected) return selected;
-    return weightedPick(rng, withWeights(this.treasure.motifs.getAll(), (entry) => style?.weights?.motifs?.[entry.id] ?? 1));
+    return weightedPick(rng, withWeights(this.treasure.motifs.getAll(), (entry) => {
+      const styleWeight = Number(style?.weights?.motifs?.[entry.id] ?? 1);
+      const typeWeight = Number(type.motifWeights?.[entry.id] ?? 1);
+      return styleWeight * typeWeight;
+    }));
   }
 
   #pickRegistryEntry(registry, selectedId, rng) {
@@ -342,7 +416,8 @@ export class TreasureGenerator {
     value *= quantity;
     value = Math.round(value * 10) / 10;
 
-    const sentence = interpolate(localized(component.sentence, locale), {
+    const sentenceTemplate = quantity === 1 && component.sentenceSingular ? component.sentenceSingular : component.sentence;
+    const sentence = interpolate(localized(sentenceTemplate, locale), {
       material: localized(material?.label, locale),
       craftsmanship: localized(craftsmanship?.label, locale),
       quantity
@@ -405,16 +480,26 @@ export class TreasureGenerator {
     return { name, description };
   }
 
-  #toItemSource(candidate, locale) {
+  #toItemSource(candidate, locale, request) {
     const rendered = this.#render(candidate, locale);
+    const plan = this.#plan(candidate);
     return {
       name: rendered.name,
       type: "treasure",
       img: candidate.type.img ?? "systems/pf2e/icons/default-icons/treasure.svg",
+      flags: {
+        "pf2e-item-forge": {
+          generated: true,
+          generator: this.id,
+          generatorVersion: 2,
+          seed: request.seed,
+          treasure: plan
+        }
+      },
       system: {
         description: { value: toHtmlParagraphs(rendered.description) },
         baseItem: null,
-        bulk: { value: 0.1 },
+        bulk: { value: Number(candidate.type.bulk ?? 0.1) },
         category: candidate.type.systemCategory ?? "art-object",
         containerId: null,
         equipped: { carryType: "worn" },
@@ -449,11 +534,7 @@ export class TreasureGenerator {
         quantity: component.quantity,
         value: component.value
       })),
-      valuation: {
-        baseValue: candidate.baseValue,
-        componentValue: candidate.componentValue,
-        finalValue: candidate.value
-      }
+      valuation: { ...candidate.valuation }
     };
   }
 }

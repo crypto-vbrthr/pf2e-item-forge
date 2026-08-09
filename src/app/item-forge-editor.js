@@ -250,7 +250,13 @@ export class ItemForgeEditor extends HandlebarsApplication {
             displayLabel: localizeMaybe(rune.label)
           })),
           runeSummary: this.#formatRuneSummary(this.previewResult.metadata?.runes),
-          treasure: this.previewResult.metadata?.treasure ?? null,
+          treasure: this.previewResult.metadata?.treasure
+            ? {
+                ...this.previewResult.metadata.treasure,
+                attributeEntries: Object.values(this.previewResult.metadata.treasure.attributes ?? {}),
+                valuation: this.previewResult.metadata.treasure.valuation ?? null
+              }
+            : null,
           value: this.previewResult.metadata?.value ?? null,
           solverAttempts: this.previewResult.metadata?.solverAttempts ?? null,
           solverExact: this.previewResult.metadata?.solverExact ?? null
@@ -307,9 +313,46 @@ export class ItemForgeEditor extends HandlebarsApplication {
         this.previewResult = null;
         this.error = null;
         this.onChange?.(this.getRequest(), this);
-        if (["mode", "category", "levelMode", "source.mode", "equipment.propertyRunes.mode", "value.mode", "treasure.type"].includes(input.name)) await this.render();
+        if (["mode", "category", "levelMode", "source.mode", "equipment.propertyRunes.mode", "value.mode", "treasure.type"].includes(input.name)) {
+          await this.#renderPreservingView();
+        }
       });
     });
+  }
+
+  async #renderPreservingView() {
+    if (!this.rendered) return this.render();
+
+    const selectors = [
+      ".item-forge-parameters",
+      ".item-forge-preview",
+      ".pack-list",
+      ".property-rune-list",
+      ".preview-description__content"
+    ];
+    const scrollState = selectors.map((selector) => ({
+      selector,
+      top: this.element.querySelector(selector)?.scrollTop ?? 0,
+      left: this.element.querySelector(selector)?.scrollLeft ?? 0
+    }));
+    const detailState = [...this.element.querySelectorAll("details")].map((details, index) => ({ index, open: details.open }));
+    const active = this.element.ownerDocument?.activeElement;
+    const activeName = active?.name && this.element.contains?.(active) ? active.name : null;
+
+    await this.render();
+
+    for (const state of scrollState) {
+      const node = this.element.querySelector(state.selector);
+      if (!node) continue;
+      node.scrollTop = state.top;
+      node.scrollLeft = state.left;
+    }
+    const details = [...this.element.querySelectorAll("details")];
+    for (const state of detailState) {
+      if (details[state.index]) details[state.index].open = state.open;
+    }
+    if (activeName) this.element.querySelector(`[name="${activeName}"]`)?.focus?.({ preventScroll: true });
+    return this;
   }
 
   #hydrateRequest(request = {}) {

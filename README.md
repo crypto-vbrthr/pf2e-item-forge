@@ -2,9 +2,9 @@
 
 Reusable Item Forge architecture for Foundry VTT v14 and Pathfinder 2e.
 
-## v0.0.9 scope
+## v0.0.11 scope
 
-This release hardens the reusable API/editor architecture after the first full TreasureGenerator implementation.
+This release deepens the TreasureGenerator on top of the hardened reusable API/editor architecture.
 
 Implemented:
 
@@ -25,14 +25,18 @@ Implemented:
 - Broad treasure categories plus optional exact treasure-type selection
 - Treasure target value/range and bounded ValueSolver attempts
 - Materials, craftsmanship, conditions, motifs, styles, attributes, and reusable components
-- Style-aware treasure weighting
+- 82 built-in treasure types, 45 materials, 17 reusable components, 18 motifs, 16 conditions, 6 craftsmanship levels, and 12 styles
+- Style- and treasure-type-aware weighting for materials, motifs, workmanship, conditions, and component frequency
+- Mild target-aware candidate weighting for more efficient bounded value solving without removing seeded randomness
 - Coherent component craftsmanship and gemstone component-value support
-- Books, gemstones, jewelry, paintings, sculpture, tableware, ceremonial/luxury objects, wine/beer/mead/spirits and more
+- Books with edition/completeness, beverages with origin/quality/vessel/age, and expanded jewelry/art/tableware/ceremonial/luxury content
+- Material-aware wear such as fading, patina, water/smoke damage, cracking, worm damage, and restoration
+- Type-specific Bulk, reproducible generation flags, and detailed valuation breakdown metadata
 - Registration-time validation for extension treasure content
 - Embedded `ItemForgeEditor` with request editing, preview, reroll, description display, and no persistence side effects
 - Standalone `ItemForgeApplication` container owning Foundry document creation
 - German and English localization
-- 70 automated unit/integration/statistical/contract tests
+- 78 automated unit/integration/statistical/contract tests
 
 Not yet implemented:
 

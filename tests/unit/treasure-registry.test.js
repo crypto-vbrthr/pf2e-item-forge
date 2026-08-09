@@ -60,3 +60,31 @@ test("TreasureRegistry can validate treasure categories when a CategoryRegistry 
     (error) => error?.code === "INVALID_CONTENT_DEFINITION" && error?.details?.field === "categories"
   );
 });
+
+test("TreasureRegistry validates type weight maps and bulk", () => {
+  const treasure = new TreasureRegistry();
+  assert.throws(
+    () => treasure.types.register({
+      id: "bad.bulk",
+      categories: ["treasure"],
+      tags: [],
+      baseValue: [1, 2],
+      bulk: -1,
+      materialTags: [],
+      components: []
+    }),
+    (error) => error?.code === "INVALID_CONTENT_DEFINITION" && error?.details?.field === "bulk"
+  );
+  assert.throws(
+    () => treasure.types.register({
+      id: "bad.weights",
+      categories: ["treasure"],
+      tags: [],
+      baseValue: [1, 2],
+      materialTags: [],
+      components: [],
+      conditionWeights: { "test.condition": -1 }
+    }),
+    (error) => error?.code === "INVALID_CONTENT_DEFINITION" && error?.details?.field === "conditionWeights.test.condition"
+  );
+});

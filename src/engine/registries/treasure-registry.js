@@ -66,7 +66,7 @@ export class TreasureRegistry {
         if (!isFinitePositive(definition.valueFactor ?? 1)) throw contentError("treasure style", definition.id, "valueFactor must be greater than zero", { field: "valueFactor" });
         if (definition.weight != null && !isFinitePositive(definition.weight, { allowZero: true })) throw contentError("treasure style", definition.id, "weight must be non-negative", { field: "weight" });
         const weights = definition.weights ?? {};
-        for (const field of ["materialTags", "motifs", "craftsmanship", "typeTags", "components"]) {
+        for (const field of ["materialTags", "motifs", "craftsmanship", "typeTags", "components", "conditions"]) {
           validateWeightMap(weights[field], `weights.${field}`, "treasure style", definition.id);
         }
       }
@@ -99,6 +99,12 @@ export class TreasureRegistry {
         validateRange(definition.baseValue ?? [1, 10], "baseValue", "treasure type", definition.id);
         validateStringArray(definition.tags ?? [], "tags", "treasure type", definition.id);
         validateStringArray(definition.materialTags ?? [], "materialTags", "treasure type", definition.id);
+        if (definition.bulk != null && !isFinitePositive(definition.bulk, { allowZero: true })) {
+          throw contentError("treasure type", definition.id, "bulk must be a non-negative number", { field: "bulk" });
+        }
+        for (const field of ["conditionWeights", "craftsmanshipWeights", "motifWeights"]) {
+          validateWeightMap(definition[field], field, "treasure type", definition.id);
+        }
         if (!Array.isArray(definition.components ?? [])) throw contentError("treasure type", definition.id, "components must be an array", { field: "components" });
         for (const reference of definition.components ?? []) {
           if (!reference?.id || !this.components.has(reference.id)) {
