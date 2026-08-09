@@ -287,7 +287,9 @@
       "NoPredefinedWornItemCandidate": "No predefined worn magic item matches the selected constraints.",
       "NoWornItemProfileCandidate": "No generated worn-item profile matches the selected level, rarity, and worn category.",
       "NoWornItemTemplate": "No suitable PF2e structural template is available for this worn category.",
-      "UnknownWornItemProfile": "The selected worn magic item profile is not registered."
+      "UnknownWornItemProfile": "The selected worn magic item profile is not registered.",
+      "InvalidWornItemTemplateType": "The structural worn-item template does not use a safe PF2e equipment document type.",
+      "WornItemTemplateUsageMismatch": "The structural template usage does not match the selected worn usage category."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatic level-appropriate",
@@ -555,7 +557,10 @@
       "ArtificerBracers": "Artificer's Bracers",
       "MistweaveGarment": "Mistweave Garment",
       "HorizonHelm": "Horizon Helm",
-      "ResoluteBrooch": "Resolute Brooch"
+      "ResoluteBrooch": "Resolute Brooch",
+      "PathmarkCharm": "Pathmark Charm",
+      "SignalGloves": "Signal Gloves",
+      "QuickhandBracers": "Quickhand Bracers"
     },
     "WornText": {
       "WayfarerFootwearName": "Wayfarer Shoes",
@@ -595,7 +600,22 @@
       "OncePerTenMinutes": "once per 10 minutes",
       "ResoluteBroochName": "Resolute Brooch",
       "ResoluteBroochDescription": "This weighty metal brooch grows warm when fear or alien emotion tries to overwhelm its wearer’s resolve.",
-      "ResoluteBroochEffect": "You gain a +{bonus} item bonus to saving throws against fear and emotion effects. Activate [reaction] (concentrate); Frequency {frequency}; Trigger You gain the frightened condition or increase its value; Effect Reduce your frightened value by {reduction}."
+      "ResoluteBroochEffect": "You gain a +{bonus} item bonus to saving throws against fear and emotion effects. Activate [reaction] (concentrate); Frequency {frequency}; Trigger You gain the frightened condition or increase its value; Effect Reduce your frightened value by {reduction}.",
+      "PathmarkCharmName": "Pathmark Charm",
+      "PathmarkCharmDescription": "A freely turning brass needle rests beneath the glass of this small charm and aligns itself to a magically marked point.",
+      "PathmarkCharmEffect": "Activate [one-action] (concentrate); Frequency {frequency}; Effect Choose a point you can see within 30 feet. For 1 hour, you know the direction to that point while you remain within 1 mile of it. The charm reveals neither the distance nor a safe route.",
+      "SignalGlovesName": "Signal Gloves",
+      "SignalGlovesDescription": "Fine illusionary threads are woven through the fingertips of these gloves.",
+      "SignalGlovesEffect": "Activate [one-action] (concentrate); Effect Until you Dismiss the effect, clear glowing signs appear above your hands. You can display simple fixed signals such as danger, stop, come here, yes, no, or a direction. The signs can be seen clearly from up to 60 feet away under normal visibility.",
+      "QuickhandBracersName": "Quickhand Bracers",
+      "QuickhandBracersDescription": "Short silver lines run across these bracers and flash when their wearer reaches for equipment.",
+      "QuickhandBracersEffect": "Activate [one-action] (manipulate); Frequency {frequency}; Effect Interact up to twice. Each Interact must only draw, stow, or retrieve an item of light Bulk or less from an easily accessible worn container.",
+      "NonInvestmentNote": "This generated item uses the listed worn usage but does not require investment. Its special ability is stored as rules text plus a structured Item Forge manifest."
+    },
+    "WornAvailability": {
+      "PredefinedOnly": "(predefined only)",
+      "GeneratedOnly": "(generated only)",
+      "Unavailable": "(unavailable)"
     }
   }
 }

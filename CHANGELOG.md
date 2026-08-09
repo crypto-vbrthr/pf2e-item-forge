@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.0.25
+
+- Hardens generated worn-item structural templates: the generic worn generator now accepts only slot-matched `equipment` documents and will not silently inherit backpack/container/kit schemas.
+- Adds mode-aware worn-slot capability reporting through `game.pf2eItemForge.getWornSlotCapabilities()` and `getCapabilities().wornSlots`, including predefined/generated availability, profile/template counts, and generated levels.
+- Uses the same worn-slot capabilities in the Embedded Editor so subcategories that cannot be fulfilled in the selected predefined/generated mode are disabled instead of leading to a dead-end generation request.
+- Tightens `WornMagicProfileRegistry` validation for canonical rarity values, non-empty unique variant IDs, and the new boolean `invested` contract.
+- Makes profile investment explicit: generated worn items default to invested, but reviewed profiles can opt out; magical tradition traits count as magic markers without redundantly forcing the `magical` trait.
+- Clears all foreign template flag scopes from generated worn items in addition to Rule Elements, subitems, apex data, slug, publication data, and description.
+- Extends the core generated worn library from eleven to fourteen profile families with Pathmark Charm (level 1), Signal Gloves (level 2), and Quickhand Bracers (level 3), yielding continuous automatic strict-mode core coverage from item level 1 through 20.
+- Adds optional balance-analogue metadata to profile provenance so reviewed profile families can retain concrete published reference anchors.
+- Expands live Magic diagnostics across representative unrestricted, eyepiece, headwear, and footwear generated worn contracts and validates exact usage-slot agreement, safe document type, investment state, magic markers, cleaned source data, and rules-text automation.
+- Keeps unknown `worn` usages classified as `other` for predefined selection while continuing to forbid `other` as a generated profile slot.
+- Test suite: 196 passing tests.
+
 ## 0.0.24
 
 - Expands the core generated worn-item library from six to eleven reviewed profile families.

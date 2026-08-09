@@ -24,3 +24,25 @@ test("isMagicWornTraits recognizes invested and magical-tradition worn items", (
   assert.equal(isMagicWornTraits(["magical"]), true);
   assert.equal(isMagicWornTraits(["clockwork"]), false);
 });
+
+test("worn slot capabilities distinguish published availability from safe generated templates", async () => {
+  const { getWornSlotCapabilities } = await import("../../src/engine/worn-item-utils.js");
+  const entries = [
+    { type: "backpack", categories: ["magic.worn", "magic.worn.backpack"] },
+    { type: "equipment", categories: ["magic.worn", "magic.worn.footwear"] }
+  ];
+  const profiles = [
+    { slot: "backpack", variants: [{ level: 3 }] },
+    { slot: "footwear", variants: [{ level: 4 }, { level: 10 }] }
+  ];
+  const capabilities = getWornSlotCapabilities({ entries, profiles });
+  const backpack = capabilities.find((slot) => slot.id === "backpack");
+  const footwear = capabilities.find((slot) => slot.id === "footwear");
+  assert.equal(backpack.existing, true);
+  assert.equal(backpack.generated, false, "a backpack document is not a safe generic worn-item template");
+  assert.equal(backpack.generatedProfileCount, 1);
+  assert.equal(backpack.generatedTemplateCount, 0);
+  assert.equal(footwear.existing, true);
+  assert.equal(footwear.generated, true);
+  assert.deepEqual(footwear.generatedLevels, [4, 10]);
+});

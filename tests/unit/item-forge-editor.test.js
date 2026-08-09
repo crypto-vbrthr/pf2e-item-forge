@@ -203,3 +203,25 @@ test("ItemForgeEditor preserves worn magic root and usage subcategories", () => 
     assert.equal(request.magic.wornMode, "generated");
   }
 });
+
+test("generated worn mode disables non-generatable worn subcategories and resets an unavailable selection", async () => {
+  const api = apiFixture();
+  api.categories.getAll = () => [
+    { id: "magic.worn", label: "PF2E_ITEM_FORGE.Categories.MagicWorn" },
+    { id: "magic.worn.backpack", label: "PF2E_ITEM_FORGE.Categories.MagicWornBackpack" },
+    { id: "magic.worn.footwear", label: "PF2E_ITEM_FORGE.Categories.MagicWornFootwear" }
+  ];
+  api.categories.getAncestors = (id) => id === "magic.worn" ? ["magic"] : ["magic.worn", "magic"];
+  api.getWornSlotCapabilities = () => [
+    { id: "backpack", existing: true, generated: false },
+    { id: "footwear", existing: true, generated: true }
+  ];
+  const editor = new ItemForgeEditor({
+    api,
+    request: { mode: "magic", category: "magic.worn.backpack", level: 8, magic: { wornMode: "generated", wornProfile: "automatic" }, seed: "availability" }
+  });
+  const context = await editor._prepareContext({});
+  assert.equal(editor.getRequest().category, "magic.worn");
+  assert.equal(context.categories.find((entry) => entry.id === "magic.worn.backpack").disabled, true);
+  assert.equal(context.categories.find((entry) => entry.id === "magic.worn.footwear").disabled, false);
+});

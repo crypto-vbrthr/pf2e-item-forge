@@ -1,4 +1,4 @@
-import { parseWornUsage } from "./worn-item-utils.js";
+import { hasMagicMarkerTraits, parseWornUsage } from "./worn-item-utils.js";
 
 function clone(value) {
   if (globalThis.foundry?.utils?.deepClone) return globalThis.foundry.utils.deepClone(value);
@@ -85,7 +85,10 @@ export class MagicItemDiagnostics {
       { id: "specific-shield-existing", request: { mode: "magic", category: "magic.shield", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { specificMode: "existing" }, seed: "diagnostic-specific-shield-existing" } },
       { id: "specific-shield-generated", request: { mode: "magic", category: "magic.shield", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { specificMode: "generated", specificProfile: "automatic", theme: "automatic" }, seed: "diagnostic-specific-shield-generated" } },
       { id: "worn-existing", request: { mode: "magic", category: "magic.worn", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { wornMode: "existing", wornProfile: "automatic" }, seed: "diagnostic-worn-existing" } },
-      { id: "worn-generated", request: { mode: "magic", category: "magic.worn", level: { min: 6, max: 6, target: 6 }, levelPolicy: "strict", source: { mode: "system" }, magic: { wornMode: "generated", wornProfile: "automatic" }, seed: "diagnostic-worn-generated" } },
+      { id: "worn-generated-unrestricted", expectedWornSlot: "unrestricted", request: { mode: "magic", category: "magic.worn.unrestricted", level: { min: 1, max: 1, target: 1 }, levelPolicy: "strict", source: { mode: "system" }, magic: { wornMode: "generated", wornProfile: "automatic" }, seed: "diagnostic-worn-unrestricted" } },
+      { id: "worn-generated-eyepiece", expectedWornSlot: "eyepiece", request: { mode: "magic", category: "magic.worn.eyepiece", level: { min: 5, max: 5, target: 5 }, levelPolicy: "strict", source: { mode: "system" }, magic: { wornMode: "generated", wornProfile: "automatic" }, seed: "diagnostic-worn-eyepiece" } },
+      { id: "worn-generated-headwear", expectedWornSlot: "headwear", request: { mode: "magic", category: "magic.worn.headwear", level: { min: 10, max: 10, target: 10 }, levelPolicy: "strict", source: { mode: "system" }, magic: { wornMode: "generated", wornProfile: "automatic" }, seed: "diagnostic-worn-headwear" } },
+      { id: "worn-generated-footwear", expectedWornSlot: "footwear", request: { mode: "magic", category: "magic.worn.footwear", level: { min: 4, max: 4, target: 4 }, levelPolicy: "strict", source: { mode: "system" }, magic: { wornMode: "generated", wornProfile: "automatic" }, seed: "diagnostic-worn-footwear" } },
       { id: "equipment-composed-price", priceAudit: true, request: { mode: "equipment", category: "weapon", level: { min: 4, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, equipment: { fundamentalRunes: "automatic", propertyRunes: { mode: "none", selected: [] } }, seed: "diagnostic-equipment-price" } }
     ];
 
@@ -109,7 +112,7 @@ export class MagicItemDiagnostics {
     };
   }
 
-  async #runScenario({ id, request, priceAudit = false }) {
+  async #runScenario({ id, request, priceAudit = false, expectedWornSlot = null }) {
     try {
       const result = await this.api.preview(request);
       const source = result?.itemSource;
@@ -133,14 +136,25 @@ export class MagicItemDiagnostics {
         const durability = shieldDurability(source);
         if (durability.hardness == null || durability.hp == null || durability.bt == null) issues.push("generated shield durability is incomplete");
       }
-      if (["worn-existing", "worn-generated"].includes(id)) {
+      if (id === "worn-existing" || id.startsWith("worn-generated-")) {
         const usage = source.system?.usage?.value;
-        if (!parseWornUsage(usage).worn) issues.push("worn item lacks a recognized worn usage");
+        const parsedUsage = parseWornUsage(usage);
+        if (!parsedUsage.worn) issues.push("worn item lacks a recognized worn usage");
+        if (expectedWornSlot && parsedUsage.slot !== expectedWornSlot) issues.push(`worn usage parsed as ${parsedUsage.slot ?? "none"}, expected ${expectedWornSlot}`);
       }
-      if (id === "worn-generated") {
+      if (id.startsWith("worn-generated-")) {
         const traits = source.system?.traits?.value ?? [];
-        if (!traits.includes("invested")) issues.push("generated worn item lacks invested trait");
-        if (!traits.includes("magical")) issues.push("generated worn item lacks magical trait");
+        const expectedInvested = result.metadata?.wornItem?.invested !== false;
+        if (expectedInvested && !traits.includes("invested")) issues.push("generated worn item lacks required invested trait");
+        if (!expectedInvested && traits.includes("invested")) issues.push("non-invested worn profile inherited invested trait");
+        if (!hasMagicMarkerTraits(traits)) issues.push("generated worn item lacks a magical or tradition trait");
+        if (source.type !== "equipment") issues.push(`generated worn item uses unsafe document type ${source.type}`);
+        if (expectedWornSlot && result.metadata?.wornItem?.slot !== expectedWornSlot) issues.push("generated worn metadata slot does not match requested usage family");
+        if (!Array.isArray(source.system?.rules) || source.system.rules.length !== 0) issues.push("generated worn item inherited template Rule Elements");
+        if (Array.isArray(source.system?.subitems) && source.system.subitems.length) issues.push("generated worn item inherited template subitems");
+        if (Object.hasOwn(source.system ?? {}, "apex")) issues.push("generated worn item inherited template apex data");
+        const foreignFlags = Object.keys(source.flags ?? {}).filter((scope) => scope !== "pf2e-item-forge");
+        if (foreignFlags.length) issues.push(`generated worn item inherited template flags: ${foreignFlags.join(", ")}`);
         if (result.metadata?.automation?.level !== "rules-text") issues.push("generated worn item is not marked rules-text automation");
       }
       if (issues.length) return { id, status: "failed", message: issues.join(", "), generator: result.metadata?.generator ?? null };

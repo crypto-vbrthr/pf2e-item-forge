@@ -8,13 +8,15 @@ test("MagicItemTemplateResolver keeps implementation templates separate from sel
     { id: "system-staff", type: "weapon", level: 0, slug: "staff", pack: "pf2e.equipment", packageType: "system", packageName: "pf2e", categories: ["weapon"] },
     { id: "addon-heart", pack: "addon.items", packageType: "module", packageName: "addon", categories: ["magic.spellheart"] },
     { id: "system-heart", pack: "pf2e.equipment", packageType: "system", packageName: "pf2e", categories: ["magic.spellheart"] },
-    { id: "addon-cloak", level: 2, pack: "addon.items", packageType: "module", packageName: "addon", categories: ["magic.worn", "magic.worn.cloak"] },
-    { id: "system-cloak", level: 5, pack: "pf2e.equipment", packageType: "system", packageName: "pf2e", categories: ["magic.worn", "magic.worn.cloak"] }
+    { id: "addon-cloak", type: "equipment", level: 2, pack: "addon.items", packageType: "module", packageName: "addon", categories: ["magic.worn", "magic.worn.cloak"] },
+    { id: "system-cloak-backpack", type: "backpack", level: 1, pack: "pf2e.equipment", packageType: "system", packageName: "pf2e", categories: ["magic.worn", "magic.worn.cloak"] },
+    { id: "system-cloak", type: "equipment", level: 5, pack: "pf2e.equipment", packageType: "system", packageName: "pf2e", categories: ["magic.worn", "magic.worn.cloak"] }
   ];
   const resolver = new MagicItemTemplateResolver({ compendiumIndex: { entries } });
   assert.equal(resolver.resolveStaffBaseEntry().id, "system-staff");
   assert.equal(resolver.resolveSpellheartTemplateEntry().id, "system-heart");
-  assert.equal(resolver.resolveWornTemplateEntry("cloak").id, "system-cloak");
+  assert.equal(resolver.resolveWornTemplateEntry("cloak").id, "system-cloak", "default worn templates must use the safe equipment document type");
+  assert.equal(resolver.resolveWornTemplateEntry("cloak", { allowedTypes: ["backpack"] }).id, "system-cloak-backpack");
   assert.equal(resolver.templateMetadata(resolver.resolveStaffBaseEntry(), { kind: "staff-base" }).source, "implementation-template");
 });
 

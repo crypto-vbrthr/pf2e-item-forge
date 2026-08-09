@@ -17,10 +17,10 @@ function request(overrides = {}) {
   };
 }
 
-function entry(id, { name = id, level = 4, rarity = "common", slot = "footwear", usage = "worn shoes", categories = null, traits = ["invested", "magical"], pack = "pf2e.equipment-srd" } = {}) {
+function entry(id, { name = id, type = "equipment", level = 4, rarity = "common", slot = "footwear", usage = "worn shoes", categories = null, traits = ["invested", "magical"], pack = "pf2e.equipment-srd" } = {}) {
   return {
     id, uuid: `Compendium.${pack}.Item.${id}`, pack, packageType: "system", packageName: "pf2e",
-    name, type: "equipment", level, rarity, wornSlot: slot, usage, traits,
+    name, type, level, rarity, wornSlot: slot, usage, traits,
     categories: categories ?? ["item", "magic", "magic.worn", `magic.worn.${slot}`]
   };
 }
@@ -29,7 +29,7 @@ function sourceFor(e, { rules = [{ key: "FlatModifier", selector: "acrobatics", 
   return {
     _id: e.id,
     name: e.name,
-    type: "equipment",
+    type: e.type,
     img: "icons/equipment/feet/boots-leather-brown.webp",
     system: {
       level: { value: e.level },
@@ -47,8 +47,20 @@ function sourceFor(e, { rules = [{ key: "FlatModifier", selector: "acrobatics", 
 
 function formatter(key, data = {}) {
   const strings = {
+    "PF2E_ITEM_FORGE.WornProfiles.PathmarkCharm": "Pathmark Charm",
+    "PF2E_ITEM_FORGE.WornProfiles.SignalGloves": "Signal Gloves",
+    "PF2E_ITEM_FORGE.WornProfiles.QuickhandBracers": "Quickhand Bracers",
     "PF2E_ITEM_FORGE.WornProfiles.WayfarerFootwear": "Wayfarer Footwear",
     "PF2E_ITEM_FORGE.WornProfiles.MercifulMask": "Merciful Mask",
+    "PF2E_ITEM_FORGE.WornText.PathmarkCharmName": "Pathmark Charm",
+    "PF2E_ITEM_FORGE.WornText.PathmarkCharmDescription": "Wayfinding charm.",
+    "PF2E_ITEM_FORGE.WornText.PathmarkCharmEffect": "Remember a direction; {frequency}.",
+    "PF2E_ITEM_FORGE.WornText.SignalGlovesName": "Signal Gloves",
+    "PF2E_ITEM_FORGE.WornText.SignalGlovesDescription": "Signaling gloves.",
+    "PF2E_ITEM_FORGE.WornText.SignalGlovesEffect": "Display simple signs.",
+    "PF2E_ITEM_FORGE.WornText.QuickhandBracersName": "Quickhand Bracers",
+    "PF2E_ITEM_FORGE.WornText.QuickhandBracersDescription": "Fast gear handling.",
+    "PF2E_ITEM_FORGE.WornText.QuickhandBracersEffect": "Interact twice; {frequency}.",
     "PF2E_ITEM_FORGE.WornText.WayfarerFootwearName": "Wayfarer Shoes",
     "PF2E_ITEM_FORGE.WornText.WayfarerFootwearDescription": "Travel shoes.",
     "PF2E_ITEM_FORGE.WornText.WayfarerFootwearEffect": "Acrobatics +{bonus}; {frequency}.",
@@ -59,6 +71,7 @@ function formatter(key, data = {}) {
     "PF2E_ITEM_FORGE.WornText.OncePerHour": "once per hour",
     "PF2E_ITEM_FORGE.WornText.SpecialAbility": "Special Ability:",
     "PF2E_ITEM_FORGE.WornText.InvestmentNote": "Rules-text item.",
+    "PF2E_ITEM_FORGE.WornText.NonInvestmentNote": "Rules-text item without investment.",
     "PF2E_ITEM_FORGE.SpecificItemVariants.Base": "Base",
     "PF2E_ITEM_FORGE.SpecificItemVariants.Greater": "Greater",
     "PF2E_ITEM_FORGE.SpecificItemVariants.Major": "Major"
@@ -68,7 +81,7 @@ function formatter(key, data = {}) {
   return value;
 }
 
-function makeGenerator(entries) {
+function makeGenerator(entries, { profiles = registerCoreWornMagicProfiles(new WornMagicProfileRegistry()) } = {}) {
   const byUuid = new Map(entries.map((e) => [e.uuid, e]));
   const index = {
     ready: true,
@@ -88,8 +101,8 @@ function makeGenerator(entries) {
     async refresh() {}
   };
   const templateResolver = {
-    resolveWornTemplateEntry(slot) {
-      return entries.find((e) => e.wornSlot === slot) ?? null;
+    resolveWornTemplateEntry(slot, { allowedTypes = ["equipment"] } = {}) {
+      return entries.find((e) => e.wornSlot === slot && allowedTypes.includes(e.type)) ?? null;
     },
     templateMetadata(e, { kind }) {
       return { kind, source: "implementation-template", uuid: e.uuid, pack: e.pack };
@@ -97,7 +110,7 @@ function makeGenerator(entries) {
   };
   return new WornMagicItemGenerator({
     compendiumIndex: index,
-    wornMagicProfiles: registerCoreWornMagicProfiles(new WornMagicProfileRegistry()),
+    wornMagicProfiles: profiles,
     templateResolver,
     formatter
   });
@@ -133,6 +146,8 @@ test("generated worn item uses a slot-matched PF2e template but strips its nativ
   assert.equal(result.metadata.templateSource.uuid, shoes.uuid);
   assert.equal(result.metadata.wornItem.profile, "core.wayfarer-footwear");
   assert.match(result.metadata.wornItem.effect, /Acrobatics \+1/);
+  assert.deepEqual(Object.keys(result.itemSource.flags), ["pf2e-item-forge"], "generated items must not inherit template flag scopes");
+  assert.equal(result.itemSource.flags.pf2e, undefined);
 });
 
 test("worn subcategory restricts automatic generated profiles to the requested usage type", async () => {
@@ -160,7 +175,7 @@ test("explicit worn profiles remain strict even though automatic generation has 
   );
 });
 
-test("automatic generated worn items have a strict core candidate at every level from 4 through 20", async () => {
+test("automatic generated worn items have a strict core candidate at every level from 1 through 20", async () => {
   const templates = [
     entry("boots-template", { slot: "footwear", usage: "worn shoes" }),
     entry("eyepiece-template", { slot: "eyepiece", usage: "worn eyepiece" }),
@@ -175,7 +190,7 @@ test("automatic generated worn items have a strict core candidate at every level
     entry("headwear-template", { slot: "headwear", usage: "worn headwear" })
   ];
   const g = makeGenerator(templates);
-  for (let level = 4; level <= 20; level += 1) {
+  for (let level = 1; level <= 20; level += 1) {
     const result = await g.generate(request({
       level: { min: level, max: level, target: level },
       magic: { wornMode: "generated", wornProfile: "automatic" },
@@ -183,6 +198,52 @@ test("automatic generated worn items have a strict core candidate at every level
     }));
     assert.equal(result.metadata.level, level);
   }
+});
+
+test("non-invested worn profiles do not inherit invested from their structural template", async () => {
+  const gloves = entry("gloves-template", { slot: "gloves", usage: "worn gloves", traits: ["invested", "magical"] });
+  const result = await makeGenerator([gloves]).generate(request({
+    category: "magic.worn.gloves",
+    level: { min: 2, max: 2, target: 2 },
+    magic: { wornMode: "generated", wornProfile: "core.signal-gloves" }
+  }));
+  assert.equal(result.metadata.wornItem.invested, false);
+  assert.ok(!result.itemSource.system.traits.value.includes("invested"));
+  assert.ok(result.itemSource.system.traits.value.includes("magical"));
+  assert.ok(result.itemSource.system.traits.value.includes("illusion"));
+});
+
+test("tradition-specific generated worn profiles do not add a redundant magical trait", async () => {
+  const profiles = new WornMagicProfileRegistry();
+  profiles.register({
+    id: "test.divine-footwear",
+    slot: "footwear",
+    traits: ["Divine"],
+    nameTemplate: "PF2E_ITEM_FORGE.WornText.WayfarerFootwearName",
+    description: "PF2E_ITEM_FORGE.WornText.WayfarerFootwearDescription",
+    effectText: "PF2E_ITEM_FORGE.WornText.WayfarerFootwearEffect",
+    variants: [{ id: "base", level: 4, price: 90, values: { bonus: 1, frequency: "PF2E_ITEM_FORGE.WornText.OncePerDay" } }]
+  });
+  const shoes = entry("boots-template", { slot: "footwear", usage: "worn shoes" });
+  const result = await makeGenerator([shoes], { profiles }).generate(request({
+    magic: { wornMode: "generated", wornProfile: "test.divine-footwear" }
+  }));
+  assert.ok(result.itemSource.system.traits.value.includes("divine"));
+  assert.ok(!result.itemSource.system.traits.value.includes("magical"));
+});
+
+test("unsafe or usage-mismatched worn templates are rejected instead of leaking foreign schemas", async () => {
+  const unsafe = entry("backpack-template", { type: "backpack", slot: "footwear", usage: "worn shoes" });
+  await assert.rejects(
+    () => makeGenerator([unsafe]).generate(request()),
+    (error) => error?.code === "NO_WORN_ITEM_TEMPLATE"
+  );
+
+  const mismatched = entry("bad-usage", { slot: "footwear", usage: "worn mask" });
+  await assert.rejects(
+    () => makeGenerator([mismatched]).generate(request()),
+    (error) => error?.code === "WORN_ITEM_TEMPLATE_USAGE_MISMATCH"
+  );
 });
 
 test("generated worn items are deterministic for the same seed", async () => {

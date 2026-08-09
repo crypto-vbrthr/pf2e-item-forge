@@ -17,7 +17,7 @@ function apiFixture() {
       getMetadata: () => [{ id: "test", priority: 10, modes: ["custom"] }],
       getModes: () => ["custom"]
     },
-    compendiumIndex: { refresh: async () => true, getAvailablePacks: () => [], ready: true, entries: [{ id: 1 }], spellEntries: [{ id: 2 }], getPackErrors: () => [{ pack: "bad.pack" }] },
+    compendiumIndex: { refresh: async () => true, getAvailablePacks: () => [], ready: true, entries: [{ id: 1, type: "equipment", categories: ["magic.worn", "magic.worn.footwear"] }], spellEntries: [{ id: 2 }], getPackErrors: () => [{ pack: "bad.pack" }] },
     treasure: {
       types: { getAll: () => [] }, materials: { getAll: () => [] }, components: { getAll: () => [] },
       motifs: { getAll: () => [] }, conditions: { getAll: () => [] }, craftsmanship: { getAll: () => [] }, styles: { getAll: () => [] }
@@ -28,7 +28,7 @@ function apiFixture() {
     spellheartProfiles: { getAll: () => [{ id: "core.elemental-conduit", label: "Elemental", allowedThemes: ["fire", "cold"], variants: [{ level: 3 }, { level: 8 }, { level: 13 }] }] },
     specificItemProfiles: { getAll: () => [{ id: "core.retributive-weapon", itemType: "weapon", label: "Retributive", allowedThemes: [], variants: [{ level: 3 }, { level: 10 }, { level: 16 }] }] },
     specificShieldProfiles: { getAll: () => [{ id: "core.restorative-shield", label: "Restorative", allowedThemes: [], variants: [{ level: 5 }, { level: 10 }, { level: 15 }] }] },
-    wornMagicProfiles: { getAll: () => [{ id: "core.wayfarer-footwear", slot: "footwear", label: "Wayfarer", variants: [{ level: 4 }, { level: 10 }, { level: 17 }] }] },
+    wornMagicProfiles: { getAll: () => [{ id: "core.wayfarer-footwear", slot: "footwear", label: "Wayfarer", invested: true, variants: [{ level: 4 }, { level: 10 }, { level: 17 }] }] },
     openApplication: () => "opened"
   });
 }
@@ -61,9 +61,23 @@ test("ItemForgeApi capabilities expose generator priority metadata and registere
   assert.deepEqual(capabilities.specificItemProfiles, [{ id: "core.retributive-weapon", itemType: "weapon", label: "Retributive", themes: [], levels: [3, 10, 16] }]);
   assert.deepEqual(capabilities.specificShieldProfiles, [{ id: "core.restorative-shield", label: "Restorative", themes: [], levels: [5, 10, 15] }]);
   assert.deepEqual(capabilities.wornItemModes, ["generated", "existing"]);
-  assert.deepEqual(capabilities.wornMagicProfiles, [{ id: "core.wayfarer-footwear", slot: "footwear", label: "Wayfarer", levels: [4, 10, 17] }]);
+  assert.deepEqual(capabilities.wornMagicProfiles, [{ id: "core.wayfarer-footwear", slot: "footwear", label: "Wayfarer", invested: true, levels: [4, 10, 17] }]);
+  const footwear = capabilities.wornSlots.find((slot) => slot.id === "footwear");
+  assert.equal(footwear.existing, true);
+  assert.equal(footwear.generated, true);
+  assert.equal(footwear.generatedProfileCount, 1);
+  assert.deepEqual(footwear.generatedLevels, [4, 10, 17]);
+  assert.equal(capabilities.wornSlots.find((slot) => slot.id === "backpack").generated, false);
 });
 
+
+test("ItemForgeApi exposes mode-aware worn slot capabilities for external callers", () => {
+  const api = apiFixture();
+  const slots = api.getWornSlotCapabilities();
+  assert.equal(slots.find((slot) => slot.id === "footwear").generatedTemplateCount, 1);
+  assert.equal(slots.find((slot) => slot.id === "footwear").existingCount, 1);
+  assert.equal(slots.find((slot) => slot.id === "other").generated, false);
+});
 
 test("ItemForgeApi exposes compendium index diagnostics", () => {
   const diagnostics = apiFixture().getIndexDiagnostics();

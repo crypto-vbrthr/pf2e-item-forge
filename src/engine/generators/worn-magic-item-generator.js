@@ -1,6 +1,6 @@
 import { SeededRng } from "../seeded-rng.js";
 import { candidateLevelResolver } from "../candidate-level-resolver.js";
-import { wornSlotLabelKey } from "../worn-item-utils.js";
+import { hasMagicMarkerTraits, parseWornUsage, wornSlotLabelKey } from "../worn-item-utils.js";
 
 function clone(value) {
   if (globalThis.foundry?.utils?.deepClone) return globalThis.foundry.utils.deepClone(value);
@@ -141,7 +141,7 @@ export class WornMagicItemGenerator {
     }
 
     const selected = new SeededRng(request.seed).pick(selection.candidates);
-    const templateEntry = this.templateResolver?.resolveWornTemplateEntry?.(selected.profile.slot) ?? null;
+    const templateEntry = this.templateResolver?.resolveWornTemplateEntry?.(selected.profile.slot, { allowedTypes: ["equipment"] }) ?? null;
     if (!templateEntry) {
       const error = new Error(`No PF2e worn-item implementation template is available for slot ${selected.profile.slot}`);
       error.code = "NO_WORN_ITEM_TEMPLATE";
@@ -157,6 +157,19 @@ export class WornMagicItemGenerator {
 
     const itemSource = typeof document.toObject === "function" ? document.toObject() : clone(document._source ?? document);
     itemSource._id = null;
+    if (itemSource.type !== "equipment") {
+      const error = new Error(`Worn-item implementation template ${templateEntry.uuid} has unsafe document type ${itemSource.type}`);
+      error.code = "INVALID_WORN_ITEM_TEMPLATE_TYPE";
+      error.details = { slot: selected.profile.slot, type: itemSource.type, uuid: templateEntry.uuid };
+      throw error;
+    }
+    const parsedUsage = parseWornUsage(itemSource.system?.usage?.value);
+    if (!parsedUsage.worn || parsedUsage.slot !== selected.profile.slot) {
+      const error = new Error(`Worn-item implementation template ${templateEntry.uuid} usage does not match slot ${selected.profile.slot}`);
+      error.code = "WORN_ITEM_TEMPLATE_USAGE_MISMATCH";
+      error.details = { slot: selected.profile.slot, usage: itemSource.system?.usage?.value ?? null, uuid: templateEntry.uuid };
+      throw error;
+    }
     const rendered = this.#composeCustomItem(itemSource, selected, request);
     const profileLabel = localize(this.formatter, selected.profile.label, {}, selected.profile.id);
     const variantLabel = localize(this.formatter, selected.variant.label, {}, selected.variant.id);
@@ -198,7 +211,7 @@ export class WornMagicItemGenerator {
           usage: rendered.usage,
           effect: rendered.effect,
           priceGp: selected.variant.price,
-          invested: true,
+          invested: selected.profile.invested,
           automation: selected.profile.automation,
           balance: clone(selected.profile.balance)
         }
@@ -224,7 +237,10 @@ export class WornMagicItemGenerator {
     itemSource.system.price ??= { value: {} };
     itemSource.system.price.value = { gp: variant.price };
     itemSource.system.traits ??= { value: [] };
-    itemSource.system.traits.value = [...new Set(["invested", "magical", ...(profile.traits ?? [])])].sort();
+    const traits = new Set(profile.traits ?? []);
+    if (profile.invested) traits.add("invested");
+    if (!hasMagicMarkerTraits([...traits])) traits.add("magical");
+    itemSource.system.traits.value = [...traits].sort();
     if (Object.hasOwn(itemSource.system.traits, "rarity")) itemSource.system.traits.rarity = profile.rarity;
     if (itemSource.system.rarity?.value !== undefined) itemSource.system.rarity.value = profile.rarity;
     itemSource.system.rules = [];
@@ -238,12 +254,13 @@ export class WornMagicItemGenerator {
     itemSource.system.description.value = [
       description ? `<p>${description}</p>` : "",
       `<p><strong>${localize(this.formatter, "PF2E_ITEM_FORGE.WornText.SpecialAbility", {}, "Effect:")}</strong> ${effect}</p>`,
-      `<p><em>${localize(this.formatter, "PF2E_ITEM_FORGE.WornText.InvestmentNote", {}, "This generated item has the invested trait and uses the listed worn usage. Its custom ability is rules text plus Item Forge metadata.")}</em></p>`
+      `<p><em>${localize(this.formatter, profile.invested ? "PF2E_ITEM_FORGE.WornText.InvestmentNote" : "PF2E_ITEM_FORGE.WornText.NonInvestmentNote", {}, profile.invested
+        ? "This generated item has the invested trait and uses the listed worn usage. Its custom ability is rules text plus Item Forge metadata."
+        : "This generated item uses the listed worn usage without requiring investment. Its custom ability is rules text plus Item Forge metadata.")}</em></p>`
     ].filter(Boolean).join("\n");
 
-    itemSource.flags ??= {};
+    itemSource.flags = {};
     itemSource.flags["pf2e-item-forge"] = {
-      ...(itemSource.flags["pf2e-item-forge"] ?? {}),
       generated: true,
       generator: this.id,
       seed: request.seed,
@@ -253,6 +270,7 @@ export class WornMagicItemGenerator {
         variant: variant.id,
         slot: profile.slot,
         usage,
+        invested: profile.invested,
         effect,
         automation: profile.automation,
         balance: clone(profile.balance)

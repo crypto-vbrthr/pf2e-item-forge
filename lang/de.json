@@ -287,7 +287,9 @@
       "NoPredefinedWornItemCandidate": "Für die gewählten Vorgaben wurde kein vordefinierter getragener magischer Gegenstand gefunden.",
       "NoWornItemProfileCandidate": "Für Stufe, Seltenheit und Tragekategorie passt kein Profil für einen generierten getragenen Gegenstand.",
       "NoWornItemTemplate": "Für diese Tragekategorie wurde keine geeignete PF2e-Strukturvorlage gefunden.",
-      "UnknownWornItemProfile": "Das gewählte Profil für getragene magische Gegenstände ist nicht registriert."
+      "UnknownWornItemProfile": "Das gewählte Profil für getragene magische Gegenstände ist nicht registriert.",
+      "InvalidWornItemTemplateType": "Die technische Vorlage für den getragenen Gegenstand besitzt keinen sicheren PF2e-Ausrüstungstyp.",
+      "WornItemTemplateUsageMismatch": "Die Nutzungsart der technischen Vorlage passt nicht zur ausgewählten Tragekategorie."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatisch stufengerecht",
@@ -555,7 +557,10 @@
       "ArtificerBracers": "Handwerker-Armschienen",
       "MistweaveGarment": "Nebelgewebe-Gewand",
       "HorizonHelm": "Horizonthelm",
-      "ResoluteBrooch": "Brosche der Entschlossenheit"
+      "ResoluteBrooch": "Brosche der Entschlossenheit",
+      "PathmarkCharm": "Pfadmarken-Amulett",
+      "SignalGloves": "Signalhandschuhe",
+      "QuickhandBracers": "Armschienen der flinken Hand"
     },
     "WornText": {
       "WayfarerFootwearName": "Wegfinder-Schuhe",
@@ -595,7 +600,22 @@
       "OncePerTenMinutes": "einmal pro 10 Minuten",
       "ResoluteBroochName": "Brosche der Entschlossenheit",
       "ResoluteBroochDescription": "Die schwere Metallbrosche wird warm, wenn Furcht oder fremde Gefühle versuchen, den Willen ihres Trägers zu überwältigen.",
-      "ResoluteBroochEffect": "Du erhältst einen Gegenstandsbonus von +{bonus} auf Rettungswürfe gegen Furcht- und Gefühlseffekte. Aktivieren [reaction] (konzentrieren); Häufigkeit {frequency}; Auslöser Du erhältst den Zustand Verängstigt oder erhöhst seinen Wert; Effekt Senke deinen Verängstigt-Wert um {reduction}."
+      "ResoluteBroochEffect": "Du erhältst einen Gegenstandsbonus von +{bonus} auf Rettungswürfe gegen Furcht- und Gefühlseffekte. Aktivieren [reaction] (konzentrieren); Häufigkeit {frequency}; Auslöser Du erhältst den Zustand Verängstigt oder erhöhst seinen Wert; Effekt Senke deinen Verängstigt-Wert um {reduction}.",
+      "PathmarkCharmName": "Pfadmarken-Amulett",
+      "PathmarkCharmDescription": "Eine frei drehende Nadel aus Messing liegt unter dem Glas dieses kleinen Anhängers und richtet sich nach einer magisch gesetzten Wegmarke aus.",
+      "PathmarkCharmEffect": "Aktivieren [one-action] (konzentrieren); Häufigkeit {frequency}; Effekt Wähle einen Punkt, den du innerhalb von 9 Metern sehen kannst. Für 1 Stunde kennst du die Richtung zu diesem Punkt, solange du dich nicht weiter als 1,5 Kilometer von ihm entfernst. Das Amulett verrät weder Entfernung noch einen sicheren Weg.",
+      "SignalGlovesName": "Signalhandschuhe",
+      "SignalGlovesDescription": "Feine illusionäre Fäden sind in die Fingerspitzen dieser Handschuhe eingewoben.",
+      "SignalGlovesEffect": "Aktivieren [one-action] (konzentrieren); Effekt Bis du den Effekt aufhebst, erscheinen über deinen Händen klare leuchtende Zeichen. Du kannst damit einfache festgelegte Signale wie Gefahr, Halt, Komm her, Ja, Nein oder eine Richtung anzeigen. Die Zeichen sind bei normaler Sicht bis zu 18 Meter weit erkennbar.",
+      "QuickhandBracersName": "Armschienen der flinken Hand",
+      "QuickhandBracersDescription": "Kurze silberne Linien laufen über diese Armschienen und blitzen auf, sobald ihr Träger nach Ausrüstung greift.",
+      "QuickhandBracersEffect": "Aktivieren [one-action] (manipulieren); Häufigkeit {frequency}; Effekt Führe bis zu zwei Interagieren-Aktionen aus. Jede davon darf nur dazu verwendet werden, einen Gegenstand von Leichter Last oder weniger zu ziehen, wegzustecken oder aus einem leicht zugänglichen getragenen Behälter zu nehmen.",
+      "NonInvestmentNote": "Dieser generierte Gegenstand verwendet die angegebene Nutzungsart, benötigt aber keine Investition. Seine besondere Fähigkeit wird als Regeltext plus strukturiertes Item-Forge-Manifest gespeichert."
+    },
+    "WornAvailability": {
+      "PredefinedOnly": "(nur vordefiniert)",
+      "GeneratedOnly": "(nur generierbar)",
+      "Unavailable": "(nicht verfügbar)"
     }
   }
 }

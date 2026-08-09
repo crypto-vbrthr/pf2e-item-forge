@@ -3,9 +3,12 @@ import { validateGeneratedProfileAutomation } from "../generation-contract.js";
 import { WORN_SLOT_DEFINITIONS } from "../worn-item-utils.js";
 
 const VALID_SLOTS = new Set(WORN_SLOT_DEFINITIONS.map((slot) => slot.id));
+const VALID_RARITIES = new Set(["common", "uncommon", "rare", "unique"]);
 
 function uniqueStrings(values) {
-  return [...new Set((Array.isArray(values) ? values : []).filter((value) => typeof value === "string" && value.trim()).map((value) => value.trim()))];
+  return [...new Set((Array.isArray(values) ? values : [])
+    .filter((value) => typeof value === "string" && value.trim())
+    .map((value) => value.trim().toLowerCase()))];
 }
 
 export class WornMagicProfileRegistry {
@@ -21,7 +24,7 @@ export class WornMagicProfileRegistry {
 
     const variants = Array.isArray(definition.variants)
       ? definition.variants.map((variant, index) => ({
-          id: String(variant.id ?? ["base", "greater", "major"][index] ?? `tier-${index + 1}`),
+          id: String(variant.id ?? ["base", "greater", "major"][index] ?? `tier-${index + 1}`).trim(),
           label: variant.label ?? null,
           level: Number(variant.level),
           price: Number(variant.price),
@@ -31,12 +34,20 @@ export class WornMagicProfileRegistry {
     if (!variants.length) throw new Error(`Worn magic profile ${id} requires at least one variant`);
 
     let lastLevel = -Infinity;
+    const variantIds = new Set();
     for (const variant of variants) {
+      if (!variant.id) throw new Error(`Worn magic profile ${id} has an empty variant id`);
+      if (variantIds.has(variant.id)) throw new Error(`Worn magic profile ${id} has duplicate variant id ${variant.id}`);
+      variantIds.add(variant.id);
       if (!Number.isInteger(variant.level) || variant.level < 1) throw new Error(`Invalid worn magic item level in ${id}`);
       if (variant.level <= lastLevel) throw new Error(`Worn magic profile ${id} variants must increase in level`);
       if (!Number.isFinite(variant.price) || variant.price <= 0) throw new Error(`Invalid worn magic item price in ${id}`);
       lastLevel = variant.level;
     }
+
+    const rarity = String(definition.rarity ?? "common").trim().toLowerCase();
+    if (!VALID_RARITIES.has(rarity)) throw new Error(`Worn magic profile ${id} has invalid rarity ${rarity}`);
+    if (definition.invested !== undefined && typeof definition.invested !== "boolean") throw new TypeError(`Worn magic profile ${id} invested must be boolean`);
 
     const profile = {
       id,
@@ -45,7 +56,8 @@ export class WornMagicProfileRegistry {
       description: definition.description ?? null,
       nameTemplate: definition.nameTemplate ?? null,
       effectText: definition.effectText ?? null,
-      rarity: definition.rarity ?? "common",
+      rarity,
+      invested: definition.invested !== false,
       traits: uniqueStrings(definition.traits),
       automation: validateGeneratedProfileAutomation(definition.automation, { kind: "Worn magic profile", id }),
       balance: normalizeBalanceMetadata(definition.balance, { basis: "unspecified", reviewed: false }),
@@ -74,7 +86,49 @@ export class WornMagicProfileRegistry {
 }
 
 export function registerCoreWornMagicProfiles(registry = new WornMagicProfileRegistry()) {
-  const balance = { basis: "published-analogs", reviewed: true, notes: "Core homebrew worn-item profile benchmarked against published invested worn items and GM Core item-design guidance." };
+  const balance = { basis: "published-analogs", reviewed: true, analogs: ["mirror-goggles", "mask-of-mercy", "treasure-vault-worn-item-tables"], notes: "Core homebrew worn-item profile benchmarked against published invested worn items and GM Core item-design guidance." };
+
+
+  registry.register({
+    id: "core.pathmark-charm",
+    balance: { basis: "published-analogs", reviewed: true, analogs: ["ring-of-discretion", "candlecap"], notes: "Low-level utility profile benchmarked against level-1 published worn items in Treasure Vault." },
+    slot: "unrestricted",
+    label: "PF2E_ITEM_FORGE.WornProfiles.PathmarkCharm",
+    nameTemplate: "PF2E_ITEM_FORGE.WornText.PathmarkCharmName",
+    description: "PF2E_ITEM_FORGE.WornText.PathmarkCharmDescription",
+    effectText: "PF2E_ITEM_FORGE.WornText.PathmarkCharmEffect",
+    variants: [
+      { id: "base", label: "PF2E_ITEM_FORGE.SpecificItemVariants.Base", level: 1, price: 15, values: { frequency: "PF2E_ITEM_FORGE.WornText.OncePerDay" } }
+    ]
+  });
+
+  registry.register({
+    id: "core.signal-gloves",
+    balance: { basis: "published-analogs", reviewed: true, analogs: ["apparition-gloves", "goz-mask"], notes: "Low-level non-invested utility profile benchmarked against level-2 published worn items in Treasure Vault." },
+    slot: "gloves",
+    invested: false,
+    traits: ["illusion"],
+    label: "PF2E_ITEM_FORGE.WornProfiles.SignalGloves",
+    nameTemplate: "PF2E_ITEM_FORGE.WornText.SignalGlovesName",
+    description: "PF2E_ITEM_FORGE.WornText.SignalGlovesDescription",
+    effectText: "PF2E_ITEM_FORGE.WornText.SignalGlovesEffect",
+    variants: [
+      { id: "base", label: "PF2E_ITEM_FORGE.SpecificItemVariants.Base", level: 2, price: 25, values: {} }
+    ]
+  });
+
+  registry.register({
+    id: "core.quickhand-bracers",
+    balance: { basis: "published-analogs", reviewed: true, analogs: ["armory-bracelet", "skinsaw-mask"], notes: "Low-level action utility profile benchmarked against level-3 published worn items in Treasure Vault." },
+    slot: "bracers",
+    label: "PF2E_ITEM_FORGE.WornProfiles.QuickhandBracers",
+    nameTemplate: "PF2E_ITEM_FORGE.WornText.QuickhandBracersName",
+    description: "PF2E_ITEM_FORGE.WornText.QuickhandBracersDescription",
+    effectText: "PF2E_ITEM_FORGE.WornText.QuickhandBracersEffect",
+    variants: [
+      { id: "base", label: "PF2E_ITEM_FORGE.SpecificItemVariants.Base", level: 3, price: 50, values: { frequency: "PF2E_ITEM_FORGE.WornText.OncePerDay" } }
+    ]
+  });
 
   registry.register({
     id: "core.wayfarer-footwear",

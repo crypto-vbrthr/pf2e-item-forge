@@ -25,17 +25,37 @@ function sourceFor(request) {
     source.system.hardness = 8;
     source.system.hp = { value: 40, max: 40, brokenThreshold: 20 };
   }
-  if (request.category === "magic.worn") {
-    source.system.usage = { value: "worn cloak" };
-    source.system.traits.value = request.magic?.wornMode === "generated" ? ["invested", "magical"] : ["invested", "magical"];
+  if (request.category === "magic.worn" || request.category.startsWith("magic.worn.")) {
+    const slot = request.category.startsWith("magic.worn.") ? request.category.slice("magic.worn.".length) : "cloak";
+    const usage = {
+      unrestricted: "worn",
+      eyepiece: "worn eyepiece",
+      headwear: "worn headwear",
+      footwear: "worn shoes"
+    }[slot] ?? `worn ${slot}`;
+    source.system.usage = { value: usage };
+    source.system.traits.value = ["invested", "magical"];
+    if (request.magic?.wornMode === "generated") {
+      source.system.rules = [];
+      source.flags = { "pf2e-item-forge": { generated: true } };
+    }
   }
   return source;
+}
+
+function metadataFor(request) {
+  const slot = request.category.startsWith("magic.worn.") ? request.category.slice("magic.worn.".length) : null;
+  return {
+    generator: "test",
+    automation: { level: request.magic?.wornMode === "generated" ? "rules-text" : "native" },
+    ...(request.magic?.wornMode === "generated" ? { wornItem: { slot, invested: true } } : {})
+  };
 }
 
 test("MagicItemDiagnostics validates generated sources without persisting world items", async () => {
   let constructed = 0;
   const api = {
-    async preview(request) { return { itemSource: sourceFor(request), metadata: { generator: "test", automation: { level: request.magic?.wornMode === "generated" ? "rules-text" : "native" } } }; },
+    async preview(request) { return { itemSource: sourceFor(request), metadata: metadataFor(request) }; },
     compendiumIndex: {
       entries: [{ categories: ["magic.weapon"], specific: { material: {}, runes: {} } }],
       spellEntries: [{ castActions: 1 }, { castActions: 2 }],
@@ -49,19 +69,21 @@ test("MagicItemDiagnostics validates generated sources without persisting world 
   const result = await diagnostics.run();
   assert.equal(result.failed, 0);
   assert.equal(result.warnings, 1, "price audit warns when the runtime document does not derive a different price");
-  assert.equal(constructed, 15);
+  assert.equal(constructed, 18);
   assert.ok(result.checks.some((check) => check.id === "pf2e-specific-schema" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "specific-weapon-generated" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "specific-armor-generated" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "specific-shield-generated" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "worn-existing" && check.status === "passed"));
-  assert.ok(result.checks.some((check) => check.id === "worn-generated" && check.status === "passed"));
+  for (const id of ["worn-generated-unrestricted", "worn-generated-eyepiece", "worn-generated-headwear", "worn-generated-footwear"]) {
+    assert.ok(result.checks.some((check) => check.id === id && check.status === "passed"), `expected ${id} to pass`);
+  }
   assert.ok(result.checks.some((check) => check.id === "compendium-index-errors" && check.status === "passed"));
 });
 
 test("MagicItemDiagnostics exposes compendium indexing failures as a failed contract check", async () => {
   const api = {
-    async preview(request) { return { itemSource: sourceFor(request), metadata: { generator: "test", automation: { level: request.magic?.wornMode === "generated" ? "rules-text" : "native" } } }; },
+    async preview(request) { return { itemSource: sourceFor(request), metadata: metadataFor(request) }; },
     compendiumIndex: {
       entries: [],
       spellEntries: [],

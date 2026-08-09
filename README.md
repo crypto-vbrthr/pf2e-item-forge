@@ -2,9 +2,9 @@
 
 Reusable Item Forge architecture for Foundry VTT v14 and Pathfinder 2e.
 
-## v0.0.24 scope
+## v0.0.25 scope
 
-This release expands generated worn magic items into a continuous core level band. Published PF2e worn items can still be selected intact, while generated homebrew worn items now have at least one automatic strict-mode core candidate at every item level from 4 through 20.
+This release hardens the generated worn-magic-item contract. Published PF2e worn items can still be selected intact, while generated homebrew worn items now use safe equipment-only structural templates, mode-aware worn-slot capabilities, stricter profile validation, and continuous automatic strict-mode core coverage from item level 1 through 20.
 
 Implemented:
 
@@ -24,9 +24,11 @@ Implemented:
 - Spellhearts can either be selected as complete predefined PF2e items or generated from validated custom Spellheart profiles with coherent armor/weapon benefits, spell progressions, prices, and themes
 - Specific magic weapons and armor can either be copied exactly from selected compendia or generated from validated profiles that own level, price, runes, theme, and special ability as one unit
 - Specific magic shields have their own predefined/generated paths plus a dedicated `specificShieldProfiles` registry and explicit Hardness/HP/Broken Threshold contracts
-- Worn magic items have predefined/generated paths, usage-aware categories, a public `wornMagicProfiles` registry, and continuous automatic core coverage from item level 4 through 20
-- Published worn items preserve native PF2e usage, Rule Elements, activations, price, traits, and automation; generated worn items use whole-effect profiles plus rules-text manifests. Eleven core families now cover footwear, eyepieces, belts, cloaks, masks, circlets, gloves, bracers, garments, unrestricted jewelry, and headwear
-- Public `specificItemProfiles`, `specificShieldProfiles`, and `wornMagicProfiles` registries for extension modules and campaign content
+- Worn magic items have predefined/generated paths, usage-aware categories, a public `wornMagicProfiles` registry, mode-aware `wornSlots` capabilities, and continuous automatic core coverage from item level 1 through 20
+- Published worn items preserve native PF2e usage, Rule Elements, activations, price, traits, and automation; generated worn items use whole-effect profiles plus rules-text manifests. Fourteen core families cover item levels 1 through 20 across footwear, eyepieces, belts, cloaks, masks, circlets, gloves, bracers, garments, unrestricted jewelry, and headwear
+- Generated worn profiles use `equipment` documents only as generic structural templates; backpack/container schemas are not borrowed by the generic worn generator
+- Worn profiles support an explicit `invested` contract (default `true`), normalize canonical rarity/variant IDs, and treat arcane/divine/occult/primal as sufficient magic markers without redundantly forcing the `magical` trait
+- Public `specificItemProfiles`, `specificShieldProfiles`, and `wornMagicProfiles` registries for extension modules and campaign content; `getWornSlotCapabilities()` and `getCapabilities().wornSlots` expose actual predefined/generated slot availability
 - Magic themes for fire, cold, electricity, healing, illusion, mental, vitality, void, arcane, divine, occult, primal, and summoning
 - Composed weapons, armor, and shields with fundamental runes
 - Registry-driven property runes with automatic/random/fixed/none modes and compatibility rules
@@ -47,8 +49,8 @@ Implemented:
 - Standalone `ItemForgeApplication` container owning Foundry document creation and preserving `createdByForge` versus `generated` provenance
 - German and English localization
 - Shared generation-result contract for `contentSources`, `templateSource`, and automation level
-- Live Magic diagnostics for predefined and generated magic paths including worn items, strict source-shape checks, pack-index failures, and composed-equipment price preparation
-- 190 automated unit/integration/statistical/contract tests
+- Live Magic diagnostics for predefined and generated magic paths including representative unrestricted, eyepiece, headwear, and footwear worn contracts, strict source-shape checks, pack-index failures, and composed-equipment price preparation
+- 196 automated unit/integration/statistical/contract tests
 
 Not yet implemented:
 

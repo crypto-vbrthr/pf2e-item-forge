@@ -164,6 +164,8 @@ export class ItemForgeEditor extends HandlebarsApplication {
         NO_PREDEFINED_WORN_ITEM_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoPredefinedWornItemCandidate",
         NO_WORN_ITEM_PROFILE_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoWornItemProfileCandidate",
         NO_WORN_ITEM_TEMPLATE: "PF2E_ITEM_FORGE.Errors.NoWornItemTemplate",
+        INVALID_WORN_ITEM_TEMPLATE_TYPE: "PF2E_ITEM_FORGE.Errors.InvalidWornItemTemplateType",
+        WORN_ITEM_TEMPLATE_USAGE_MISMATCH: "PF2E_ITEM_FORGE.Errors.WornItemTemplateUsageMismatch",
         UNKNOWN_WORN_ITEM_PROFILE: "PF2E_ITEM_FORGE.Errors.UnknownWornItemProfile",
         UNKNOWN_STAFF_PROFILE: "PF2E_ITEM_FORGE.Errors.UnknownStaffProfile",
         UNSUPPORTED_TREASURE_CATEGORY: "PF2E_ITEM_FORGE.Errors.UnsupportedTreasureCategory",
@@ -196,6 +198,18 @@ export class ItemForgeEditor extends HandlebarsApplication {
     const selectedPacks = new Set(this.request.source.includePacks ?? []);
     const rarity = new Set(this.request.rarity ?? []);
     this.#ensureModeCategory();
+
+    const wornSlotCapabilities = this.api.getWornSlotCapabilities?.() ?? this.api.getCapabilities?.().wornSlots ?? [];
+    const wornCapabilityBySlot = new Map(wornSlotCapabilities.map((entry) => [entry.id, entry]));
+    const wornModeForCategories = this.request.magic?.wornMode ?? "existing";
+    const selectedWornSlotForCategories = String(this.request.category ?? "").startsWith("magic.worn.")
+      ? String(this.request.category).slice("magic.worn.".length)
+      : null;
+    if (this.request.mode === "magic" && selectedWornSlotForCategories) {
+      const capability = wornCapabilityBySlot.get(selectedWornSlotForCategories);
+      if (capability && !capability[wornModeForCategories]) this.request.category = "magic.worn";
+    }
+
     const categories = this.api.categories.getAll()
       .filter((category) => {
         if (this.request.mode === "equipment") return this.#isEquipmentCategory(category.id);
@@ -205,10 +219,23 @@ export class ItemForgeEditor extends HandlebarsApplication {
       })
       .map((category) => {
         const depth = this.api.categories.getAncestors(category.id).length;
+        const slot = category.id.startsWith?.("magic.worn.") ? category.id.slice("magic.worn.".length) : null;
+        const capability = slot ? wornCapabilityBySlot.get(slot) : null;
+        const disabled = Boolean(capability && this.request.mode === "magic" && !capability[wornModeForCategories]);
+        let availabilitySuffix = "";
+        if (disabled) {
+          const key = wornModeForCategories === "generated" && capability.existing
+            ? "PF2E_ITEM_FORGE.WornAvailability.PredefinedOnly"
+            : wornModeForCategories === "existing" && capability.generated
+              ? "PF2E_ITEM_FORGE.WornAvailability.GeneratedOnly"
+              : "PF2E_ITEM_FORGE.WornAvailability.Unavailable";
+          availabilitySuffix = ` ${localizeMaybe(key)}`;
+        }
         return {
           id: category.id,
-          label: `${"  ".repeat(depth)}${localizeMaybe(category.label)}`,
-          selected: category.id === this.request.category
+          label: `${"  ".repeat(depth)}${localizeMaybe(category.label)}${availabilitySuffix}`,
+          selected: category.id === this.request.category,
+          disabled
         };
       });
 
@@ -585,6 +612,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
       generatedWorn,
       wornModes,
       wornProfiles,
+      wornSlotCapabilities,
       specificModes,
       specificProfiles,
       specificMagicThemes,

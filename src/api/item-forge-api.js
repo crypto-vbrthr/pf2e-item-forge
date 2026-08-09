@@ -1,3 +1,4 @@
+import { getWornSlotCapabilities } from "../engine/worn-item-utils.js";
 import { API_VERSION } from "../constants.js";
 
 export class ItemForgeApi {
@@ -58,6 +59,14 @@ export class ItemForgeApi {
     };
   }
 
+
+  getWornSlotCapabilities() {
+    return getWornSlotCapabilities({
+      entries: this.compendiumIndex?.entries ?? [],
+      profiles: this.wornMagicProfiles?.getAll?.() ?? []
+    });
+  }
+
   getCapabilities() {
     return {
       apiVersion: this.apiVersion,
@@ -79,11 +88,12 @@ export class ItemForgeApi {
       spellheartModes: ["generated", "existing"],
       specificItemModes: ["generated", "existing"],
       wornItemModes: ["generated", "existing"],
+      wornSlots: this.getWornSlotCapabilities(),
       staffProfiles: this.staffProfiles?.getAll?.().map((profile) => ({ id: profile.id, label: profile.label, levels: profile.variants.map((variant) => variant.level), ...(profile.balance ? { balance: profile.balance } : {}) })) ?? [],
       spellheartProfiles: this.spellheartProfiles?.getAll?.().map((profile) => ({ id: profile.id, label: profile.label, themes: [...profile.allowedThemes], levels: profile.variants.map((variant) => variant.level), ...(profile.balance ? { balance: profile.balance } : {}) })) ?? [],
       specificItemProfiles: this.specificItemProfiles?.getAll?.().map((profile) => ({ id: profile.id, itemType: profile.itemType, label: profile.label, themes: [...profile.allowedThemes], levels: profile.variants.map((variant) => variant.level), ...(profile.balance ? { balance: profile.balance } : {}) })) ?? [],
       specificShieldProfiles: this.specificShieldProfiles?.getAll?.().map((profile) => ({ id: profile.id, label: profile.label, themes: [...profile.allowedThemes], levels: profile.variants.map((variant) => variant.level), ...(profile.balance ? { balance: profile.balance } : {}) })) ?? [],
-      wornMagicProfiles: this.wornMagicProfiles?.getAll?.().map((profile) => ({ id: profile.id, slot: profile.slot, label: profile.label, levels: profile.variants.map((variant) => variant.level), ...(profile.balance ? { balance: profile.balance } : {}) })) ?? [],
+      wornMagicProfiles: this.wornMagicProfiles?.getAll?.().map((profile) => ({ id: profile.id, slot: profile.slot, label: profile.label, invested: profile.invested, levels: profile.variants.map((variant) => variant.level), ...(profile.balance ? { balance: profile.balance } : {}) })) ?? [],
       propertyRunes: this.propertyRunes.getAll().map((rune) => ({ id: rune.id, slug: rune.slug, itemType: rune.itemType, level: rune.level, rarity: rune.rarity })),
       levelPolicies: ["strict", "nearest", "notAbove", "notBelow"],
       embeddedEditor: true,

@@ -6,7 +6,7 @@
       <label>{{localize "PF2E_ITEM_FORGE.Fields.GenerationMode"}}</label>
       <select name="mode">
         {{#each generationModes}}
-          <option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+          <option value="{{id}}" {{#if selected}}selected{{/if}} {{#if disabled}}disabled{{/if}}>{{label}}</option>
         {{/each}}
       </select>
       {{#if isEquipmentMode}}<p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.EquipmentMode"}}</p>{{/if}}
