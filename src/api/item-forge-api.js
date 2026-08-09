@@ -38,13 +38,21 @@ export class ItemForgeApi {
       generators: this.generators.getAll().map((generator) => generator.id),
       categories: this.categories.getAll().map((category) => category.id),
       sourceModes: ["all", "system", "selected"],
-      generationModes: ["existing", "equipment"],
+      generationModes: ["existing", "equipment", "treasure"],
       fundamentalRuneModes: ["automatic", "none"],
       propertyRuneModes: ["automatic", "random", "fixed", "none"],
       propertyRunes: this.propertyRunes.getAll().map((rune) => ({ id: rune.id, slug: rune.slug, itemType: rune.itemType, level: rune.level, rarity: rune.rarity })),
       levelPolicies: ["strict", "nearest", "notAbove", "notBelow"],
       embeddedEditor: true,
-      treasureRegistries: true
+      treasureRegistries: {
+        types: this.treasure.types.getAll().length,
+        materials: this.treasure.materials.getAll().length,
+        components: this.treasure.components.getAll().length,
+        motifs: this.treasure.motifs.getAll().length,
+        conditions: this.treasure.conditions.getAll().length,
+        craftsmanship: this.treasure.craftsmanship.getAll().length,
+        styles: this.treasure.styles.getAll().length
+      }
     };
   }
 

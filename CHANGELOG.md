@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.0.8
+
+- Adds the first full generated `TreasureGenerator` through `mode: "treasure"`.
+- Generates exactly one nonmagical sale/flavor treasure per engine request, preserving the Item Forge/Loot Forge responsibility boundary.
+- Adds target-value and value-range inputs plus configurable `ValueSolver` attempt limits.
+- Material, craftsmanship, condition, style, attributes, and reusable components now contribute to the generated price.
+- Adds explicit closest-valid fallback warnings when the requested value cannot be hit inside the attempt budget.
+- Adds 45 built-in treasure archetypes across gemstones, art, sculpture, jewelry, tableware, ceremonial objects, luxury goods, books/manuscripts, wine, beer, mead, and spirits.
+- Adds 29 materials, 8 reusable components, 9 motifs, 9 conditions, 6 craftsmanship grades, and 8 styles.
+- Adds frames, pedestals, gemstone settings, gilding, engraving, bindings, illustrations, wax seals, bottles/amphorae/casks, and book/drink-specific data attributes.
+- Material and condition compatibility prevents obviously invalid combinations; the editor filters materials according to the selected treasure category.
+- Adds new hierarchical treasure categories, including painting/sculpture/textile-art and beverage subcategories.
+- Generated results are valid PF2e `treasure` item sources with price denominations, descriptions, and required physical-item defaults.
+- Preview now shows generated treasure value, archetype, material, craftsmanship, condition, style, motif, components, and description.
+- Generated world items retain the full generation plan in Item Forge flags.
+- Adds `craftsmanship` to the public treasure registries and reports registry counts via capabilities.
+- Unknown registry IDs fail explicitly rather than silently falling back to random content.
+- Adds German/English localization for the TreasureGenerator UI.
+- Adds integration, extension, valuation, determinism, attempt-limit, and 300-seed statistical variety tests.
+- Automated suite now contains 51 passing tests.
+
 ## 0.0.7
 
 - Adds a dedicated `ScrollGenerator` for `consumable.scroll` requests.

@@ -7,6 +7,7 @@ export class TreasureRegistry {
     this.components = new ContentRegistry("treasure component");
     this.motifs = new ContentRegistry("treasure motif");
     this.conditions = new ContentRegistry("treasure condition");
+    this.craftsmanship = new ContentRegistry("treasure craftsmanship");
     this.styles = new ContentRegistry("treasure style");
   }
 }

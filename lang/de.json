@@ -33,7 +33,17 @@
       "GenerationMode": "Erzeugungsart",
       "FundamentalRunes": "Basisrunen",
       "PropertyRunes": "Eigenschaftsrunen",
-      "FixedPropertyRunes": "Feste Eigenschaftsrunen"
+      "FixedPropertyRunes": "Feste Eigenschaftsrunen",
+      "ValueMode": "Wertvorgabe",
+      "ValueTarget": "Zielwert (GM)",
+      "ValueMin": "Wert von (GM)",
+      "ValueMax": "Wert bis (GM)",
+      "ValueTolerance": "Toleranz",
+      "Material": "Material",
+      "Craftsmanship": "Verarbeitung",
+      "Condition": "Zustand",
+      "Motif": "Motiv",
+      "Style": "Stil"
     },
     "LevelMode": {
       "Single": "Einzelne Stufe",
@@ -59,13 +69,15 @@
     "Hints": {
       "EmptyRarityMeansAll": "Keine Auswahl bedeutet: alle Seltenheiten zulassen.",
       "NoItemPacks": "Keine Item-Kompendien gefunden.",
-      "SolverAttempts": "Ist bereits Teil des stabilen Request-Schemas; der Schatzgenerator verwendet diesen Wert in einer späteren Ausbaustufe.",
+      "SolverAttempts": "Maximale Zahl der Versuche, mit denen wertbasierte Generatoren ein Ergebnis innerhalb der gewünschten Wertspanne suchen.",
       "EquipmentMode": "Wählt einen nicht-spezifischen Basisgegenstand aus den gewählten Kompendien und versieht ihn mit einer stufengerechten Kombination von Basisrunen.",
       "PropertyRunesLater": "Eigenschaftsrunen werden als eigener Komponentenblock ergänzt; diese Version legt bereits Stufenauflösung und Runenplätze dafür fest.",
       "PropertyRuneMode": "Automatisch füllt verfügbare Runenplätze stufengerecht; Zufällig variiert Anzahl und Auswahl; Fest verwendet nur die ausgewählten Runen.",
       "NoPropertyRunes": "Für diese Gegenstandsart sind keine Eigenschaftsrunen registriert.",
       "PropertyRuneCapacity": "Die tatsächliche Zahl möglicher Eigenschaftsrunen wird durch den Wert der Verbesserungsrune begrenzt.",
-      "ScrollSources": "Bei Schriftrollen werden zusätzlich Zauber-Kompendien als Quellen angeboten. Die generische Schriftrolle dient nur als Vorlage; der erzeugte Gegenstand erhält einen passenden Zauber."
+      "ScrollSources": "Bei Schriftrollen werden zusätzlich Zauber-Kompendien als Quellen angeboten. Die generische Schriftrolle dient nur als Vorlage; der erzeugte Gegenstand erhält einen passenden Zauber.",
+      "TreasureMode": "Erzeugt genau einen nichtmagischen Verkaufs- oder Kunstschatz. Material, Verarbeitung und Zustand beeinflussen seinen Wert.",
+      "ValueTolerance": "0,15 entspricht ±15 % um den Zielwert. Wird kein Treffer gefunden, liefert der ValueSolver das nächstgelegene gültige Ergebnis mit Warnung."
     },
     "Preview": {
       "Empty": "Noch nichts geschmiedet. Parameter wählen und Generieren drücken.",
@@ -85,7 +97,11 @@
       "Spell": "Enthaltener Zauber",
       "SpellRank": "Zaubergrad",
       "HeightenedFrom": "erhöht von Grad",
-      "Description": "Beschreibung"
+      "Description": "Beschreibung",
+      "Value": "Wert",
+      "TreasureType": "Schatzart",
+      "SolverAttempts": "ValueSolver-Versuche",
+      "Components": "Besondere Bestandteile"
     },
     "Notifications": {
       "GenerationFailed": "Für diese Parameter konnte kein Gegenstand erzeugt werden.",
@@ -124,11 +140,22 @@
       "TreasureArt": "Kunstgegenstand",
       "TreasureJewelry": "Schmuck",
       "TreasureBook": "Buch",
-      "TreasureBeverage": "Wertvolles Getränk"
+      "TreasureBeverage": "Wertvolles Getränk",
+      "TreasureArtPainting": "Gemälde & Porträts",
+      "TreasureArtSculpture": "Skulpturen & Reliefs",
+      "TreasureArtTextile": "Textilkunst",
+      "TreasureTableware": "Tafel- & Trinkkultur",
+      "TreasureCeremonial": "Zeremonielle Gegenstände",
+      "TreasureLuxury": "Luxusgüter",
+      "TreasureBeverageWine": "Wein",
+      "TreasureBeverageBeer": "Bier",
+      "TreasureBeverageMead": "Met",
+      "TreasureBeverageSpirit": "Spirituosen"
     },
     "GenerationMode": {
       "Existing": "Vordefinierten Gegenstand auswählen",
-      "Equipment": "Waffe, Rüstung oder Schild zusammensetzen"
+      "Equipment": "Waffe, Rüstung oder Schild zusammensetzen",
+      "Treasure": "Schatzgegenstand generieren"
     },
     "FundamentalRunes": {
       "Automatic": "Automatisch stufengerecht",
@@ -141,7 +168,11 @@
       "ItemDocumentNotFound": "Der ausgewählte Gegenstand konnte nicht aus dem Kompendium geladen werden.",
       "InvalidPropertyRuneSelection": "Die ausgewählten Eigenschaftsrunen passen nicht zum Basisgegenstand, überschreiten die verfügbaren Runenplätze oder liegen außerhalb der erlaubten Stufe/Seltenheit.",
       "NoScrollSpellCandidate": "In den gewählten Quellen wurde kein für eine Schriftrolle geeigneter Zauber gefunden. Zaubertricks, Fokuszauber und Rituale werden ausgeschlossen.",
-      "SpellDocumentNotFound": "Der ausgewählte Zauber konnte nicht aus seinem Kompendium geladen werden."
+      "SpellDocumentNotFound": "Der ausgewählte Zauber konnte nicht aus seinem Kompendium geladen werden.",
+      "UnsupportedTreasureCategory": "Die Schatzgenerierung unterstützt nur Kategorien innerhalb von „Schatz“.",
+      "NoTreasureType": "Für die gewählte Schatzkategorie ist keine passende Schatzart registriert.",
+      "NoTreasureCandidate": "Mit den gewählten Material-, Zustands- und Wertvorgaben konnte kein gültiger Schatz erzeugt werden.",
+      "UnknownTreasureContent": "Eine angeforderte Schatzdefinition ist nicht registriert oder nicht mehr verfügbar."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatisch stufengerecht",
@@ -174,6 +205,13 @@
     "Sources": {
       "Items": "Gegenstände",
       "Spells": "Zauber"
+    },
+    "Treasure": {
+      "Any": "Beliebig",
+      "ValueHeading": "Verkaufswert",
+      "DetailsHeading": "Gestaltung",
+      "ValueTarget": "Zielwert mit Toleranz",
+      "ValueRange": "Wertbereich"
     }
   }
 }

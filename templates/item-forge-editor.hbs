@@ -10,6 +10,7 @@
         {{/each}}
       </select>
       {{#if isEquipmentMode}}<p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.EquipmentMode"}}</p>{{/if}}
+      {{#if isTreasureMode}}<p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.TreasureMode"}}</p>{{/if}}
     </div>
 
     <div class="form-group">
@@ -60,65 +61,142 @@
     {{/if}}
     {{/if}}
 
-    <div class="form-group">
-      <label>{{localize "PF2E_ITEM_FORGE.Fields.LevelMode"}}</label>
-      <select name="levelMode">
-        <option value="single" {{#unless isRange}}selected{{/unless}}>{{localize "PF2E_ITEM_FORGE.LevelMode.Single"}}</option>
-        <option value="range" {{#if isRange}}selected{{/if}}>{{localize "PF2E_ITEM_FORGE.LevelMode.Range"}}</option>
-      </select>
-    </div>
+    {{#if isTreasureMode}}
+      <fieldset class="treasure-settings">
+        <legend>{{localize "PF2E_ITEM_FORGE.Treasure.ValueHeading"}}</legend>
+        <div class="form-group">
+          <label>{{localize "PF2E_ITEM_FORGE.Fields.ValueMode"}}</label>
+          <select name="value.mode">
+            <option value="target" {{#unless treasureValueRange}}selected{{/unless}}>{{localize "PF2E_ITEM_FORGE.Treasure.ValueTarget"}}</option>
+            <option value="range" {{#if treasureValueRange}}selected{{/if}}>{{localize "PF2E_ITEM_FORGE.Treasure.ValueRange"}}</option>
+          </select>
+        </div>
+        {{#if treasureValueRange}}
+          <div class="form-row">
+            <div class="form-group">
+              <label>{{localize "PF2E_ITEM_FORGE.Fields.ValueMin"}}</label>
+              <input type="number" name="value.min" min="0.1" step="0.1" value="{{request.value.min}}">
+            </div>
+            <div class="form-group">
+              <label>{{localize "PF2E_ITEM_FORGE.Fields.ValueMax"}}</label>
+              <input type="number" name="value.max" min="0.1" step="0.1" value="{{request.value.max}}">
+            </div>
+          </div>
+        {{else}}
+          <div class="form-row">
+            <div class="form-group">
+              <label>{{localize "PF2E_ITEM_FORGE.Fields.ValueTarget"}}</label>
+              <input type="number" name="value.target" min="0.1" step="0.1" value="{{request.value.target}}">
+            </div>
+            <div class="form-group">
+              <label>{{localize "PF2E_ITEM_FORGE.Fields.ValueTolerance"}}</label>
+              <input type="number" name="value.tolerance" min="0" max="1" step="0.01" value="{{request.value.tolerance}}">
+            </div>
+          </div>
+          <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.ValueTolerance"}}</p>
+        {{/if}}
+      </fieldset>
 
-    <div class="form-row">
+      <fieldset class="treasure-settings">
+        <legend>{{localize "PF2E_ITEM_FORGE.Treasure.DetailsHeading"}}</legend>
+        {{#if treasureSupportsMaterial}}
+        <div class="form-group">
+          <label>{{localize "PF2E_ITEM_FORGE.Fields.Material"}}</label>
+          <select name="treasure.material">
+            {{#each treasureMaterials}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+          </select>
+        </div>
+        {{/if}}
+        {{#if treasureSupportsCraftsmanship}}
+        <div class="form-group">
+          <label>{{localize "PF2E_ITEM_FORGE.Fields.Craftsmanship"}}</label>
+          <select name="treasure.craftsmanship">
+            {{#each treasureCraftsmanship}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+          </select>
+        </div>
+        {{/if}}
+        <div class="form-group">
+          <label>{{localize "PF2E_ITEM_FORGE.Fields.Condition"}}</label>
+          <select name="treasure.condition">
+            {{#each treasureConditions}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+          </select>
+        </div>
+        {{#if treasureSupportsMotif}}
+        <div class="form-group">
+          <label>{{localize "PF2E_ITEM_FORGE.Fields.Motif"}}</label>
+          <select name="treasure.motif">
+            {{#each treasureMotifs}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+          </select>
+        </div>
+        {{/if}}
+        <div class="form-group">
+          <label>{{localize "PF2E_ITEM_FORGE.Fields.Style"}}</label>
+          <select name="treasure.style">
+            {{#each treasureStyles}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+          </select>
+        </div>
+      </fieldset>
+    {{else}}
       <div class="form-group">
-        <label>{{#if isRange}}{{localize "PF2E_ITEM_FORGE.Fields.LevelMin"}}{{else}}{{localize "PF2E_ITEM_FORGE.Fields.Level"}}{{/if}}</label>
-        <input type="number" name="level.min" min="0" max="30" value="{{request.level.min}}">
-      </div>
-      {{#if isRange}}
-      <div class="form-group">
-        <label>{{localize "PF2E_ITEM_FORGE.Fields.LevelMax"}}</label>
-        <input type="number" name="level.max" min="0" max="30" value="{{request.level.max}}">
-      </div>
-      {{/if}}
-    </div>
-
-    <div class="form-group">
-      <label>{{localize "PF2E_ITEM_FORGE.Fields.LevelPolicy"}}</label>
-      <select name="levelPolicy">
-        {{#each levelPolicies}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
-      </select>
-    </div>
-
-    <fieldset>
-      <legend>{{localize "PF2E_ITEM_FORGE.Fields.Rarity"}}</legend>
-      <label class="checkbox"><input type="checkbox" name="rarity" value="common" {{#if rarity.common}}checked{{/if}}> {{localize "PF2E_ITEM_FORGE.Rarity.Common"}}</label>
-      <label class="checkbox"><input type="checkbox" name="rarity" value="uncommon" {{#if rarity.uncommon}}checked{{/if}}> {{localize "PF2E_ITEM_FORGE.Rarity.Uncommon"}}</label>
-      <label class="checkbox"><input type="checkbox" name="rarity" value="rare" {{#if rarity.rare}}checked{{/if}}> {{localize "PF2E_ITEM_FORGE.Rarity.Rare"}}</label>
-      <label class="checkbox"><input type="checkbox" name="rarity" value="unique" {{#if rarity.unique}}checked{{/if}}> {{localize "PF2E_ITEM_FORGE.Rarity.Unique"}}</label>
-      <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.EmptyRarityMeansAll"}}</p>
-    </fieldset>
-
-    <fieldset>
-      <legend>{{localize "PF2E_ITEM_FORGE.Fields.Sources"}}</legend>
-      {{#if isScrollCategory}}<p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.ScrollSources"}}</p>{{/if}}
-      <div class="form-group">
-        <select name="source.mode">
-          {{#each sourceModes}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+        <label>{{localize "PF2E_ITEM_FORGE.Fields.LevelMode"}}</label>
+        <select name="levelMode">
+          <option value="single" {{#unless isRange}}selected{{/unless}}>{{localize "PF2E_ITEM_FORGE.LevelMode.Single"}}</option>
+          <option value="range" {{#if isRange}}selected{{/if}}>{{localize "PF2E_ITEM_FORGE.LevelMode.Range"}}</option>
         </select>
       </div>
-      {{#if selectedSources}}
-      <div class="pack-list">
-        {{#each packs}}
-          <label class="checkbox pack-list__entry">
-            <input type="checkbox" name="sourcePack" value="{{id}}" {{#if checked}}checked{{/if}}>
-            <span>{{label}}</span>
-            <small>{{id}}{{#if contentSummary}} · {{contentSummary}}{{/if}}</small>
-          </label>
-        {{else}}
-          <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.NoItemPacks"}}</p>
-        {{/each}}
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>{{#if isRange}}{{localize "PF2E_ITEM_FORGE.Fields.LevelMin"}}{{else}}{{localize "PF2E_ITEM_FORGE.Fields.Level"}}{{/if}}</label>
+          <input type="number" name="level.min" min="0" max="30" value="{{request.level.min}}">
+        </div>
+        {{#if isRange}}
+        <div class="form-group">
+          <label>{{localize "PF2E_ITEM_FORGE.Fields.LevelMax"}}</label>
+          <input type="number" name="level.max" min="0" max="30" value="{{request.level.max}}">
+        </div>
+        {{/if}}
       </div>
-      {{/if}}
-    </fieldset>
+
+      <div class="form-group">
+        <label>{{localize "PF2E_ITEM_FORGE.Fields.LevelPolicy"}}</label>
+        <select name="levelPolicy">
+          {{#each levelPolicies}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+        </select>
+      </div>
+
+      <fieldset>
+        <legend>{{localize "PF2E_ITEM_FORGE.Fields.Rarity"}}</legend>
+        <label class="checkbox"><input type="checkbox" name="rarity" value="common" {{#if rarity.common}}checked{{/if}}> {{localize "PF2E_ITEM_FORGE.Rarity.Common"}}</label>
+        <label class="checkbox"><input type="checkbox" name="rarity" value="uncommon" {{#if rarity.uncommon}}checked{{/if}}> {{localize "PF2E_ITEM_FORGE.Rarity.Uncommon"}}</label>
+        <label class="checkbox"><input type="checkbox" name="rarity" value="rare" {{#if rarity.rare}}checked{{/if}}> {{localize "PF2E_ITEM_FORGE.Rarity.Rare"}}</label>
+        <label class="checkbox"><input type="checkbox" name="rarity" value="unique" {{#if rarity.unique}}checked{{/if}}> {{localize "PF2E_ITEM_FORGE.Rarity.Unique"}}</label>
+        <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.EmptyRarityMeansAll"}}</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>{{localize "PF2E_ITEM_FORGE.Fields.Sources"}}</legend>
+        {{#if isScrollCategory}}<p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.ScrollSources"}}</p>{{/if}}
+        <div class="form-group">
+          <select name="source.mode">
+            {{#each sourceModes}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+          </select>
+        </div>
+        {{#if selectedSources}}
+        <div class="pack-list">
+          {{#each packs}}
+            <label class="checkbox pack-list__entry">
+              <input type="checkbox" name="sourcePack" value="{{id}}" {{#if checked}}checked{{/if}}>
+              <span>{{label}}</span>
+              <small>{{id}}{{#if contentSummary}} · {{contentSummary}}{{/if}}</small>
+            </label>
+          {{else}}
+            <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.NoItemPacks"}}</p>
+          {{/each}}
+        </div>
+        {{/if}}
+      </fieldset>
+    {{/if}}
 
     <details>
       <summary>{{localize "PF2E_ITEM_FORGE.Editor.Advanced"}}</summary>
@@ -151,8 +229,12 @@
           <h2>{{preview.name}}</h2>
           <div class="chips">
             <span>{{preview.type}}</span>
-            <span>{{localize "PF2E_ITEM_FORGE.Preview.Level"}} {{preview.level}}</span>
-            <span>{{preview.rarity}}</span>
+            {{#if preview.treasure}}
+              <span>{{localize "PF2E_ITEM_FORGE.Preview.Value"}} {{preview.value}} GM</span>
+            {{else}}
+              <span>{{localize "PF2E_ITEM_FORGE.Preview.Level"}} {{preview.level}}</span>
+              <span>{{preview.rarity}}</span>
+            {{/if}}
           </div>
           <dl>
             <dt>{{localize "PF2E_ITEM_FORGE.Preview.Source"}}</dt><dd>{{preview.sourcePack}}</dd>
@@ -175,6 +257,24 @@
                 {{/each}}
               </dd>
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.EffectiveLevel"}}</dt><dd>{{preview.level}}</dd>
+            {{/if}}
+            {{#if preview.treasure}}
+              <dt>{{localize "PF2E_ITEM_FORGE.Preview.TreasureType"}}</dt><dd>{{preview.treasure.type.label}}</dd>
+              {{#if preview.treasure.material}}<dt>{{localize "PF2E_ITEM_FORGE.Fields.Material"}}</dt><dd>{{preview.treasure.material.label}}</dd>{{/if}}
+              {{#if preview.treasure.craftsmanship}}<dt>{{localize "PF2E_ITEM_FORGE.Fields.Craftsmanship"}}</dt><dd>{{preview.treasure.craftsmanship.label}}</dd>{{/if}}
+              <dt>{{localize "PF2E_ITEM_FORGE.Fields.Condition"}}</dt><dd>{{preview.treasure.condition.label}}</dd>
+              <dt>{{localize "PF2E_ITEM_FORGE.Fields.Style"}}</dt><dd>{{preview.treasure.style.label}}</dd>
+              {{#if preview.treasure.motif}}<dt>{{localize "PF2E_ITEM_FORGE.Fields.Motif"}}</dt><dd>{{preview.treasure.motif.label}}</dd>{{/if}}
+              <dt>{{localize "PF2E_ITEM_FORGE.Preview.Value"}}</dt><dd>{{preview.value}} GM</dd>
+              <dt>{{localize "PF2E_ITEM_FORGE.Preview.SolverAttempts"}}</dt><dd>{{preview.solverAttempts}}</dd>
+              {{#if preview.treasure.components.length}}
+                <dt>{{localize "PF2E_ITEM_FORGE.Preview.Components"}}</dt>
+                <dd>
+                  {{#each preview.treasure.components}}
+                    <span class="property-rune-chip">{{label}}{{#if material}} · {{material}}{{/if}}{{#if quantity}} ×{{quantity}}{{/if}}</span>
+                  {{/each}}
+                </dd>
+              {{/if}}
             {{/if}}
           </dl>
           {{#if preview.description}}

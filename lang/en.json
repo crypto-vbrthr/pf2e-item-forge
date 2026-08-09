@@ -33,7 +33,17 @@
       "GenerationMode": "Generation type",
       "FundamentalRunes": "Fundamental runes",
       "PropertyRunes": "Property runes",
-      "FixedPropertyRunes": "Fixed property runes"
+      "FixedPropertyRunes": "Fixed property runes",
+      "ValueMode": "Value specification",
+      "ValueTarget": "Target value (gp)",
+      "ValueMin": "Value from (gp)",
+      "ValueMax": "Value to (gp)",
+      "ValueTolerance": "Tolerance",
+      "Material": "Material",
+      "Craftsmanship": "Craftsmanship",
+      "Condition": "Condition",
+      "Motif": "Motif",
+      "Style": "Style"
     },
     "LevelMode": {
       "Single": "Single level",
@@ -59,13 +69,15 @@
     "Hints": {
       "EmptyRarityMeansAll": "No selection means all rarities are allowed.",
       "NoItemPacks": "No item compendiums found.",
-      "SolverAttempts": "Already part of the stable request schema; the treasure generator will use this value in a later phase.",
+      "SolverAttempts": "Maximum number of attempts value-based generators may use to find a result inside the requested value range.",
       "EquipmentMode": "Selects a non-specific base item from the chosen compendiums and applies a level-appropriate combination of fundamental runes.",
       "PropertyRunesLater": "Property runes will be added as a separate component block; this version already establishes level resolution and property-rune capacity.",
       "PropertyRuneMode": "Automatic fills available rune slots with level-appropriate runes; Random varies count and selection; Fixed uses only the selected runes.",
       "NoPropertyRunes": "No property runes are registered for this item type.",
       "PropertyRuneCapacity": "The actual number of property runes is limited by the potency rune value.",
-      "ScrollSources": "For scrolls, spell compendiums are also offered as sources. The generic scroll is only a template; the generated item receives a suitable spell."
+      "ScrollSources": "For scrolls, spell compendiums are also offered as sources. The generic scroll is only a template; the generated item receives a suitable spell.",
+      "TreasureMode": "Generates exactly one nonmagical sale or art treasure. Material, craftsmanship, and condition affect its value.",
+      "ValueTolerance": "0.15 means ±15% around the target value. If no match is found, the ValueSolver returns the closest valid result with a warning."
     },
     "Preview": {
       "Empty": "Nothing forged yet. Choose parameters and press Generate.",
@@ -85,7 +97,11 @@
       "Spell": "Contained spell",
       "SpellRank": "Spell rank",
       "HeightenedFrom": "heightened from rank",
-      "Description": "Description"
+      "Description": "Description",
+      "Value": "Value",
+      "TreasureType": "Treasure type",
+      "SolverAttempts": "ValueSolver attempts",
+      "Components": "Special components"
     },
     "Notifications": {
       "GenerationFailed": "No item could be generated for these parameters.",
@@ -124,11 +140,22 @@
       "TreasureArt": "Art object",
       "TreasureJewelry": "Jewelry",
       "TreasureBook": "Book",
-      "TreasureBeverage": "Valuable beverage"
+      "TreasureBeverage": "Valuable beverage",
+      "TreasureArtPainting": "Paintings & portraits",
+      "TreasureArtSculpture": "Sculptures & reliefs",
+      "TreasureArtTextile": "Textile art",
+      "TreasureTableware": "Tableware & drinking vessels",
+      "TreasureCeremonial": "Ceremonial objects",
+      "TreasureLuxury": "Luxury goods",
+      "TreasureBeverageWine": "Wine",
+      "TreasureBeverageBeer": "Beer",
+      "TreasureBeverageMead": "Mead",
+      "TreasureBeverageSpirit": "Spirits"
     },
     "GenerationMode": {
       "Existing": "Select a predefined item",
-      "Equipment": "Compose a weapon, armor, or shield"
+      "Equipment": "Compose a weapon, armor, or shield",
+      "Treasure": "Generate treasure object"
     },
     "FundamentalRunes": {
       "Automatic": "Automatic level-appropriate progression",
@@ -141,7 +168,11 @@
       "ItemDocumentNotFound": "The selected item could not be loaded from its compendium.",
       "InvalidPropertyRuneSelection": "The selected property runes are incompatible with the base item, exceed available rune slots, or fall outside the allowed level/rarity constraints.",
       "NoScrollSpellCandidate": "No spell suitable for a scroll was found in the selected sources. Cantrips, focus spells, and rituals are excluded.",
-      "SpellDocumentNotFound": "The selected spell could not be loaded from its compendium."
+      "SpellDocumentNotFound": "The selected spell could not be loaded from its compendium.",
+      "UnsupportedTreasureCategory": "Treasure generation supports only categories under Treasure.",
+      "NoTreasureType": "No registered treasure type matches the selected treasure category.",
+      "NoTreasureCandidate": "No valid treasure could be generated with the selected material, condition, and value constraints.",
+      "UnknownTreasureContent": "A requested treasure definition is not registered or is no longer available."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatic level-appropriate",
@@ -174,6 +205,13 @@
     "Sources": {
       "Items": "items",
       "Spells": "spells"
+    },
+    "Treasure": {
+      "Any": "Any",
+      "ValueHeading": "Sale value",
+      "DetailsHeading": "Design",
+      "ValueTarget": "Target value with tolerance",
+      "ValueRange": "Value range"
     }
   }
 }

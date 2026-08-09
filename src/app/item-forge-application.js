@@ -88,10 +88,12 @@ export class ItemForgeApplication extends HandlebarsApplication {
     delete source._id;
     source.flags ??= {};
     source.flags[MODULE_ID] = {
+      ...(source.flags[MODULE_ID] ?? {}),
       generated: true,
       generator: preview.metadata?.generator ?? "unknown",
       seed: preview.metadata?.seed ?? null,
       sourceUuid: preview.metadata?.sourceUuid ?? null,
+      plan: preview.plan ?? null,
       createdAt: new Date().toISOString()
     };
     await Item.create(source, { renderSheet: true });

@@ -38,3 +38,18 @@ test("normalizeRequest supports property rune modes and removes duplicate fixed 
   assert.equal(request.equipment.propertyRunes.mode, "fixed");
   assert.deepEqual(request.equipment.propertyRunes.selected, ["flaming", "frost"]);
 });
+
+test("normalizeRequest supports treasure mode and value constraints", () => {
+  const request = normalizeRequest({
+    mode: "treasure",
+    category: "treasure.jewelry",
+    value: { mode: "range", min: 80, max: 40 },
+    treasure: { material: "core.material.silver" },
+    seed: "x"
+  });
+  assert.equal(request.mode, "treasure");
+  assert.equal(request.value.mode, "range");
+  assert.equal(request.value.min, 40);
+  assert.equal(request.value.max, 80);
+  assert.equal(request.treasure.material, "core.material.silver");
+});

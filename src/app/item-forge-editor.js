@@ -48,10 +48,18 @@ export class ItemForgeEditor extends HandlebarsApplication {
       category: request.category ?? "item",
       levelMode: request.levelMode ?? "single",
       level: request.level ?? { min: 1, max: 1, target: 1 },
+      value: request.value ?? { mode: "target", target: 25, min: 10, max: 50, tolerance: 0.15 },
       levelPolicy: request.levelPolicy ?? "strict",
       rarity: request.rarity ?? [],
       source: request.source ?? { mode: "all", includePacks: [], excludePacks: [] },
       solver: request.solver ?? { maxAttempts: 50 },
+      treasure: request.treasure ?? {
+        material: "any",
+        condition: "any",
+        craftsmanship: "any",
+        motif: "any",
+        style: "any"
+      },
       equipment: request.equipment ?? {
         fundamentalRunes: "automatic",
         propertyRunes: { mode: "automatic", selected: [] }
@@ -62,8 +70,10 @@ export class ItemForgeEditor extends HandlebarsApplication {
     this.request.equipment.fundamentalRunes ??= "automatic";
     this.request.equipment.propertyRunes ??= { mode: "automatic", selected: [] };
     this.request.equipment.propertyRunes.selected ??= [];
+    this.request.value ??= { mode: "target", target: 25, min: 10, max: 50, tolerance: 0.15 };
+    this.request.treasure ??= { material: "any", condition: "any", craftsmanship: "any", motif: "any", style: "any" };
     if (this.request.levelMode === "single") this.request.level.max = this.request.level.min;
-    this.#ensureEquipmentCategory();
+    this.#ensureModeCategory();
     this.previewResult = null;
     this.error = null;
     this.busy = false;
@@ -86,6 +96,9 @@ export class ItemForgeEditor extends HandlebarsApplication {
     this.request.equipment.fundamentalRunes ??= "automatic";
     this.request.equipment.propertyRunes ??= { mode: "automatic", selected: [] };
     this.request.equipment.propertyRunes.selected ??= [];
+    this.request.value ??= { mode: "target", target: 25, min: 10, max: 50, tolerance: 0.15 };
+    this.request.treasure ??= { material: "any", condition: "any", craftsmanship: "any", motif: "any", style: "any" };
+    this.#ensureModeCategory();
     this.previewResult = null;
     this.error = null;
     return this.render();
@@ -120,7 +133,11 @@ export class ItemForgeEditor extends HandlebarsApplication {
         ITEM_DOCUMENT_NOT_FOUND: "PF2E_ITEM_FORGE.Errors.ItemDocumentNotFound",
         INVALID_PROPERTY_RUNE_SELECTION: "PF2E_ITEM_FORGE.Errors.InvalidPropertyRuneSelection",
         NO_SCROLL_SPELL_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoScrollSpellCandidate",
-        SPELL_DOCUMENT_NOT_FOUND: "PF2E_ITEM_FORGE.Errors.SpellDocumentNotFound"
+        SPELL_DOCUMENT_NOT_FOUND: "PF2E_ITEM_FORGE.Errors.SpellDocumentNotFound",
+        UNSUPPORTED_TREASURE_CATEGORY: "PF2E_ITEM_FORGE.Errors.UnsupportedTreasureCategory",
+        NO_TREASURE_TYPE: "PF2E_ITEM_FORGE.Errors.NoTreasureType",
+        NO_TREASURE_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoTreasureCandidate",
+        UNKNOWN_TREASURE_CONTENT: "PF2E_ITEM_FORGE.Errors.UnknownTreasureContent"
       }[code];
       this.error = { code, message: errorKey ? localizeMaybe(errorKey) : error.message };
       this.previewResult = null;
@@ -146,9 +163,13 @@ export class ItemForgeEditor extends HandlebarsApplication {
     const context = await super._prepareContext(options);
     const selectedPacks = new Set(this.request.source.includePacks ?? []);
     const rarity = new Set(this.request.rarity ?? []);
-    this.#ensureEquipmentCategory();
+    this.#ensureModeCategory();
     const categories = this.api.categories.getAll()
-      .filter((category) => this.request.mode !== "equipment" || this.#isEquipmentCategory(category.id))
+      .filter((category) => {
+        if (this.request.mode === "equipment") return this.#isEquipmentCategory(category.id);
+        if (this.request.mode === "treasure") return this.#isTreasureCategory(category.id);
+        return true;
+      })
       .map((category) => {
         const depth = this.api.categories.getAncestors(category.id).length;
         return {
@@ -173,10 +194,10 @@ export class ItemForgeEditor extends HandlebarsApplication {
       selected: this.request.levelPolicy === id,
       label: localizeMaybe(`PF2E_ITEM_FORGE.LevelPolicy.${{ strict: "Strict", nearest: "Nearest", notAbove: "NotAbove", notBelow: "NotBelow" }[id]}`)
     }));
-    const generationModes = ["existing", "equipment"].map((id) => ({
+    const generationModes = ["existing", "equipment", "treasure"].map((id) => ({
       id,
       selected: this.request.mode === id,
-      label: localizeMaybe(`PF2E_ITEM_FORGE.GenerationMode.${id === "existing" ? "Existing" : "Equipment"}`)
+      label: localizeMaybe(`PF2E_ITEM_FORGE.GenerationMode.${{ existing: "Existing", equipment: "Equipment", treasure: "Treasure" }[id]}`)
     }));
     const fundamentalRuneModes = ["automatic", "none"].map((id) => ({
       id,
@@ -206,6 +227,36 @@ export class ItemForgeEditor extends HandlebarsApplication {
       label: localizeMaybe(`PF2E_ITEM_FORGE.SourceMode.${{ all: "All", system: "System", selected: "Selected" }[id]}`)
     }));
 
+    const matchingTreasureTypes = this.request.mode === "treasure"
+      ? this.api.treasure.types.getAll().filter((type) => this.api.categories.matches(type.categories ?? [], this.request.category))
+      : [];
+    const allowedMaterials = this.api.treasure.materials.getAll().filter((material) => {
+      const tags = new Set(material.tags ?? []);
+      return matchingTreasureTypes.some((type) => (type.materialTags ?? []).some((tag) => tags.has(tag)));
+    });
+    if (this.request.mode === "treasure" && this.request.treasure.material !== "any" && !allowedMaterials.some((entry) => entry.id === this.request.treasure.material)) {
+      this.request.treasure.material = "any";
+    }
+    if (this.request.mode === "treasure" && matchingTreasureTypes.length && matchingTreasureTypes.every((type) => !type.supportsMotif)) {
+      this.request.treasure.motif = "any";
+    }
+    if (this.request.mode === "treasure" && matchingTreasureTypes.length && matchingTreasureTypes.every((type) => type.usesCraftsmanship === false)) {
+      this.request.treasure.craftsmanship = "any";
+    }
+    const treasureOption = (registry, selectedId, entries = registry.getAll()) => [
+      { id: "any", label: localizeMaybe("PF2E_ITEM_FORGE.Treasure.Any"), selected: !selectedId || selectedId === "any" },
+      ...entries.map((entry) => ({
+        id: entry.id,
+        label: typeof entry.label === "object" ? (entry.label[game.i18n.lang?.startsWith("de") ? "de" : "en"] ?? entry.label.en ?? entry.label.de ?? entry.id) : localizeMaybe(entry.label),
+        selected: entry.id === selectedId
+      }))
+    ];
+    const treasureMaterials = treasureOption(this.api.treasure.materials, this.request.treasure?.material, allowedMaterials);
+    const treasureConditions = treasureOption(this.api.treasure.conditions, this.request.treasure?.condition);
+    const treasureCraftsmanship = treasureOption(this.api.treasure.craftsmanship, this.request.treasure?.craftsmanship);
+    const treasureMotifs = treasureOption(this.api.treasure.motifs, this.request.treasure?.motif);
+    const treasureStyles = treasureOption(this.api.treasure.styles, this.request.treasure?.style);
+
     const preview = this.previewResult
       ? {
           name: this.previewResult.itemSource?.name,
@@ -226,7 +277,11 @@ export class ItemForgeEditor extends HandlebarsApplication {
             ...rune,
             displayLabel: localizeMaybe(rune.label)
           })),
-          runeSummary: this.#formatRuneSummary(this.previewResult.metadata?.runes)
+          runeSummary: this.#formatRuneSummary(this.previewResult.metadata?.runes),
+          treasure: this.previewResult.metadata?.treasure ?? null,
+          value: this.previewResult.metadata?.value ?? null,
+          solverAttempts: this.previewResult.metadata?.solverAttempts ?? null,
+          solverExact: this.previewResult.metadata?.solverExact ?? null
         }
       : null;
 
@@ -239,6 +294,16 @@ export class ItemForgeEditor extends HandlebarsApplication {
       propertyRuneModes,
       propertyRunes,
       isEquipmentMode: this.request.mode === "equipment",
+      isTreasureMode: this.request.mode === "treasure",
+      treasureValueRange: this.request.value?.mode === "range",
+      treasureMaterials,
+      treasureConditions,
+      treasureCraftsmanship,
+      treasureMotifs,
+      treasureStyles,
+      treasureSupportsMaterial: allowedMaterials.length > 0,
+      treasureSupportsMotif: matchingTreasureTypes.some((type) => type.supportsMotif),
+      treasureSupportsCraftsmanship: matchingTreasureTypes.some((type) => type.usesCraftsmanship !== false),
       supportsPropertyRunes: ["weapon", "armor"].includes(propertyRuneType),
       fixedPropertyRunes: this.request.equipment?.propertyRunes?.mode === "fixed",
       packs,
@@ -265,11 +330,11 @@ export class ItemForgeEditor extends HandlebarsApplication {
     element.querySelectorAll("input, select").forEach((input) => {
       input.addEventListener("change", async () => {
         this.#syncFromDom();
-        if (input.name === "mode") this.#ensureEquipmentCategory();
+        if (input.name === "mode") this.#ensureModeCategory();
         this.previewResult = null;
         this.error = null;
         this.onChange?.(this.getRequest(), this);
-        if (["mode", "category", "levelMode", "source.mode", "equipment.propertyRunes.mode"].includes(input.name)) await this.render();
+        if (["mode", "category", "levelMode", "source.mode", "equipment.propertyRunes.mode", "value.mode"].includes(input.name)) await this.render();
       });
     });
   }
@@ -280,6 +345,10 @@ export class ItemForgeEditor extends HandlebarsApplication {
     );
   }
 
+  #isTreasureCategory(category) {
+    return category === "treasure" || this.api.categories.isDescendant(category, "treasure");
+  }
+
   #equipmentType(category) {
     for (const root of ["weapon", "armor", "shield"]) {
       if (category === root || this.api.categories.isDescendant(category, root)) return root;
@@ -287,9 +356,12 @@ export class ItemForgeEditor extends HandlebarsApplication {
     return null;
   }
 
-  #ensureEquipmentCategory() {
+  #ensureModeCategory() {
     if (this.request.mode === "equipment" && !this.#isEquipmentCategory(this.request.category)) {
       this.request.category = "weapon";
+    }
+    if (this.request.mode === "treasure" && !this.#isTreasureCategory(this.request.category)) {
+      this.request.category = "treasure";
     }
   }
 
@@ -333,6 +405,18 @@ export class ItemForgeEditor extends HandlebarsApplication {
     this.request.equipment.propertyRunes ??= { mode: "automatic", selected: [] };
     this.request.equipment.propertyRunes.mode = value("equipment.propertyRunes.mode", this.request.equipment.propertyRunes.mode ?? "automatic");
     this.request.equipment.propertyRunes.selected = [...root.querySelectorAll('[name="propertyRune"]:checked')].map((input) => input.value);
+    this.request.value ??= {};
+    this.request.value.mode = value("value.mode", this.request.value.mode ?? "target");
+    this.request.value.target = Number.parseFloat(value("value.target", this.request.value.target ?? 25));
+    this.request.value.min = Number.parseFloat(value("value.min", this.request.value.min ?? 10));
+    this.request.value.max = Number.parseFloat(value("value.max", this.request.value.max ?? 50));
+    this.request.value.tolerance = Number.parseFloat(value("value.tolerance", this.request.value.tolerance ?? 0.15));
+    this.request.treasure ??= {};
+    this.request.treasure.material = value("treasure.material", this.request.treasure.material ?? "any");
+    this.request.treasure.condition = value("treasure.condition", this.request.treasure.condition ?? "any");
+    this.request.treasure.craftsmanship = value("treasure.craftsmanship", this.request.treasure.craftsmanship ?? "any");
+    this.request.treasure.motif = value("treasure.motif", this.request.treasure.motif ?? "any");
+    this.request.treasure.style = value("treasure.style", this.request.treasure.style ?? "any");
 
     this.request.rarity = [...root.querySelectorAll('[name="rarity"]:checked')].map((input) => input.value);
     this.request.source.includePacks = [...root.querySelectorAll('[name="sourcePack"]:checked')].map((input) => input.value);

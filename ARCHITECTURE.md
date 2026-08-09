@@ -15,10 +15,10 @@ ItemForgeEngine (business logic)
         |     +-- spell index (support data for spell consumables)
         |
         +-- GeneratorRegistry
+        |     +-- TreasureGenerator
         |     +-- ScrollGenerator
         |     +-- ExistingItemGenerator
         |     +-- EquipmentGenerator
-        |     +-- TreasureGenerator [planned]
         |
         +-- ItemLevelResolver
         +-- PropertyRuneRegistry
@@ -29,37 +29,59 @@ ItemForgeEngine (business logic)
               +-- components
               +-- motifs
               +-- conditions
+              +-- craftsmanship
               +-- styles
 ```
 
 ## Boundaries
 
-- The engine creates one item result per request.
+- The engine creates exactly one item result per request.
 - The editor edits one request and previews one result.
 - The application container owns persistence/workflow actions.
 - Other modules should use the public engine API, not the standalone GUI.
-- Future Loot Forge integration should distribute budgets and issue individual Item Forge requests.
+- A future Loot Forge should own total budget, quantity, and overall theme, then issue individual Item Forge requests.
 - Built-in and external treasure content use the same registries.
-- Spell documents are support data, not directly generatable physical items. The `ScrollGenerator` may select an eligible spell and embed it into a physical scroll result.
+- Spell documents are support data, not directly generatable physical items.
 
-## Scroll generation
+## Treasure generation
 
-`ScrollGenerator` owns `mode: "existing"` + `category: "consumable.scroll"` before the general existing-item strategy resolves.
+`TreasureGenerator` handles `mode: "treasure"`. Generated treasure is deliberately nonmagical and intended primarily for sale/flavor.
 
 ```text
-Scroll request
+Treasure request
    |
-   +-- selected spell compendiums
-   |      -> eligible non-cantrip/non-focus/non-ritual spells
-   |
-   +-- meaningful base/heightened ranks
-   |      -> interval or fixed heightening definitions
-   |
-   +-- PF2e generic scroll template for that rank
-   |      -> determines physical scroll level/price
+   +-- category -> matching TreasureType definitions
+   +-- optional material / condition / craftsmanship / motif / style constraints
+   +-- target value or value range
    |
    v
-physical Consumable source with embedded system.spell
+ValueSolver (bounded attempts)
+   |
+   +-- seeded candidate composition
+   |     +-- base archetype value
+   |     +-- material factor
+   |     +-- craftsmanship factor (where applicable)
+   |     +-- condition factor
+   |     +-- style factor
+   |     +-- data-defined attributes
+   |     +-- reusable components
+   |
+   +-- closest valid candidate if no in-range result exists
+   v
+PF2e Treasure item source + generation plan
 ```
 
-The generic scroll templates are infrastructure and are suppressed from ordinary predefined-item selection so an empty scroll cannot leak into broad `item` or `consumable` generation.
+Treasure archetypes are data-driven. The generator does not require a code branch for each painting, ring, book, wine, or future custom type. A type definition declares its categories, allowed material tags, optional components/attributes, valuation data, and name/description templates.
+
+### Extension rule
+
+If a new treasure idea can be expressed as data, it should be added through the registries rather than generator code. Special generator strategies should be reserved for genuinely unusual behavior.
+
+### ValueSolver
+
+- Per-request `solver.maxAttempts`
+- Global default from module settings
+- Absolute safety cap of 1000
+- Returns the first result inside the requested tolerance/range
+- Otherwise returns the closest valid candidate with `VALUE_TARGET_APPROXIMATED`
+- Never loops indefinitely

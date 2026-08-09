@@ -114,9 +114,19 @@ export const CORE_CATEGORY_LABEL_KEYS = {
   treasure: "PF2E_ITEM_FORGE.Categories.Treasure",
   "treasure.gemstone": "PF2E_ITEM_FORGE.Categories.TreasureGemstone",
   "treasure.art": "PF2E_ITEM_FORGE.Categories.TreasureArt",
+  "treasure.art.painting": "PF2E_ITEM_FORGE.Categories.TreasureArtPainting",
+  "treasure.art.sculpture": "PF2E_ITEM_FORGE.Categories.TreasureArtSculpture",
+  "treasure.art.textile": "PF2E_ITEM_FORGE.Categories.TreasureArtTextile",
   "treasure.jewelry": "PF2E_ITEM_FORGE.Categories.TreasureJewelry",
+  "treasure.tableware": "PF2E_ITEM_FORGE.Categories.TreasureTableware",
+  "treasure.ceremonial": "PF2E_ITEM_FORGE.Categories.TreasureCeremonial",
+  "treasure.luxury": "PF2E_ITEM_FORGE.Categories.TreasureLuxury",
   "treasure.book": "PF2E_ITEM_FORGE.Categories.TreasureBook",
-  "treasure.beverage": "PF2E_ITEM_FORGE.Categories.TreasureBeverage"
+  "treasure.beverage": "PF2E_ITEM_FORGE.Categories.TreasureBeverage",
+  "treasure.beverage.wine": "PF2E_ITEM_FORGE.Categories.TreasureBeverageWine",
+  "treasure.beverage.beer": "PF2E_ITEM_FORGE.Categories.TreasureBeverageBeer",
+  "treasure.beverage.mead": "PF2E_ITEM_FORGE.Categories.TreasureBeverageMead",
+  "treasure.beverage.spirit": "PF2E_ITEM_FORGE.Categories.TreasureBeverageSpirit"
 };
 
 export function registerCoreCategories(registry) {
@@ -139,9 +149,19 @@ export function registerCoreCategories(registry) {
     ["treasure", "item", 60],
     ["treasure.gemstone", "treasure", 61],
     ["treasure.art", "treasure", 62],
+    ["treasure.art.painting", "treasure.art", 62.1],
+    ["treasure.art.sculpture", "treasure.art", 62.2],
+    ["treasure.art.textile", "treasure.art", 62.3],
     ["treasure.jewelry", "treasure", 63],
-    ["treasure.book", "treasure", 64],
-    ["treasure.beverage", "treasure", 65]
+    ["treasure.tableware", "treasure", 64],
+    ["treasure.ceremonial", "treasure", 65],
+    ["treasure.luxury", "treasure", 66],
+    ["treasure.book", "treasure", 67],
+    ["treasure.beverage", "treasure", 68],
+    ["treasure.beverage.wine", "treasure.beverage", 68.1],
+    ["treasure.beverage.beer", "treasure.beverage", 68.2],
+    ["treasure.beverage.mead", "treasure.beverage", 68.3],
+    ["treasure.beverage.spirit", "treasure.beverage", 68.4]
   ];
 
   for (const [id, parent, order] of categories) {
