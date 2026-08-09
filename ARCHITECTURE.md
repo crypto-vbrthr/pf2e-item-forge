@@ -17,6 +17,7 @@ ItemForgeEngine (canonical normalization, validation, generation)
         +-- GeneratorRegistry (priority + declared generation modes)
         |     +-- WandGenerator
         |     +-- StaffGenerator
+        |     +-- SpellheartGenerator
         |     +-- TreasureGenerator
         |     +-- ScrollGenerator
         |     +-- EquipmentGenerator
@@ -47,7 +48,7 @@ ItemForgeEngine (canonical normalization, validation, generation)
 - Other modules should use the public engine API and may embed `ItemForgeEditor` without the standalone Item Forge window.
 - Future Loot Forge integration should distribute budgets/counts/themes and issue individual Item Forge requests.
 - Built-in and external treasure content use the same validated registries.
-- Spell documents are support data, not directly generatable physical items. `ScrollGenerator` and `WandGenerator` may select eligible spells and embed them into physical item results; `StaffGenerator` either copies a predefined PF2e staff unchanged or uses the spell index to build a structured staff-family manifest.
+- Spell documents are support data, not directly generatable physical items. `ScrollGenerator` and `WandGenerator` may select eligible spells and embed them into physical item results; `StaffGenerator` either copies a predefined PF2e staff unchanged or uses the spell index to build a structured staff-family manifest. `SpellheartGenerator` deliberately copies complete predefined spellheart items because each published spellheart has bespoke armor/weapon benefits and activation rules.
 
 ## Generator resolution
 
@@ -57,6 +58,7 @@ Core priorities:
 
 ```text
 WandGenerator         220  mode magic
+SpellheartGenerator   215  mode magic
 StaffGenerator        210  mode magic
 TreasureGenerator     200  mode treasure
 ScrollGenerator       200  mode existing
@@ -69,7 +71,7 @@ Registered generation modes are exposed through the public capabilities API and 
 
 ## Spell-bound permanent magic items
 
-`mode: "magic"` currently owns two generated categories: `magic.wand` and `magic.staff`. Both reuse the same spell-support index and the same meaningful-heightening helper used by scroll generation. Magic themes are data-driven filters/weighting hints rather than hard-coded spell lists.
+`mode: "magic"` currently owns `magic.wand`, `magic.staff`, and `magic.spellheart`. Wands and generated staves reuse the spell-support index and meaningful-heightening helpers. Spellhearts are handled as complete predefined items because their attachment benefits and activations are item-specific rather than a generic spell-container schema.
 
 ### Wands
 
@@ -84,6 +86,13 @@ Registered generation modes are exposed through the public capabilities API and 
 Generated families use deterministic per-tier RNG streams so generating a stronger variant with the same seed preserves the exact lower-tier spell choices. A spell may reappear at a higher rank only when its indexed heightening data actually supports that rank. The shared spell utility never down-ranks a higher-rank spell merely because a lower maximum rank is requested.
 
 Generated staff spell lists are stored as enriched `@UUID` links in the description and as a complete structured family manifest in `flags.pf2e-item-forge.staff`, including profile, selected variant, inherited tiers, and per-tier additions. Generated staves are marked as specific magic weapons. The implementation still deliberately avoids inventing an undocumented PF2e-native custom-staff spell-preparation storage schema; predefined staves use their native data, while generated family automation can later be wired to the verified live-system contract.
+
+
+### Spellhearts
+
+`SpellheartGenerator` resolves `mode: "magic"` + `category: "magic.spellheart"`. The compendium index classifies physical `equipment` items carrying the `spellheart` trait into the dedicated magic category. Generation then applies the normal source, rarity, seed, and level/level-policy constraints and clones one matching spellheart document.
+
+The generator intentionally does **not** synthesize arbitrary new spellhearts yet. Published spellhearts can grant different benefits when affixed to armor versus a weapon and often carry bespoke activated spells and rule elements. Preserving the complete source document avoids producing attractive-looking but mechanically incomplete homebrew items. A future generated-spellheart composer should therefore be built from validated effect/activation templates rather than by mixing text fragments.
 
 ## Treasure generation
 

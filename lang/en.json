@@ -89,7 +89,8 @@
       "MagicTheme": "Automatic chooses a theme with enough eligible spells. A selected theme is a hard constraint.",
       "AllowHeightenedSpells": "Only spells with actual heightening data may reappear at higher ranks in generated wands or staves.",
       "StaffMode": "Predefined copies an existing PF2e staff unchanged from the selected compendia. Generated creates a new thematic staff family using rules-style level profiles.",
-      "StaffProfile": "The profile defines the levels of the base, greater, and major variants and which new spell ranks each variant adds. Earlier variants are inherited in full."
+      "StaffProfile": "The profile defines the levels of the base, greater, and major variants and which new spell ranks each variant adds. Earlier variants are inherited in full.",
+      "SpellheartMode": "Published spellhearts have bespoke armor and weapon benefits plus their own activations. The Item Forge therefore selects a complete predefined spellheart from the chosen compendia and preserves its PF2e rules data unchanged."
     },
     "Preview": {
       "Empty": "Nothing forged yet. Choose parameters and press Generate.",
@@ -174,7 +175,8 @@
       "TreasureBeverageSpirit": "Spirits",
       "Magic": "Magic item",
       "MagicWand": "Wand",
-      "MagicStaff": "Staff"
+      "MagicStaff": "Staff",
+      "MagicSpellheart": "Spellheart"
     },
     "GenerationMode": {
       "Existing": "Select a predefined item",
@@ -203,7 +205,8 @@
       "NoStaffSpellCandidate": "No suitable staff spell list could be assembled for the selected level and theme.",
       "NoStaffBaseItem": "The PF2e base weapon required for a staff could not be found.",
       "NoPredefinedStaffCandidate": "No predefined staff matching the requested level was found in the selected compendia.",
-      "UnknownStaffProfile": "The selected staff family profile is not registered."
+      "UnknownStaffProfile": "The selected staff family profile is not registered.",
+      "NoPredefinedSpellheartCandidate": "No predefined spellheart matches the selected level, rarity, and source filters."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatic level-appropriate",

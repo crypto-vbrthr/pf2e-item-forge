@@ -89,7 +89,8 @@
       "MagicTheme": "Automatisch wählt ein Thema mit genügend passenden Zaubern. Ein festes Thema ist eine harte Vorgabe.",
       "AllowHeightenedSpells": "Nur Zauber mit einer echten Erhöhungsdefinition dürfen auf höheren Graden erneut in Zauberstäben oder Zauberstecken auftauchen.",
       "StaffMode": "Vordefiniert kopiert einen vorhandenen PF2e-Zauberstecken unverändert aus den ausgewählten Kompendien. Generiert erstellt eine neue thematische Zaubersteckenfamilie nach regelwerksnahen Stufenprofilen.",
-      "StaffProfile": "Das Profil bestimmt die Stufen der Grund-, starken und mächtigen Variante und welche neuen Zaubergrade jede Variante hinzufügt. Frühere Varianten werden vollständig geerbt."
+      "StaffProfile": "Das Profil bestimmt die Stufen der Grund-, starken und mächtigen Variante und welche neuen Zaubergrade jede Variante hinzufügt. Frühere Varianten werden vollständig geerbt.",
+      "SpellheartMode": "Zauberherzen besitzen im Regelwerk jeweils eigene Effekte für Rüstungen und Waffen sowie eigene Aktivierungen. Die Item Forge wählt deshalb hier einen vollständigen vordefinierten Zauberherz-Gegenstand aus den gewählten Kompendien und erhält dessen PF2e-Regeldaten unverändert."
     },
     "Preview": {
       "Empty": "Noch nichts geschmiedet. Parameter wählen und Generieren drücken.",
@@ -174,7 +175,8 @@
       "TreasureBeverageSpirit": "Spirituosen",
       "Magic": "Magischer Gegenstand",
       "MagicWand": "Zauberstab",
-      "MagicStaff": "Zauberstecken"
+      "MagicStaff": "Zauberstecken",
+      "MagicSpellheart": "Zauberherz"
     },
     "GenerationMode": {
       "Existing": "Vordefinierten Gegenstand auswählen",
@@ -203,7 +205,8 @@
       "NoStaffSpellCandidate": "Für die gewählte Stufe und das gewählte Thema konnte keine passende Zauberliste für einen Zauberstecken zusammengestellt werden.",
       "NoStaffBaseItem": "Die PF2e-Basiswaffe für einen Zauberstecken konnte nicht gefunden werden.",
       "NoPredefinedStaffCandidate": "In den gewählten Kompendien wurde kein vordefinierter Zauberstecken für die Stufenvorgabe gefunden.",
-      "UnknownStaffProfile": "Das gewählte Zauberstecken-Familienprofil ist nicht registriert."
+      "UnknownStaffProfile": "Das gewählte Zauberstecken-Familienprofil ist nicht registriert.",
+      "NoPredefinedSpellheartCandidate": "Kein vordefiniertes Zauberherz entspricht den gewählten Stufen-, Seltenheits- und Quellenfiltern."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatisch stufengerecht",

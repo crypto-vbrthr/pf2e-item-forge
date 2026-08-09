@@ -74,7 +74,7 @@
             <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.StaffMode"}}</p>
           </div>
         {{/if}}
-        {{#unless isStaffCategory}}
+        {{#if showMagicSpellSettings}}
           <div class="form-group">
             <label>{{localize "PF2E_ITEM_FORGE.Fields.MagicTheme"}}</label>
             <select name="magic.theme">
@@ -87,7 +87,10 @@
             {{localize "PF2E_ITEM_FORGE.Fields.AllowHeightenedSpells"}}
           </label>
           <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.AllowHeightenedSpells"}}</p>
-        {{/unless}}
+        {{/if}}
+        {{#if isSpellheartCategory}}
+          <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.SpellheartMode"}}</p>
+        {{/if}}
         {{#if generatedStaff}}
           <div class="form-group">
             <label>{{localize "PF2E_ITEM_FORGE.Fields.StaffProfile"}}</label>
@@ -303,7 +306,7 @@
               <dd>{{preview.spell.rank}}{{#if preview.spell.heightened}} ({{localize "PF2E_ITEM_FORGE.Preview.HeightenedFrom"}} {{preview.spell.baseRank}}){{/if}}</dd>
             {{/if}}
             {{#if preview.magic}}
-              <dt>{{localize "PF2E_ITEM_FORGE.Preview.MagicKind"}}</dt><dd>{{#if preview.spell}}{{localize "PF2E_ITEM_FORGE.Categories.MagicWand"}}{{else}}{{localize "PF2E_ITEM_FORGE.Categories.MagicStaff"}}{{/if}}</dd>
+              <dt>{{localize "PF2E_ITEM_FORGE.Preview.MagicKind"}}</dt><dd>{{preview.magic.kindLabel}}</dd>
               {{#if preview.magic.staffModeLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.StaffMode"}}</dt><dd>{{preview.magic.staffModeLabel}}</dd>{{/if}}
               {{#if preview.magic.themeLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.MagicTheme"}}</dt><dd>{{preview.magic.themeLabel}}</dd>{{/if}}
               {{#if preview.magic.profileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.StaffProfile"}}</dt><dd>{{preview.magic.profileLabel}}</dd>{{/if}}

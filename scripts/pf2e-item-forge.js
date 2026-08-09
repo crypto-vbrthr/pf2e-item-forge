@@ -8,6 +8,7 @@ import { EquipmentGenerator } from "../src/engine/generators/equipment-generator
 import { TreasureGenerator } from "../src/engine/generators/treasure-generator.js";
 import { WandGenerator } from "../src/engine/generators/wand-generator.js";
 import { StaffGenerator } from "../src/engine/generators/staff-generator.js";
+import { SpellheartGenerator } from "../src/engine/generators/spellheart-generator.js";
 import { StaffProfileRegistry, registerCoreStaffProfiles } from "../src/engine/registries/staff-profile-registry.js";
 import { getSelectableMagicThemes } from "../src/engine/magic-themes.js";
 import { TreasureRegistry } from "../src/engine/registries/treasure-registry.js";
@@ -63,6 +64,7 @@ function createApi() {
   generators.register(new TreasureGenerator({ categories, treasure }), { priority: 200, modes: ["treasure"] });
   generators.register(new WandGenerator({ compendiumIndex }), { priority: 220, modes: ["magic"] });
   generators.register(new StaffGenerator({ compendiumIndex, staffProfiles }), { priority: 210, modes: ["magic"] });
+  generators.register(new SpellheartGenerator({ compendiumIndex }), { priority: 215, modes: ["magic"] });
   generators.register(new ScrollGenerator({ compendiumIndex }), { priority: 200, modes: ["existing"] });
   generators.register(new EquipmentGenerator({ compendiumIndex, propertyRunes }), { priority: 150, modes: ["equipment"] });
   generators.register(new ExistingItemGenerator({ compendiumIndex }), { priority: 0, modes: ["existing"] });

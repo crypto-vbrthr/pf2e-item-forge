@@ -49,7 +49,7 @@ export class ItemForgeApi {
       fundamentalRuneModes: ["automatic", "none"],
       propertyRuneModes: ["automatic", "random", "fixed", "none"],
       magicThemes: this.magicThemes.map((theme) => theme.id),
-      magicItemKinds: ["wand", "staff"],
+      magicItemKinds: ["wand", "staff", "spellheart"],
       staffModes: ["generated", "existing"],
       staffProfiles: this.staffProfiles?.getAll?.().map((profile) => ({ id: profile.id, label: profile.label, levels: profile.variants.map((variant) => variant.level) })) ?? [],
       propertyRunes: this.propertyRunes.getAll().map((rune) => ({ id: rune.id, slug: rune.slug, itemType: rune.itemType, level: rune.level, rarity: rune.rarity })),

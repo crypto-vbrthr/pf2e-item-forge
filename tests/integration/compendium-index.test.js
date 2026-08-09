@@ -110,3 +110,26 @@ test("CompendiumIndex classifies PF2e wands and magical staves for magic generat
   assert.ok(index.entries.find((entry) => entry.id === "magic-staff").categories.includes("magic.staff"));
   assert.equal(index.entries.find((entry) => entry.id === "mundane-staff").categories.includes("magic.staff"), false);
 });
+
+
+test("CompendiumIndex classifies spellhearts as dedicated magic items", async () => {
+  const pack = makePack("pf2e.spellhearts", [
+    raw("spellheart", "equipment", 7, {
+      traits: { value: ["magical", "spellheart", "force"], rarity: "common" },
+      usage: { value: "affixed-to-armor-or-a-weapon" },
+      description: { value: "<p>Armor and weapon benefits.</p>" }
+    }),
+    raw("ordinary-equipment", "equipment", 7, { traits: { value: ["magical"], rarity: "common" } })
+  ]);
+  const categories = registerCoreCategories(new CategoryRegistry());
+  const game = { system: { id: "pf2e" }, packs: new FakePackCollection([pack]) };
+  const index = new CompendiumIndex({ categoryRegistry: categories, gameProvider: () => game });
+  await index.refresh();
+  const spellheart = index.entries.find((entry) => entry.id === "spellheart");
+  const ordinary = index.entries.find((entry) => entry.id === "ordinary-equipment");
+  assert.ok(spellheart.categories.includes("magic.spellheart"));
+  assert.ok(spellheart.categories.includes("magic"));
+  assert.equal(spellheart.usage, "affixed-to-armor-or-a-weapon");
+  assert.match(spellheart.description, /Armor and weapon benefits/);
+  assert.equal(ordinary.categories.includes("magic.spellheart"), false);
+});

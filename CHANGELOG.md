@@ -1,9 +1,23 @@
 # Changelog
 
+## 0.0.15
+
+- Adds the dedicated `magic.spellheart` category and `SpellheartGenerator`.
+- Classifies PF2e equipment carrying the `spellheart` trait as spellhearts while retaining its ordinary equipment classification.
+- Spellheart generation selects a complete predefined item from the configured compendia and preserves its descriptions, armor/weapon benefits, activations, rules, price, rarity, and other native PF2e data.
+- Supports exact/interval item-level constraints, all standard level policies, rarity filters, source-pack filters, and deterministic seeds for spellheart selection.
+- Spellheart generation does not request spell-only compendia because published spellhearts already contain their own activations.
+- Embedded editor adds Spellheart as a magic category and explains why the current implementation preserves complete predefined spellhearts rather than synthesizing incomplete custom effects.
+- Preview identifies Spellheart correctly as the magic item kind and continues to show its full enriched description and price.
+- Public capability metadata now includes `spellheart` in `magicItemKinds`.
+- Adds spellheart classification, generator, API, editor, localization, deterministic selection, and level-policy regression coverage.
+- Automated suite now contains 109 passing tests.
+
 ## 0.0.14
 
-- Preview: displays the price for every generated or selected item, not only treasure items.
-- Prices support PF2e platinum, gold, silver, and copper coin values and are localized in German/English.
+- Preview now displays the PF2e price for every generated or selected item type, including predefined items, composed equipment, scrolls, wands, staves, and treasure.
+- Supports platinum, gold, silver, and copper price structures and localized coin abbreviations.
+- Adds price-formatting regression coverage.
 
 ## 0.0.13
 

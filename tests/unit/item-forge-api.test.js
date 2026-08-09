@@ -43,4 +43,5 @@ test("ItemForgeApi capabilities expose generator priority metadata and registere
   assert.deepEqual(capabilities.generatorMetadata, [{ id: "test", priority: 10, modes: ["custom"] }]);
   assert.deepEqual(capabilities.staffModes, ["generated", "existing"]);
   assert.deepEqual(capabilities.staffProfiles, [{ id: "core.3-8-12", label: "Profile", levels: [3, 8, 12] }]);
+  assert.ok(capabilities.magicItemKinds.includes("spellheart"));
 });

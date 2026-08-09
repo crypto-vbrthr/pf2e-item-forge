@@ -104,6 +104,7 @@ export class CompendiumIndex {
             usage: getProperty(raw, "system.usage.value") ?? null,
             armorCategory: getProperty(raw, "system.category") ?? null,
             damageType: getProperty(raw, "system.damage.damageType") ?? null,
+            description: getProperty(raw, "system.description.value") ?? "",
             categories
           });
         }
@@ -240,6 +241,10 @@ export class CompendiumIndex {
       if (category === "wand" || traits.includes("wand")) categories.push("magic", "magic.wand");
     } else if (["equipment", "backpack", "book", "kit"].includes(type)) {
       categories.push("equipment");
+      const equipmentTraits = system.traits?.value ?? [];
+      if (equipmentTraits.includes("spellheart")) {
+        categories.push("magic", "magic.spellheart");
+      }
     } else if (type === "treasure") {
       categories.push("treasure");
     }

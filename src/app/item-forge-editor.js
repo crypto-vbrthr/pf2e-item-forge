@@ -134,6 +134,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
         NO_STAFF_SPELL_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoStaffSpellCandidate",
         NO_STAFF_BASE_ITEM: "PF2E_ITEM_FORGE.Errors.NoStaffBaseItem",
         NO_PREDEFINED_STAFF_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoPredefinedStaffCandidate",
+        NO_PREDEFINED_SPELLHEART_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoPredefinedSpellheartCandidate",
         UNKNOWN_STAFF_PROFILE: "PF2E_ITEM_FORGE.Errors.UnknownStaffProfile",
         UNSUPPORTED_TREASURE_CATEGORY: "PF2E_ITEM_FORGE.Errors.UnsupportedTreasureCategory",
         NO_TREASURE_TYPE: "PF2E_ITEM_FORGE.Errors.NoTreasureType",
@@ -183,7 +184,8 @@ export class ItemForgeEditor extends HandlebarsApplication {
 
     const isScrollCategory = this.request.mode === "existing" && this.request.category === "consumable.scroll";
     const isMagicMode = this.request.mode === "magic";
-    const usesSpellSources = isScrollCategory || isMagicMode;
+    const isSpellheartCategory = isMagicMode && this.request.category === "magic.spellheart";
+    const usesSpellSources = isScrollCategory || (isMagicMode && !isSpellheartCategory);
     const packs = this.api.getAvailableItemPacks({ includeSpellPacks: usesSpellSources }).map((pack) => ({
       ...pack,
       checked: selectedPacks.has(pack.id),
@@ -306,6 +308,11 @@ export class ItemForgeEditor extends HandlebarsApplication {
           magic: this.previewResult.metadata?.magic
             ? {
                 ...this.previewResult.metadata.magic,
+                kindLabel: ({
+                  wand: localizeMaybe("PF2E_ITEM_FORGE.Categories.MagicWand"),
+                  staff: localizeMaybe("PF2E_ITEM_FORGE.Categories.MagicStaff"),
+                  spellheart: localizeMaybe("PF2E_ITEM_FORGE.Categories.MagicSpellheart")
+                })[this.previewResult.metadata.magic.kind] ?? this.previewResult.metadata.magic.kind,
                 themeLabel: this.previewResult.metadata.magic.theme
                   ? localizeMaybe((this.api.magicThemes ?? []).find((theme) => theme.id === this.previewResult.metadata.magic.theme)?.label ?? this.previewResult.metadata.magic.theme)
                   : null,
@@ -355,6 +362,8 @@ export class ItemForgeEditor extends HandlebarsApplication {
       isTreasureMode: this.request.mode === "treasure",
       isMagicMode,
       isStaffCategory,
+      isSpellheartCategory,
+      showMagicSpellSettings: isMagicMode && !isStaffCategory && !isSpellheartCategory,
       generatedStaff,
       staffModes,
       staffProfiles,
@@ -468,7 +477,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
   }
 
   #isMagicCategory(category) {
-    return category === "magic.wand" || category === "magic.staff";
+    return category === "magic.wand" || category === "magic.staff" || category === "magic.spellheart";
   }
 
   #equipmentType(category) {

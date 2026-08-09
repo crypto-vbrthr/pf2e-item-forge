@@ -79,3 +79,22 @@ test("normalizeRequest hydrates magic item settings", () => {
   assert.equal(explicit.magic.staffMode, "existing");
   assert.equal(explicit.magic.staffProfile, "core.6-10-14");
 });
+
+
+test("magic spellheart requests retain the dedicated category", () => {
+  const request = normalizeRequest({ mode: "magic", category: "magic.spellheart", level: 7, seed: "x" });
+  assert.equal(request.category, "magic.spellheart");
+  assert.deepEqual(request.level, { min: 7, max: 7, target: 7 });
+});
+
+test("validation accepts spellheart as a supported magic category", async () => {
+  const { validateRequest } = await import("../../src/engine/request-normalizer.js");
+  const { CategoryRegistry, registerCoreCategories } = await import("../../src/engine/category-registry.js");
+  const categories = registerCoreCategories(new CategoryRegistry());
+  const result = validateRequest(
+    { mode: "magic", category: "magic.spellheart", level: 7, source: { mode: "system" }, seed: "x" },
+    { categories, generationModes: ["magic"] }
+  );
+  assert.equal(result.valid, true);
+  assert.equal(result.request.category, "magic.spellheart");
+});

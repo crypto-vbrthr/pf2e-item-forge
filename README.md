@@ -2,9 +2,9 @@
 
 Reusable Item Forge architecture for Foundry VTT v14 and Pathfinder 2e.
 
-## v0.0.14 scope
+## v0.0.15 scope
 
-This release adds universal price display to the preview while retaining the corrected PF2e-style staff-family generation and reusable API/editor architecture.
+This release adds dedicated spellheart support while preserving PF2e spellheart rules data exactly, alongside the existing spell-bearing wand/staff and reusable API/editor architecture.
 
 Implemented:
 
@@ -18,9 +18,10 @@ Implemented:
 - Deterministic seeded generation
 - Existing physical compendium items, excluding feats/spells/rule documents
 - Spell-bearing scroll generation with meaningful legal heightening
-- Generated spell-bound magic-item mode for wands and staves
+- Spell-bound/special magic-item mode for wands, staves, and spellhearts
 - Wands use the PF2e generic wand templates and embed one real spell at a legal base or meaningful heightened rank
 - Staves can either be copied exactly from selected compendia or generated as rulebook-style variant families with inherited lower variants
+- Spellhearts are selected as complete predefined PF2e items so their bespoke armor/weapon benefits, activations, prices, and native automation remain intact
 - Magic themes for fire, cold, electricity, healing, illusion, mental, vitality, void, arcane, divine, occult, primal, and summoning
 - Composed weapons, armor, and shields with fundamental runes
 - Registry-driven property runes with automatic/random/fixed/none modes and compatibility rules
@@ -37,13 +38,14 @@ Implemented:
 - Material-aware wear such as fading, patina, water/smoke damage, cracking, worm damage, and restoration
 - Type-specific Bulk, reproducible generation flags, and detailed valuation breakdown metadata
 - Registration-time validation for extension treasure content
-- Embedded `ItemForgeEditor` with request editing, preview, reroll, description and localized price display, and no persistence side effects
+- Embedded `ItemForgeEditor` with request editing, preview, reroll, description display, and no persistence side effects
 - Standalone `ItemForgeApplication` container owning Foundry document creation
 - German and English localization
-- 101 automated unit/integration/statistical/contract tests
+- 109 automated unit/integration/statistical/contract tests
 
 Not yet implemented:
 
+- Generated/custom spellheart composition with validated armor/weapon effect templates (predefined spellhearts are supported now)
 - Native PF2e staff-preparation/casting automation for generated custom staff-family manifests (predefined staves preserve their native PF2e data unchanged)
 - Precious-material composition for functional weapons/armor
 - Presets
@@ -124,6 +126,19 @@ await game.pf2eItemForge.generate({
   level: 8,
   source: { mode: "system" },
   magic: { staffMode: "existing" }
+});
+```
+
+
+Select a predefined spellheart while preserving all published PF2e rules data:
+
+```js
+await game.pf2eItemForge.generate({
+  mode: "magic",
+  category: "magic.spellheart",
+  level: { min: 7, max: 10 },
+  levelPolicy: "strict",
+  source: { mode: "system" }
 });
 ```
 

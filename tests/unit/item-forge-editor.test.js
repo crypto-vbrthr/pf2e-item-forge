@@ -153,3 +153,11 @@ test("preview price formatter can fall back to generated treasure value", async 
     game.i18n.localize = previousLocalize;
   }
 });
+
+
+test("ItemForgeEditor preserves spellheart as a supported embedded magic category", () => {
+  const editor = new ItemForgeEditor({ api: apiFixture(), request: { mode: "magic", category: "magic.spellheart", level: 7, seed: "spellheart" } });
+  const request = editor.getRequest();
+  assert.equal(request.mode, "magic");
+  assert.equal(request.category, "magic.spellheart");
+});
