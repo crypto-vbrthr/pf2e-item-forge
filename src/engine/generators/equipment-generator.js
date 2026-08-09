@@ -1,5 +1,6 @@
 import { SeededRng } from "../seeded-rng.js";
-import { distanceToLevelRequest, ItemLevelResolver, levelAllowed } from "../item-level-resolver.js";
+import { ItemLevelResolver } from "../item-level-resolver.js";
+import { candidateLevelResolver } from "../candidate-level-resolver.js";
 import { applyFundamentalProfile, getFundamentalProfiles, propertyRuneCapacity } from "../equipment-rune-profiles.js";
 import { RARITY_ORDER } from "../registries/property-rune-registry.js";
 import { isSpecificSystemValue } from "../compendium-index.js";
@@ -155,17 +156,9 @@ export class EquipmentGenerator {
       throw error;
     }
 
-    let candidates = plans.filter((plan) => levelAllowed(plan.effectiveLevel, request));
-    const warnings = [];
-    if (candidates.length === 0 && request.levelPolicy === "nearest" && plans.length > 0) {
-      const bestDistance = Math.min(...plans.map((plan) => distanceToLevelRequest(plan.effectiveLevel, request.level)));
-      candidates = plans.filter((plan) => distanceToLevelRequest(plan.effectiveLevel, request.level) === bestDistance);
-      warnings.push({
-        code: "LEVEL_TARGET_APPROXIMATED",
-        requested: { ...request.level },
-        actualLevels: [...new Set(candidates.map((plan) => plan.effectiveLevel))]
-      });
-    }
+    const selection = candidateLevelResolver.resolve(plans, request, { getLevel: (plan) => plan.effectiveLevel });
+    const candidates = selection.candidates;
+    const warnings = selection.warnings;
 
     if (candidates.length === 0) {
       const error = new Error("No composed equipment candidate matches the requested level");

@@ -1,3 +1,5 @@
+import { normalizeBalanceMetadata } from "./profile-balance.js";
+
 export class SpellheartProfileRegistry {
   #profiles = new Map();
 
@@ -40,6 +42,7 @@ export class SpellheartProfileRegistry {
 
     const profile = {
       id,
+      balance: normalizeBalanceMetadata(definition.balance, { basis: "unspecified", reviewed: false }),
       label: definition.label ?? id,
       description: definition.description ?? null,
       nameTemplate: definition.nameTemplate ?? null,
@@ -71,6 +74,7 @@ export class SpellheartProfileRegistry {
 export function registerCoreSpellheartProfiles(registry = new SpellheartProfileRegistry()) {
   registry.register({
     id: "core.elemental-conduit",
+    balance: { basis: "published-analogs", reviewed: true, notes: "Core profile benchmarked against published spellheart families." },
     label: "PF2E_ITEM_FORGE.SpellheartProfiles.ElementalConduit",
     description: "PF2E_ITEM_FORGE.SpellheartText.ElementalDescription",
     nameTemplate: "PF2E_ITEM_FORGE.SpellheartText.ElementalName",
@@ -96,6 +100,7 @@ export function registerCoreSpellheartProfiles(registry = new SpellheartProfileR
 
   registry.register({
     id: "core.sonic-resonator",
+    balance: { basis: "published-analogs", reviewed: true, notes: "Core profile benchmarked against published spellheart families." },
     label: "PF2E_ITEM_FORGE.SpellheartProfiles.SonicResonator",
     description: "PF2E_ITEM_FORGE.SpellheartText.SonicDescription",
     nameTemplate: "PF2E_ITEM_FORGE.SpellheartText.SonicName",
@@ -114,6 +119,7 @@ export function registerCoreSpellheartProfiles(registry = new SpellheartProfileR
 
   registry.register({
     id: "core.void-fang",
+    balance: { basis: "published-analogs", reviewed: true, notes: "Core profile benchmarked against published spellheart families." },
     label: "PF2E_ITEM_FORGE.SpellheartProfiles.VoidFang",
     description: "PF2E_ITEM_FORGE.SpellheartText.VoidDescription",
     nameTemplate: "PF2E_ITEM_FORGE.SpellheartText.VoidName",
@@ -132,6 +138,7 @@ export function registerCoreSpellheartProfiles(registry = new SpellheartProfileR
 
   registry.register({
     id: "core.vitality-feather",
+    balance: { basis: "published-analogs", reviewed: true, notes: "Core profile benchmarked against published spellheart families." },
     label: "PF2E_ITEM_FORGE.SpellheartProfiles.VitalityFeather",
     description: "PF2E_ITEM_FORGE.SpellheartText.VitalityDescription",
     nameTemplate: "PF2E_ITEM_FORGE.SpellheartText.VitalityName",

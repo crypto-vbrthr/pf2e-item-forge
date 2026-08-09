@@ -31,3 +31,8 @@ test("specific item profiles reject property runes beyond potency capacity", () 
     variants: [{ level: 8, price: 500, fundamentalProfile: "potency-1-striking" }]
   }), /property-rune capacity/);
 });
+
+test("core specific-item profiles expose reviewed balance provenance", () => {
+  const registry = registerCoreSpecificItemProfiles(new SpecificItemProfileRegistry());
+  assert.ok(registry.getAll().every((profile) => profile.balance.reviewed === true));
+});

@@ -12,7 +12,8 @@
       "Generate": "Generate",
       "Reroll": "Reroll",
       "CreateItem": "Create item",
-      "RefreshSources": "Refresh compendium index"
+      "RefreshSources": "Refresh compendium index",
+      "RunMagicDiagnostics": "Magic diagnostics"
     },
     "Editor": {
       "Parameters": "Parameters",
@@ -152,13 +153,16 @@
       "SpecificItemProfile": "Item profile",
       "SpecificItemVariant": "Variant",
       "SpecialAbility": "Special ability",
-      "Automation": "Automation"
+      "Automation": "Automation",
+      "ContentSources": "Content sources",
+      "TemplateSource": "Implementation template"
     },
     "Notifications": {
       "GenerationFailed": "No item could be generated for these parameters.",
       "NoPreview": "Generate a preview first.",
       "ItemCreated": "{name} was created in the Item Directory.",
-      "SourcesRefreshed": "Compendium index refreshed."
+      "SourcesRefreshed": "Compendium index refreshed.",
+      "MagicDiagnosticsComplete": "Magic diagnostics complete: {passed} passed, {failed} failed, {skipped} skipped."
     },
     "Settings": {
       "DefaultSolverAttempts": {
@@ -373,7 +377,7 @@
       "VitalityArmor": "You gain a +{saveBonus} item bonus to saves against death and void effects.",
       "VitalityWeapon": "While the spellheart is affixed, the weapon gains the effect of the {rune} rune.",
       "StandardActivation": "Activate — Cast a Spell",
-      "SpellStatistics": "Spells cast by activating this item use spell attack {spellAttack} and spell DC {spellDC}.",
+      "SpellStatistics": "Spells cast by activating this item use spell attack {spellAttack} and spell DC {spellDC}. When casting the cantrip, you can use your own spell attack modifier or spell DC instead if it is higher.",
       "Armor": "Armor",
       "Weapon": "Weapon",
       "OncePerDay": "once per day",
@@ -447,6 +451,18 @@
       "SpecialAbility": "Special Ability:",
       "PropertyRuneRestriction": "As a specific magic item, this item can’t gain property runes that aren’t already part of its profile. Its fundamental runes can be upgraded or transferred normally.",
       "RulesTextAutomation": "Rules text / structured metadata"
+    },
+    "Automation": {
+      "Native": "Native PF2e automation",
+      "RulesText": "Rules text / Item Forge manifest"
+    },
+    "Diagnostics": {
+      "Title": "Magic diagnostics",
+      "Passed": "Passed",
+      "Failed": "Failed",
+      "Skipped": "Skipped",
+      "SystemVersion": "PF2e version",
+      "FoundryVersion": "Foundry version"
     }
   }
 }

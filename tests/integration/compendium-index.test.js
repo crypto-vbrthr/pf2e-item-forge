@@ -210,3 +210,17 @@ test("CompendiumIndex recognizes PF2e v14 non-null specific data objects and leg
   assert.ok(index.entries.find((entry) => entry.id === "legacy-specific").categories.includes("magic.weapon"));
   assert.equal(index.entries.find((entry) => entry.id === "legacy-not-specific").categories.includes("magic.weapon"), false);
 });
+
+test("CompendiumIndex parses common PF2e spell action-time shapes defensively", async () => {
+  const pack = makePack("pf2e.actions-shape", [
+    raw("one", "spell", 1, { time: { value: "1 action" }, traits: { value: ["fire"], traditions: ["arcane"], rarity: "common" } }),
+    raw("two", "spell", 1, { time: { value: "2 actions" }, traits: { value: ["fire"], traditions: ["arcane"], rarity: "common" } }),
+    raw("reaction", "spell", 1, { time: { value: "reaction" }, traits: { value: ["fire"], traditions: ["arcane"], rarity: "common" } })
+  ]);
+  const categories = registerCoreCategories(new CategoryRegistry());
+  const index = new CompendiumIndex({ categoryRegistry: categories, gameProvider: () => ({ system: { id: "pf2e" }, packs: new FakePackCollection([pack]) }) });
+  await index.refresh();
+  assert.equal(index.spellEntries.find((entry) => entry.id === "one").castActions, 1);
+  assert.equal(index.spellEntries.find((entry) => entry.id === "two").castActions, 2);
+  assert.equal(index.spellEntries.find((entry) => entry.id === "reaction").castActions, null);
+});

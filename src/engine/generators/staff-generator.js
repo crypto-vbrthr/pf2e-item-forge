@@ -1,6 +1,8 @@
 import { SeededRng } from "../seeded-rng.js";
-import { distanceToLevelRequest, levelAllowed } from "../item-level-resolver.js";
-import { getHighestRarity, getMeaningfulSpellRanks, isNormalSlottedSpell, isStaffCantrip } from "../spell-item-utils.js";
+import { candidateLevelResolver } from "../candidate-level-resolver.js";
+import { spellCandidateService } from "../spell-candidate-service.js";
+import { MagicItemTemplateResolver } from "../magic-item-template-resolver.js";
+import { getHighestRarity, isNormalSlottedSpell, isStaffCantrip } from "../spell-item-utils.js";
 import { MAGIC_THEME_DEFINITIONS, getMagicTheme, spellMatchesMagicTheme } from "../magic-themes.js";
 import { registerCoreStaffProfiles, StaffProfileRegistry } from "../registries/staff-profile-registry.js";
 import { setSpecificSystemValue } from "../compendium-index.js";
@@ -51,6 +53,7 @@ export class StaffGenerator {
   constructor({
     compendiumIndex,
     staffProfiles = registerCoreStaffProfiles(new StaffProfileRegistry()),
+    templateResolver = null,
     formatter = (key, data) => globalThis.game?.i18n?.format?.(key, data) ?? key
   } = {}) {
     this.id = "staff";
@@ -58,6 +61,7 @@ export class StaffGenerator {
     this.priority = 210;
     this.index = compendiumIndex;
     this.staffProfiles = staffProfiles;
+    this.templateResolver = templateResolver ?? new MagicItemTemplateResolver({ compendiumIndex });
     this.formatter = formatter;
   }
 
@@ -74,18 +78,9 @@ export class StaffGenerator {
 
   async #generateExisting(request) {
     const allCandidates = this.index.query(request).filter((entry) => entry.categories?.includes?.("magic.staff"));
-    let candidates = allCandidates.filter((entry) => levelAllowed(entry.level, request));
-    const warnings = [];
-
-    if (!candidates.length && request.levelPolicy === "nearest" && allCandidates.length) {
-      const distance = Math.min(...allCandidates.map((entry) => distanceToLevelRequest(entry.level, request.level)));
-      candidates = allCandidates.filter((entry) => distanceToLevelRequest(entry.level, request.level) === distance);
-      warnings.push({
-        code: "LEVEL_TARGET_APPROXIMATED",
-        requested: { ...request.level },
-        actualLevels: [...new Set(candidates.map((entry) => entry.level))]
-      });
-    }
+    const selection = candidateLevelResolver.resolve(allCandidates, request, { getLevel: (entry) => entry.level });
+    const candidates = selection.candidates;
+    const warnings = selection.warnings;
 
     if (!candidates.length) {
       const error = new Error("No predefined staff matches the request");
@@ -95,14 +90,7 @@ export class StaffGenerator {
     }
 
     const rng = new SeededRng(request.seed);
-    const target = request.level.target;
-    const closest = target == null
-      ? candidates
-      : candidates.filter((entry) => {
-          const best = Math.min(...candidates.map((candidate) => Math.abs(candidate.level - target)));
-          return Math.abs(entry.level - target) === best;
-        });
-    const selected = rng.pick(closest);
+    const selected = rng.pick(candidates);
     const document = await this.index.getDocument(selected);
     if (!document) {
       const error = new Error(`Could not load predefined staff ${selected.uuid}`);
@@ -139,6 +127,7 @@ export class StaffGenerator {
         rarity: selected.rarity,
         category: request.category,
         candidateCount: candidates.length,
+        automation: { level: "native" },
         magic: { kind: "staff", staffMode: "existing", theme: null },
         baseItem: { name: selected.name, uuid: selected.uuid, level: selected.level }
       }
@@ -150,7 +139,7 @@ export class StaffGenerator {
     const selection = this.#selectFamilyVariant(request, rng);
     const { profile, variantIndex, variant } = selection;
     const warnings = [...selection.warnings];
-    const baseEntry = this.#getBaseStaffEntry();
+    const baseEntry = this.templateResolver.resolveStaffBaseEntry();
     if (!baseEntry) {
       const error = new Error("No ordinary staff weapon template is available");
       error.code = "NO_STAFF_BASE_ITEM";
@@ -163,9 +152,10 @@ export class StaffGenerator {
       throw error;
     }
 
-    const spellPool = this.index.querySpells(request).filter((spell) =>
-      (isNormalSlottedSpell(spell) || isStaffCantrip(spell)) && !spell.ritual && !spell.focus
-    );
+    const spellPool = spellCandidateService.getEligibleSpells(this.index, request, {
+      allowCantrips: true,
+      allowSlotted: true
+    });
     const themeId = this.#resolveTheme(request.magic?.theme ?? "automatic", spellPool, profile, variantIndex, rng);
     if (!themeId) {
       const error = new Error("No staff theme has enough matching spells for the selected family profile");
@@ -211,6 +201,7 @@ export class StaffGenerator {
       warnings,
       plan: {
         kind: "staff-family",
+        template: this.templateResolver.templateMetadata(baseEntry, { kind: "staff-base" }),
         theme: themeId,
         profile: { id: profile.id, label: profile.label, levels: profileLevels(profile) },
         variant: { id: variant.id, label: variant.label, index: variantIndex, level: variant.level, price: variant.price },
@@ -223,10 +214,13 @@ export class StaffGenerator {
         generator: this.id,
         sourcePack: [...new Set(spells.map((entry) => entry.spell.pack))].join(", "),
         sourceUuid: baseEntry.uuid,
+        contentSources: [...new Set(spells.map((entry) => entry.spell.pack))],
+        templateSource: this.templateResolver.templateMetadata(baseEntry, { kind: "staff-base" }),
         level: variant.level,
         rarity,
         category: request.category,
         candidateCount: themedPool.length,
+        automation: { level: "rules-text" },
         magic: {
           kind: "staff",
           staffMode: "generated",
@@ -257,18 +251,9 @@ export class StaffGenerator {
     }
 
     const all = profiles.flatMap((profile) => profile.variants.map((variant, variantIndex) => ({ profile, variant, variantIndex })));
-    let candidates = all.filter(({ variant }) => levelAllowed(variant.level, request));
-    const warnings = [];
-
-    if (!candidates.length && request.levelPolicy === "nearest" && all.length) {
-      const distance = Math.min(...all.map(({ variant }) => distanceToLevelRequest(variant.level, request.level)));
-      candidates = all.filter(({ variant }) => distanceToLevelRequest(variant.level, request.level) === distance);
-      warnings.push({
-        code: "LEVEL_TARGET_APPROXIMATED",
-        requested: { ...request.level },
-        actualLevels: [...new Set(candidates.map(({ variant }) => variant.level))]
-      });
-    }
+    const resolved = candidateLevelResolver.resolve(all, request, { getLevel: ({ variant }) => variant.level });
+    const candidates = resolved.candidates;
+    const warnings = resolved.warnings;
 
     if (!candidates.length) {
       const error = new Error("No generated staff family variant matches the requested item level");
@@ -281,25 +266,8 @@ export class StaffGenerator {
       throw error;
     }
 
-    const target = request.level.target;
-    if (target != null) {
-      const distance = Math.min(...candidates.map(({ variant }) => Math.abs(variant.level - target)));
-      candidates = candidates.filter(({ variant }) => Math.abs(variant.level - target) === distance);
-    }
-
     const selected = rng.pick(candidates);
     return { ...selected, warnings };
-  }
-
-  #getBaseStaffEntry() {
-    const systemEntries = this.index.entries.filter((entry) => entry.type === "weapon" && (entry.packageType === "system" || entry.packageName === "pf2e"));
-    const allEntries = this.index.entries.filter((entry) => entry.type === "weapon");
-    const matches = (entry) => {
-      const slug = String(entry.slug ?? "");
-      const baseItem = String(entry.baseItem ?? "");
-      return entry.level === 0 && (baseItem === "staff" || slug === "staff" || slug === "quarterstaff");
-    };
-    return systemEntries.find(matches) ?? allEntries.find(matches) ?? null;
   }
 
   #resolveTheme(requestedTheme, spellPool, profile, variantIndex, rng) {
@@ -326,7 +294,7 @@ export class StaffGenerator {
     const slotted = themed.filter(isNormalSlottedSpell);
     const maxRank = maxRankForVariant(profile, variantIndex);
     return variantRanks(profile, variantIndex).every((rank) => slotted.some((spell) =>
-      getMeaningfulSpellRanks(spell, { maxRank }).includes(rank)
+      spellCandidateService.getAvailableRanks(spell, { maxRank, allowHeightened: true }).includes(rank)
     ));
   }
 
@@ -351,7 +319,7 @@ export class StaffGenerator {
       for (const rankSpec of variant.ranks) {
         const candidates = slotted
           .filter((spell) => {
-            const ranks = allowHeightened ? getMeaningfulSpellRanks(spell, { maxRank }) : [spell.baseRank];
+            const ranks = spellCandidateService.getAvailableRanks(spell, { maxRank, allowHeightened });
             return ranks.includes(rankSpec.rank);
           })
           .map((spell) => ({ spell, rank: rankSpec.rank, cantrip: false, heightened: rankSpec.rank > spell.baseRank }));

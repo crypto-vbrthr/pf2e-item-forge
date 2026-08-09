@@ -1,7 +1,8 @@
 import { SeededRng } from "../seeded-rng.js";
-import { distanceToLevelRequest, levelAllowed } from "../item-level-resolver.js";
-import { getMeaningfulSpellRanks, getHighestRarity, isNormalSlottedSpell, spellSourceAtRank } from "../spell-item-utils.js";
-import { spellMatchesMagicTheme } from "../magic-themes.js";
+import { candidateLevelResolver } from "../candidate-level-resolver.js";
+import { spellCandidateService } from "../spell-candidate-service.js";
+import { MagicItemTemplateResolver } from "../magic-item-template-resolver.js";
+import { getHighestRarity, spellSourceAtRank } from "../spell-item-utils.js";
 
 function clone(value) {
   if (globalThis.foundry?.utils?.deepClone) return globalThis.foundry.utils.deepClone(value);
@@ -19,6 +20,7 @@ export class WandGenerator {
   constructor({
     compendiumIndex,
     wandProfiles = null,
+    templateResolver = null,
     configProvider = () => globalThis.CONFIG,
     uuidResolver = (uuid) => globalThis.fromUuid?.(uuid),
     randomId = () => globalThis.foundry?.utils?.randomID?.() ?? fallbackRandomId(),
@@ -31,9 +33,9 @@ export class WandGenerator {
     this.wandProfiles = wandProfiles;
     this.configProvider = configProvider;
     this.uuidResolver = uuidResolver;
+    this.templateResolver = templateResolver ?? new MagicItemTemplateResolver({ compendiumIndex, configProvider, uuidResolver });
     this.randomId = randomId;
     this.formatter = formatter;
-    this.templateCache = new Map();
   }
 
   supports(request) {
@@ -48,16 +50,17 @@ export class WandGenerator {
     const wandMode = request.magic?.wandMode === "special" ? "special" : "standard";
     const selectedProfileId = request.magic?.wandProfile ?? "automatic";
     const profiles = this.#resolveProfiles(wandMode, selectedProfileId);
-    const spellPool = this.index.querySpells(request)
-      .filter(isNormalSlottedSpell)
-      .filter((spell) => spellMatchesMagicTheme(spell, theme));
+    const spellPool = spellCandidateService.getEligibleSpells(this.index, request, {
+      allowSlotted: true,
+      theme
+    });
     const allCandidates = [];
 
     for (const spell of spellPool) {
-      const ranks = allowHeightened ? getMeaningfulSpellRanks(spell, { maxRank: 9 }) : [spell.baseRank];
+      const ranks = spellCandidateService.getAvailableRanks(spell, { maxRank: 9, allowHeightened });
       for (const rank of ranks) {
         if (rank < 1 || rank > 9) continue;
-        const template = await this.#getTemplate(rank);
+        const template = await this.templateResolver.resolveWandTemplate(rank);
         if (!template) continue;
 
         if (wandMode === "standard") {
@@ -80,17 +83,9 @@ export class WandGenerator {
       }
     }
 
-    let candidates = allCandidates.filter((candidate) => levelAllowed(candidate.itemLevel, request));
-    const warnings = [];
-    if (candidates.length === 0 && request.levelPolicy === "nearest" && allCandidates.length > 0) {
-      const bestDistance = Math.min(...allCandidates.map((candidate) => distanceToLevelRequest(candidate.itemLevel, request.level)));
-      candidates = allCandidates.filter((candidate) => distanceToLevelRequest(candidate.itemLevel, request.level) === bestDistance);
-      warnings.push({
-        code: "LEVEL_TARGET_APPROXIMATED",
-        requested: { ...request.level },
-        actualLevels: [...new Set(candidates.map((candidate) => candidate.itemLevel))]
-      });
-    }
+    const selection = candidateLevelResolver.resolve(allCandidates, request, { getLevel: (candidate) => candidate.itemLevel });
+    const candidates = selection.candidates;
+    const warnings = selection.warnings;
 
     if (candidates.length === 0) {
       const error = new Error("No wand spell candidate matches the request");
@@ -140,6 +135,7 @@ export class WandGenerator {
         wandMode,
         theme,
         ...profileMetadata,
+        template: this.templateResolver.templateMetadata(candidate.template, { kind: "wand" }),
         spell: {
           name: candidate.spell.name,
           sourceUuid: candidate.spell.uuid,
@@ -154,10 +150,13 @@ export class WandGenerator {
         sourcePack: candidate.spell.pack,
         sourceUuid: candidate.spell.uuid,
         templateUuid: candidate.template.uuid,
+        contentSources: [candidate.spell.pack],
+        templateSource: this.templateResolver.templateMetadata(candidate.template, { kind: "wand" }),
         level: candidate.itemLevel,
         rarity: candidate.spell.rarity,
         category: request.category,
         candidateCount: candidates.length,
+        automation: { level: candidate.profile ? "rules-text" : "native" },
         magic: {
           kind: "wand",
           wandMode,
@@ -210,24 +209,6 @@ export class WandGenerator {
     const traits = new Set(spell.traits ?? []);
     if ((rules.forbiddenTraits ?? []).some((trait) => traits.has(trait))) return false;
     return true;
-  }
-
-  async #getTemplate(rank) {
-    if (this.templateCache.has(rank)) return this.templateCache.get(rank);
-    const config = this.configProvider?.();
-    const wandConfig = config?.PF2E?.spellcastingItems?.wand;
-    const uuid = wandConfig?.compendiumUuids?.[rank] ?? wandConfig?.compendiumUuids?.[String(rank)] ?? null;
-    if (!uuid) {
-      this.templateCache.set(rank, null);
-      return null;
-    }
-    const document = await this.uuidResolver?.(uuid);
-    const source = document?.type === "consumable" && typeof document.toObject === "function"
-      ? document.toObject()
-      : null;
-    const template = source ? { uuid, source } : null;
-    this.templateCache.set(rank, template);
-    return template;
   }
 
   #composeWand(candidate, spellSource, { wandMode }) {

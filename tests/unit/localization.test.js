@@ -20,6 +20,16 @@ const REQUIRED_KEYS = [
   "PF2E_ITEM_FORGE.Actions.Reroll",
   "PF2E_ITEM_FORGE.Actions.CreateItem",
   "PF2E_ITEM_FORGE.Actions.RefreshSources",
+  "PF2E_ITEM_FORGE.Actions.RunMagicDiagnostics",
+  "PF2E_ITEM_FORGE.Automation.Native",
+  "PF2E_ITEM_FORGE.Automation.RulesText",
+  "PF2E_ITEM_FORGE.Diagnostics.Title",
+  "PF2E_ITEM_FORGE.Diagnostics.Passed",
+  "PF2E_ITEM_FORGE.Diagnostics.Failed",
+  "PF2E_ITEM_FORGE.Diagnostics.Skipped",
+  "PF2E_ITEM_FORGE.Diagnostics.SystemVersion",
+  "PF2E_ITEM_FORGE.Diagnostics.FoundryVersion",
+  "PF2E_ITEM_FORGE.Notifications.MagicDiagnosticsComplete",
   "PF2E_ITEM_FORGE.Editor.Parameters",
   "PF2E_ITEM_FORGE.Editor.Preview",
   "PF2E_ITEM_FORGE.Fields.Category",
@@ -69,6 +79,8 @@ const REQUIRED_KEYS = [
   "PF2E_ITEM_FORGE.Preview.SpecificItemVariant",
   "PF2E_ITEM_FORGE.Preview.SpecialAbility",
   "PF2E_ITEM_FORGE.Preview.Automation",
+  "PF2E_ITEM_FORGE.Preview.ContentSources",
+  "PF2E_ITEM_FORGE.Preview.TemplateSource",
   "PF2E_ITEM_FORGE.SpecificItemMode.Existing",
   "PF2E_ITEM_FORGE.SpecificItemMode.Generated",
   "PF2E_ITEM_FORGE.SpecificItemProfiles.Automatic",
@@ -163,3 +175,11 @@ for (const language of ["de", "en"]) {
     }
   });
 }
+
+test("spellheart rules text includes the PF2e cantrip statistic override", () => {
+  for (const locale of ["de", "en"]) {
+    const data = JSON.parse(fs.readFileSync(new URL(`../../lang/${locale}.json`, import.meta.url), "utf8"));
+    const text = data.PF2E_ITEM_FORGE.SpellheartText.SpellStatistics;
+    assert.match(text, locale === "de" ? /eigenen Zauberangriff/ : /your own spell attack/i);
+  }
+});

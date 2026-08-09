@@ -1,3 +1,5 @@
+import { normalizeBalanceMetadata } from "./profile-balance.js";
+
 import {
   ARMOR_FUNDAMENTAL_PROFILES,
   WEAPON_FUNDAMENTAL_PROFILES,
@@ -77,6 +79,7 @@ export class SpecificItemProfileRegistry {
     const profile = {
       id,
       itemType,
+      balance: normalizeBalanceMetadata(definition.balance, { basis: "unspecified", reviewed: false }),
       label: definition.label ?? id,
       description: definition.description ?? null,
       nameTemplate: definition.nameTemplate ?? null,
@@ -122,6 +125,7 @@ export class SpecificItemProfileRegistry {
 export function registerCoreSpecificItemProfiles(registry = new SpecificItemProfileRegistry()) {
   registry.register({
     id: "core.retributive-weapon",
+    balance: { basis: "published-analogs", reviewed: true, notes: "Core homebrew profile benchmarked against published specific magic items." },
     itemType: "weapon",
     label: "PF2E_ITEM_FORGE.SpecificItemProfiles.RetributiveWeapon",
     description: "PF2E_ITEM_FORGE.SpecificItemText.RetributiveWeaponDescription",
@@ -137,6 +141,7 @@ export function registerCoreSpecificItemProfiles(registry = new SpecificItemProf
 
   registry.register({
     id: "core.elemental-resonance-weapon",
+    balance: { basis: "published-analogs", reviewed: true, notes: "Core homebrew profile benchmarked against published specific magic items." },
     itemType: "weapon",
     label: "PF2E_ITEM_FORGE.SpecificItemProfiles.ElementalWeapon",
     description: "PF2E_ITEM_FORGE.SpecificItemText.ElementalWeaponDescription",
@@ -164,6 +169,7 @@ export function registerCoreSpecificItemProfiles(registry = new SpecificItemProf
 
   registry.register({
     id: "core.elemental-ward-armor",
+    balance: { basis: "published-analogs", reviewed: true, notes: "Core homebrew profile benchmarked against published specific magic items." },
     itemType: "armor",
     label: "PF2E_ITEM_FORGE.SpecificItemProfiles.ElementalArmor",
     description: "PF2E_ITEM_FORGE.SpecificItemText.ElementalArmorDescription",
@@ -188,6 +194,7 @@ export function registerCoreSpecificItemProfiles(registry = new SpecificItemProf
 
   registry.register({
     id: "core.guardian-reaction-armor",
+    balance: { basis: "published-analogs", reviewed: true, notes: "Core homebrew profile benchmarked against published specific magic items." },
     itemType: "armor",
     label: "PF2E_ITEM_FORGE.SpecificItemProfiles.GuardianArmor",
     description: "PF2E_ITEM_FORGE.SpecificItemText.GuardianArmorDescription",

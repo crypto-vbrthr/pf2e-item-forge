@@ -1,5 +1,5 @@
 import { SeededRng } from "../seeded-rng.js";
-import { distanceToLevelRequest, levelAllowed } from "../item-level-resolver.js";
+import { candidateLevelResolver } from "../candidate-level-resolver.js";
 
 export class ExistingItemGenerator {
   constructor({ compendiumIndex }) {
@@ -18,18 +18,9 @@ export class ExistingItemGenerator {
     // Generic scroll compendium entries are templates rather than complete
     // generated items. The dedicated ScrollGenerator attaches a spell first.
     const pool = this.index.query(request).filter((entry) => entry.consumableCategory !== "scroll");
-    let candidates = pool.filter((entry) => levelAllowed(entry.level, request));
-    const warnings = [];
-
-    if (candidates.length === 0 && request.levelPolicy === "nearest" && pool.length > 0) {
-      const bestDistance = Math.min(...pool.map((entry) => distanceToLevelRequest(entry.level, request.level)));
-      candidates = pool.filter((entry) => distanceToLevelRequest(entry.level, request.level) === bestDistance);
-      warnings.push({
-        code: "LEVEL_TARGET_APPROXIMATED",
-        requested: { ...request.level },
-        actualLevels: [...new Set(candidates.map((entry) => entry.level))]
-      });
-    }
+    const selection = candidateLevelResolver.resolve(pool, request, { getLevel: (entry) => entry.level });
+    const candidates = selection.candidates;
+    const warnings = selection.warnings;
 
     if (candidates.length === 0) {
       const error = new Error("No item candidate matches the request");

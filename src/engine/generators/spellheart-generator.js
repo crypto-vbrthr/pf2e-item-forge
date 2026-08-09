@@ -1,6 +1,9 @@
 import { SeededRng } from "../seeded-rng.js";
-import { distanceToLevelRequest, levelAllowed } from "../item-level-resolver.js";
-import { getHighestRarity, getMeaningfulSpellRanks, isNormalSlottedSpell, isStaffCantrip } from "../spell-item-utils.js";
+import { candidateLevelResolver } from "../candidate-level-resolver.js";
+import { spellCandidateService } from "../spell-candidate-service.js";
+import { MagicItemTemplateResolver } from "../magic-item-template-resolver.js";
+import { levelAllowed } from "../item-level-resolver.js";
+import { getHighestRarity, isNormalSlottedSpell, isStaffCantrip } from "../spell-item-utils.js";
 import { getMagicTheme, spellMatchesMagicTheme } from "../magic-themes.js";
 import { registerCoreSpellheartProfiles, SpellheartProfileRegistry } from "../registries/spellheart-profile-registry.js";
 
@@ -49,6 +52,7 @@ export class SpellheartGenerator {
   constructor({
     compendiumIndex,
     spellheartProfiles = registerCoreSpellheartProfiles(new SpellheartProfileRegistry()),
+    templateResolver = null,
     formatter = (key, data) => globalThis.game?.i18n?.format?.(key, data) ?? key
   } = {}) {
     this.id = "spellheart";
@@ -56,6 +60,7 @@ export class SpellheartGenerator {
     this.priority = 215;
     this.index = compendiumIndex;
     this.spellheartProfiles = spellheartProfiles;
+    this.templateResolver = templateResolver ?? new MagicItemTemplateResolver({ compendiumIndex });
     this.formatter = formatter;
   }
 
@@ -72,18 +77,9 @@ export class SpellheartGenerator {
 
   async #generateExisting(request) {
     const pool = this.index.query(request).filter((entry) => entry.categories?.includes?.("magic.spellheart"));
-    let candidates = pool.filter((entry) => levelAllowed(entry.level, request));
-    const warnings = [];
-
-    if (candidates.length === 0 && request.levelPolicy === "nearest" && pool.length > 0) {
-      const bestDistance = Math.min(...pool.map((entry) => distanceToLevelRequest(entry.level, request.level)));
-      candidates = pool.filter((entry) => distanceToLevelRequest(entry.level, request.level) === bestDistance);
-      warnings.push({
-        code: "LEVEL_TARGET_APPROXIMATED",
-        requested: { ...request.level },
-        actualLevels: [...new Set(candidates.map((entry) => entry.level))]
-      });
-    }
+    const selection = candidateLevelResolver.resolve(pool, request, { getLevel: (entry) => entry.level });
+    const candidates = selection.candidates;
+    const warnings = selection.warnings;
 
     if (candidates.length === 0) {
       const error = new Error("No predefined spellheart matches the request");
@@ -93,11 +89,6 @@ export class SpellheartGenerator {
     }
 
     const rng = new SeededRng(request.seed);
-    if (request.level.target != null) {
-      const bestDistance = Math.min(...candidates.map((entry) => Math.abs(entry.level - request.level.target)));
-      candidates = candidates.filter((entry) => Math.abs(entry.level - request.level.target) === bestDistance);
-    }
-
     const selected = rng.pick(candidates);
     const document = await this.index.getDocument(selected);
     if (!document) {
@@ -143,6 +134,7 @@ export class SpellheartGenerator {
         rarity: selected.rarity,
         category: request.category,
         candidateCount: candidates.length,
+        automation: { level: "native" },
         magic: {
           kind: "spellheart",
           spellheartMode: "existing"
@@ -157,15 +149,16 @@ export class SpellheartGenerator {
   }
 
   async #generateCustom(request) {
-    const spellPool = this.index.querySpells(request).filter((spell) =>
-      (isNormalSlottedSpell(spell) || isStaffCantrip(spell)) && !spell.ritual && !spell.focus
-    );
+    const spellPool = spellCandidateService.getEligibleSpells(this.index, request, {
+      allowCantrips: true,
+      allowSlotted: true
+    });
     const rng = new SeededRng(request.seed);
     const selection = this.#selectProfileVariantTheme(request, spellPool, rng);
     const { profile, variant, variantIndex, themeId, candidates, warnings } = selection;
     const spells = this.#selectSpells({ request, profile, variant, themeId, spellPool });
 
-    const templateEntry = this.#getStructuralTemplate();
+    const templateEntry = this.templateResolver.resolveSpellheartTemplateEntry();
     if (!templateEntry) {
       const error = new Error("No PF2e spellheart template is available");
       error.code = "NO_SPELLHEART_TEMPLATE";
@@ -202,6 +195,7 @@ export class SpellheartGenerator {
       warnings,
       plan: {
         kind: "spellheart-generated",
+        template: this.templateResolver.templateMetadata(templateEntry, { kind: "spellheart" }),
         profile: { id: profile.id, label: profile.label },
         variant: { id: variant.id, label: variant.label, index: variantIndex, level: variant.level, price: variant.price },
         theme: themeId,
@@ -213,10 +207,13 @@ export class SpellheartGenerator {
         generator: this.id,
         sourcePack: [...new Set(spells.map((entry) => entry.spell.pack))].join(", "),
         sourceUuid: templateEntry.uuid,
+        contentSources: [...new Set(spells.map((entry) => entry.spell.pack))],
+        templateSource: this.templateResolver.templateMetadata(templateEntry, { kind: "spellheart" }),
         level: variant.level,
         rarity,
         category: request.category,
         candidateCount: candidates.length,
+        automation: { level: "rules-text" },
         magic: {
           kind: "spellheart",
           spellheartMode: "generated",
@@ -287,33 +284,20 @@ export class SpellheartGenerator {
     }
 
     const structuralAtLevel = structural.filter(({ variant }) => levelAllowed(variant.level, request));
-    let candidates = all.filter(({ variant }) => levelAllowed(variant.level, request));
-    const warnings = [];
+    const resolved = candidateLevelResolver.resolve(all, request, { getLevel: ({ variant }) => variant.level });
+    let candidates = resolved.candidates;
+    const warnings = resolved.warnings;
     if (!candidates.length && structuralAtLevel.length > 0 && request.levelPolicy !== "nearest") {
       const error = new Error("No matching spells are available for the requested custom spellheart variant");
       error.code = "NO_SPELLHEART_SPELL_CANDIDATE";
       error.details = { profile: requestedProfile, theme: requestedTheme, level: request.level, source: request.source };
       throw error;
     }
-    if (!candidates.length && request.levelPolicy === "nearest" && all.length > 0) {
-      const distance = Math.min(...all.map(({ variant }) => distanceToLevelRequest(variant.level, request.level)));
-      candidates = all.filter(({ variant }) => distanceToLevelRequest(variant.level, request.level) === distance);
-      warnings.push({
-        code: "LEVEL_TARGET_APPROXIMATED",
-        requested: { ...request.level },
-        actualLevels: [...new Set(candidates.map(({ variant }) => variant.level))]
-      });
-    }
     if (!candidates.length) {
       const error = new Error(all.length ? "No custom spellheart variant matches the requested level" : "No custom spellheart profile has enough matching spells");
       error.code = all.length ? "NO_ITEM_IN_LEVEL_RANGE" : "NO_SPELLHEART_SPELL_CANDIDATE";
       error.details = { profile: requestedProfile, theme: requestedTheme, level: request.level, source: request.source };
       throw error;
-    }
-
-    if (request.level.target != null) {
-      const bestDistance = Math.min(...candidates.map(({ variant }) => Math.abs(variant.level - request.level.target)));
-      candidates = candidates.filter(({ variant }) => Math.abs(variant.level - request.level.target) === bestDistance);
     }
 
     const chosen = rng.pick(candidates);
@@ -327,7 +311,7 @@ export class SpellheartGenerator {
     const required = multiplicities(variant.dailyRanks);
     for (const [rank, count] of required) {
       const candidates = slotted.filter((spell) => {
-        const ranks = allowHeightened ? getMeaningfulSpellRanks(spell, { maxRank: rank }) : [spell.baseRank];
+        const ranks = spellCandidateService.getAvailableRanks(spell, { maxRank: rank, allowHeightened });
         return ranks.includes(rank);
       });
       if (new Set(candidates.map((spell) => spell.uuid)).size < count) return false;
@@ -351,9 +335,10 @@ export class SpellheartGenerator {
     const usedAtRank = new Map();
     for (const rank of variant.dailyRanks) {
       const available = slotted.filter((spell) => {
-        const ranks = request.magic?.allowHeightened !== false
-          ? getMeaningfulSpellRanks(spell, { maxRank: rank })
-          : [spell.baseRank];
+        const ranks = spellCandidateService.getAvailableRanks(spell, {
+          maxRank: rank,
+          allowHeightened: request.magic?.allowHeightened !== false
+        });
         return ranks.includes(rank) && !usedAtRank.get(rank)?.has(spell.uuid);
       });
       if (!available.length) {
@@ -368,12 +353,6 @@ export class SpellheartGenerator {
       selected.push({ spell, rank, cantrip: false, heightened: rank > spell.baseRank });
     }
     return selected;
-  }
-
-  #getStructuralTemplate() {
-    const entries = (this.index.entries ?? []).filter((entry) => entry.categories?.includes?.("magic.spellheart"));
-    const system = entries.filter((entry) => entry.packageType === "system" || entry.packageName === "pf2e");
-    return system[0] ?? entries[0] ?? null;
   }
 
   #renderEffects(profile, variant, themeId) {
@@ -427,7 +406,7 @@ export class SpellheartGenerator {
     const introParts = [];
     if (variant.spellAttack != null || variant.spellDC != null) {
       introParts.push(localize(this.formatter, "PF2E_ITEM_FORGE.SpellheartText.SpellStatistics",
-        `Spells cast by activating this item use spell attack ${variant.spellAttack ?? "—"} and DC ${variant.spellDC ?? "—"}.`,
+        `Spells cast by activating this item use spell attack ${variant.spellAttack ?? "—"} and DC ${variant.spellDC ?? "—"}. When casting the cantrip, you can use your own spell attack modifier or spell DC instead if it is higher.`,
         { spellAttack: variant.spellAttack == null ? "—" : `+${variant.spellAttack}`, spellDC: variant.spellDC ?? "—" }));
     }
     const spellRows = spells.map((entry) => {

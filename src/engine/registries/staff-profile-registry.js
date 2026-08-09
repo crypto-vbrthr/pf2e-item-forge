@@ -1,3 +1,5 @@
+import { normalizeBalanceMetadata } from "./profile-balance.js";
+
 export class StaffProfileRegistry {
   #profiles = new Map();
 
@@ -36,6 +38,7 @@ export class StaffProfileRegistry {
 
     const profile = {
       id,
+      balance: normalizeBalanceMetadata(definition.balance, { basis: "unspecified", reviewed: false }),
       label: definition.label ?? id,
       description: definition.description ?? null,
       variants
@@ -60,6 +63,7 @@ export class StaffProfileRegistry {
 export function registerCoreStaffProfiles(registry = new StaffProfileRegistry()) {
   registry.register({
     id: "core.3-8-12",
+    balance: { basis: "rulebook-family-patterns", reviewed: true, notes: "Core progression profile patterned after published staff family structures." },
     label: "PF2E_ITEM_FORGE.StaffProfiles.Core3812",
     cantrip: true,
     variants: [
@@ -71,6 +75,7 @@ export function registerCoreStaffProfiles(registry = new StaffProfileRegistry())
 
   registry.register({
     id: "core.4-8-12",
+    balance: { basis: "rulebook-family-patterns", reviewed: true, notes: "Core progression profile patterned after published staff family structures." },
     label: "PF2E_ITEM_FORGE.StaffProfiles.Core4812",
     cantrip: true,
     variants: [
@@ -82,6 +87,7 @@ export function registerCoreStaffProfiles(registry = new StaffProfileRegistry())
 
   registry.register({
     id: "core.6-10-14",
+    balance: { basis: "rulebook-family-patterns", reviewed: true, notes: "Core progression profile patterned after published staff family structures." },
     label: "PF2E_ITEM_FORGE.StaffProfiles.Core61014",
     cantrip: true,
     variants: [

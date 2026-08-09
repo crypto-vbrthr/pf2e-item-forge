@@ -22,3 +22,9 @@ test("spellheart profile registry rejects malformed profiles early", () => {
     ]
   }));
 });
+
+test("core spellheart profiles expose reviewed balance provenance", () => {
+  const registry = registerCoreSpellheartProfiles(new SpellheartProfileRegistry());
+  assert.ok(registry.getAll().every((profile) => profile.balance.reviewed === true));
+  assert.ok(registry.getAll().every((profile) => profile.balance.basis === "published-analogs"));
+});

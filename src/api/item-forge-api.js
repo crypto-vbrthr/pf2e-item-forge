@@ -1,7 +1,7 @@
 import { API_VERSION } from "../constants.js";
 
 export class ItemForgeApi {
-  constructor({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes = [], wandProfiles = null, staffProfiles = null, spellheartProfiles = null, specificItemProfiles = null, openApplication }) {
+  constructor({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes = [], wandProfiles = null, staffProfiles = null, spellheartProfiles = null, specificItemProfiles = null, diagnostics = null, openApplication }) {
     this.apiVersion = API_VERSION;
     this.engine = engine;
     this.categories = categories;
@@ -14,6 +14,7 @@ export class ItemForgeApi {
     this.staffProfiles = staffProfiles;
     this.spellheartProfiles = spellheartProfiles;
     this.specificItemProfiles = specificItemProfiles;
+    this.diagnostics = diagnostics;
     this.openApplication = openApplication;
   }
 
@@ -37,6 +38,11 @@ export class ItemForgeApi {
     return this.compendiumIndex.refresh();
   }
 
+  runMagicDiagnostics() {
+    if (!this.diagnostics) throw new Error("Magic diagnostics are unavailable");
+    return this.diagnostics.run();
+  }
+
   getAvailableItemPacks(options = {}) {
     return this.compendiumIndex.getAvailablePacks(options);
   }
@@ -53,14 +59,16 @@ export class ItemForgeApi {
       propertyRuneModes: ["automatic", "random", "fixed", "none"],
       magicThemes: this.magicThemes.map((theme) => theme.id),
       magicItemKinds: ["wand", "staff", "spellheart", "specific-weapon", "specific-armor"],
+      automationLevels: ["native", "rules-text"],
+      magicDiagnostics: Boolean(this.diagnostics),
       wandModes: ["standard", "special"],
-      wandProfiles: this.wandProfiles?.getAll?.().map((profile) => ({ id: profile.id, label: profile.label, ranks: profile.variants.map((variant) => variant.rank), levels: profile.variants.map((variant) => variant.level) })) ?? [],
+      wandProfiles: this.wandProfiles?.getAll?.().map((profile) => ({ id: profile.id, label: profile.label, ranks: profile.variants.map((variant) => variant.rank), levels: profile.variants.map((variant) => variant.level), ...(profile.balance ? { balance: profile.balance } : {}) })) ?? [],
       staffModes: ["generated", "existing"],
       spellheartModes: ["generated", "existing"],
       specificItemModes: ["generated", "existing"],
-      staffProfiles: this.staffProfiles?.getAll?.().map((profile) => ({ id: profile.id, label: profile.label, levels: profile.variants.map((variant) => variant.level) })) ?? [],
-      spellheartProfiles: this.spellheartProfiles?.getAll?.().map((profile) => ({ id: profile.id, label: profile.label, themes: [...profile.allowedThemes], levels: profile.variants.map((variant) => variant.level) })) ?? [],
-      specificItemProfiles: this.specificItemProfiles?.getAll?.().map((profile) => ({ id: profile.id, itemType: profile.itemType, label: profile.label, themes: [...profile.allowedThemes], levels: profile.variants.map((variant) => variant.level) })) ?? [],
+      staffProfiles: this.staffProfiles?.getAll?.().map((profile) => ({ id: profile.id, label: profile.label, levels: profile.variants.map((variant) => variant.level), ...(profile.balance ? { balance: profile.balance } : {}) })) ?? [],
+      spellheartProfiles: this.spellheartProfiles?.getAll?.().map((profile) => ({ id: profile.id, label: profile.label, themes: [...profile.allowedThemes], levels: profile.variants.map((variant) => variant.level), ...(profile.balance ? { balance: profile.balance } : {}) })) ?? [],
+      specificItemProfiles: this.specificItemProfiles?.getAll?.().map((profile) => ({ id: profile.id, itemType: profile.itemType, label: profile.label, themes: [...profile.allowedThemes], levels: profile.variants.map((variant) => variant.level), ...(profile.balance ? { balance: profile.balance } : {}) })) ?? [],
       propertyRunes: this.propertyRunes.getAll().map((rune) => ({ id: rune.id, slug: rune.slug, itemType: rune.itemType, level: rune.level, rarity: rune.rarity })),
       levelPolicies: ["strict", "nearest", "notAbove", "notBelow"],
       embeddedEditor: true,

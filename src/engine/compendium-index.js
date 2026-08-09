@@ -249,8 +249,13 @@ export class CompendiumIndex {
 
   #parseSpellCastActions(value) {
     if (Number.isInteger(value) && value > 0) return value;
-    const text = String(value ?? "").trim();
-    const match = text.match(/^(\d+)$/);
+    if (value && typeof value === "object") {
+      const nested = value.value ?? value.actions ?? value.actionCount ?? null;
+      if (nested !== value) return this.#parseSpellCastActions(nested);
+    }
+    const text = String(value ?? "").trim().toLowerCase();
+    if (!text || /reaction|free action|freie aktion|reaktion/.test(text)) return null;
+    const match = text.match(/^(\d+)(?:\s*(?:action|actions|aktion|aktionen))?$/i);
     return match ? Number(match[1]) : null;
   }
 

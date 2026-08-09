@@ -2,53 +2,48 @@
 
 Reusable Item Forge architecture for Foundry VTT v14 and Pathfinder 2e.
 
-## v0.0.18 scope
+## v0.0.20 scope
 
-This release adds specific magic weapons and armor with both exact predefined-item preservation and registry-driven custom generation, building on the stable magic-item, rune, compendium, and embedded-editor architecture.
+This release hardens the complete magic-item stack before additional magic families are added. It keeps the existing generator behavior while making shared level/spell selection, structural templates, automation status, diagnostics, and settings semantics explicit and reusable.
 
 Implemented:
 
 - Public `game.pf2eItemForge` API (API version 1)
 - Canonical request normalization shared by API validation, generation, and embedded-editor hydration
-- Reusable `ItemForgeEngine`
+- Dynamic engine defaults: source mode and ValueSolver attempts are read from current Foundry settings for every request, so changing settings no longer requires rebuilding the API
+- Reusable `ItemForgeEngine` and embedded `ItemForgeEditor`
 - Priority-based, extensible `GeneratorRegistry` with dynamically registered generation modes
-- Registry-based hierarchical item categories
-- Configurable compendium source selection and physical-item/spell-support indexes
+- Shared `CandidateLevelResolver` for strict/nearest/not-above/not-below candidate policies across item generators
+- Shared `SpellCandidateService` for spell eligibility, themes, and meaningful legal heightening
+- `MagicItemTemplateResolver` that cleanly separates user-selected content sources from internal PF2e implementation templates
+- Magic-result metadata distinguishes `contentSources`, `templateSource`, and automation level (`native` versus `rules-text`)
+- Live `MagicItemDiagnostics` available through the API and the Item Forge header; diagnostics construct temporary PF2e documents without persisting world items
+- Registry-based hierarchical item categories and configurable compendium source selection
 - Exact level or level range with strict/nearest/not-above/not-below policies
 - Deterministic seeded generation
 - Existing physical compendium items, excluding feats/spells/rule documents
 - Spell-bearing scroll generation with meaningful legal heightening
-- Special magic-item mode for wands, staves, spellhearts, specific magic weapons, and specific magic armor
-- Wands use the PF2e generic wand templates and embed one real spell at a legal base or meaningful heightened rank
-- Staves can either be copied exactly from selected compendia or generated as rulebook-style variant families with inherited lower variants
-- Spellhearts can either be selected as complete predefined PF2e items or generated from validated custom Spellheart profiles with coherent armor/weapon benefits, spell progressions, prices, and themes
-- Specific magic weapons and armor can either be copied exactly from selected compendia or generated from validated profiles that own level, price, runes, theme, and special ability as one unit
-- Public `specificItemProfiles` registry for extension modules and campaign content
-- Magic themes for fire, cold, electricity, healing, illusion, mental, vitality, void, arcane, divine, occult, primal, and summoning
-- Composed weapons, armor, and shields with fundamental runes
-- Registry-driven property runes with automatic/random/fixed/none modes and compatibility rules
+- Standard and special wands with validated profile constraints
+- Predefined and generated staff families with inherited rulebook-style variant progressions
+- Predefined and generated Spellhearts with coherent profile families; generated cantrips explicitly follow the PF2e rule allowing the user's own higher spell attack/DC
+- Predefined and generated specific magic weapons and armor using the current PF2e v14 non-null `system.specific` data-object contract
+- Core magic profiles expose balance provenance metadata (`basis`, `reviewed`, `notes`) for diagnostics/extensions
+- Defensive spell casting-time parsing for current/common PF2e data shapes
+- Composed weapons, armor, and shields with fundamental and property runes
 - Effective-level resolution including base item and rune levels
 - Full generated sale-treasure mode with one item per request
 - Broad treasure categories plus optional exact treasure-type selection
 - Treasure target value/range and bounded ValueSolver attempts
 - Materials, craftsmanship, conditions, motifs, styles, attributes, and reusable components
 - 82 built-in treasure types, 45 materials, 17 reusable components, 18 motifs, 16 conditions, 6 craftsmanship levels, and 12 styles
-- Style- and treasure-type-aware weighting for materials, motifs, workmanship, conditions, and component frequency
-- Mild target-aware candidate weighting for more efficient bounded value solving without removing seeded randomness
-- Coherent component craftsmanship and gemstone component-value support
-- Books with edition/completeness, beverages with origin/quality/vessel/age, and expanded jewelry/art/tableware/ceremonial/luxury content
-- Material-aware wear such as fading, patina, water/smoke damage, cracking, worm damage, and restoration
-- Type-specific Bulk, reproducible generation flags, and detailed valuation breakdown metadata
-- Registration-time validation for extension treasure content
-- Embedded `ItemForgeEditor` with request editing, preview, reroll, description display, and no persistence side effects
-- Standalone `ItemForgeApplication` container owning Foundry document creation
 - German and English localization
-- 136 automated unit/integration/statistical/contract tests
+- 152 automated unit/integration/statistical/contract tests plus an in-Foundry magic smoke-diagnostic path
 
 Not yet implemented:
 
-- Generated/custom spellheart composition with validated armor/weapon effect templates (predefined spellhearts are supported now)
-- Native PF2e staff-preparation/casting automation for generated custom staff-family manifests (predefined staves preserve their native PF2e data unchanged)
+- Native PF2e preparation/casting automation for generated custom staff-family manifests; predefined staves preserve native PF2e data unchanged
+- Native Rule Element automation for generated custom Spellheart/special-wand/specific-item abilities; generated homebrew abilities remain explicit rules text plus structured manifests
+- Specific magic shields
 - Precious-material composition for functional weapons/armor
 - Presets
 - Actor/folder output targets
@@ -56,6 +51,13 @@ Not yet implemented:
 - Loot Forge integration itself (the API contract is prepared for it)
 
 ## API examples
+
+Run the live Foundry/PF2e magic smoke diagnostics (no world items are persisted):
+
+```js
+const diagnostics = await game.pf2eItemForge.runMagicDiagnostics();
+console.table(diagnostics.checks);
+```
 
 Select a predefined item:
 

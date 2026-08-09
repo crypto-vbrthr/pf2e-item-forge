@@ -385,6 +385,8 @@ export class ItemForgeEditor extends HandlebarsApplication {
           level: this.previewResult.metadata?.level,
           rarity: this.previewResult.metadata?.rarity,
           sourcePack: this.previewResult.metadata?.sourcePack,
+          contentSources: this.previewResult.metadata?.contentSources ?? null,
+          templateSource: this.previewResult.metadata?.templateSource ?? null,
           candidateCount: this.previewResult.metadata?.candidateCount,
           warnings: this.previewResult.warnings ?? [],
           description: await enrichHtml(this.previewResult.itemSource?.system?.description?.value ?? ""),
@@ -392,6 +394,14 @@ export class ItemForgeEditor extends HandlebarsApplication {
           spells: this.previewResult.metadata?.spells ?? [],
           spellheart: this.previewResult.metadata?.spellheart ?? null,
           wand: this.previewResult.metadata?.wand ?? null,
+          automation: this.previewResult.metadata?.automation?.level
+            ? {
+                level: this.previewResult.metadata.automation.level,
+                label: localizeMaybe(this.previewResult.metadata.automation.level === "native"
+                  ? "PF2E_ITEM_FORGE.Automation.Native"
+                  : "PF2E_ITEM_FORGE.Automation.RulesText")
+              }
+            : null,
           specificItem: this.previewResult.metadata?.specificItem
             ? {
                 ...this.previewResult.metadata.specificItem,

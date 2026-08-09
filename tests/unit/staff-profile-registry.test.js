@@ -18,3 +18,9 @@ test("staff profile registry rejects non-increasing variant levels", () => {
     ]
   }));
 });
+
+test("core staff profiles expose reviewed rulebook-family provenance", () => {
+  const registry = registerCoreStaffProfiles(new StaffProfileRegistry());
+  assert.ok(registry.getAll().every((profile) => profile.balance.reviewed === true));
+  assert.ok(registry.getAll().every((profile) => profile.balance.basis === "rulebook-family-patterns"));
+});

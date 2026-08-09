@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.0.20
+
+- Adds `CandidateLevelResolver` and migrates the major item/magic generators to one shared strict/nearest/not-above/not-below candidate policy while retaining generator-specific composition rules.
+- Adds `SpellCandidateService` to centralize ordinary spell eligibility, theme filtering, and meaningful fixed/interval heightening; higher-rank spells are never down-ranked.
+- Adds `MagicItemTemplateResolver` and explicitly separates user-selected content sources from internal PF2e implementation templates used for generic scroll/wand shells, generated staff bases, and generated Spellheart shells.
+- Magic preview/result metadata now distinguishes content sources, implementation template source, and automation level (`native` or `rules-text`).
+- Corrects generated Spellheart rules text to preserve the PF2e rule that a user may use their own higher spell attack modifier or spell DC when casting the Spellheart's cantrip.
+- Adds live `MagicItemDiagnostics` through the public API and a stethoscope button in the standalone Item Forge. Diagnostics instantiate temporary PF2e documents, inspect key live schema/price/trait/spell contracts, and do not persist world items.
+- Adds normalized balance-provenance metadata to core wand, staff, Spellheart, and specific-item profiles.
+- Hardens spell casting-time parsing for integer, nested-object, localized action-text, reaction, and free-action shapes.
+- Engine defaults are now supplied dynamically from current Foundry settings on each request, so source-mode/solver setting changes no longer require API reconstruction.
+- Synchronizes architecture/README documentation with the PF2e v14 non-null `system.specific` data-object contract and the current generated-magic capabilities.
+- Automated suite now contains 152 passing tests, including new shared-service, live-diagnostic, dynamic-settings, schema, localization, and profile-provenance coverage.
+
 ## 0.0.19
 
 - Fixed detection of predefined PF2e v14 specific magic weapons and armor. PF2e v14 stores `system.specific` as a non-null baseline data object rather than `{ value: true }`.

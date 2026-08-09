@@ -1,5 +1,5 @@
 import { SeededRng } from "../seeded-rng.js";
-import { distanceToLevelRequest, levelAllowed } from "../item-level-resolver.js";
+import { candidateLevelResolver } from "../candidate-level-resolver.js";
 import {
   ARMOR_FUNDAMENTAL_PROFILES,
   WEAPON_FUNDAMENTAL_PROFILES,
@@ -124,18 +124,9 @@ export class SpecificMagicEquipmentGenerator {
     const pool = this.index.query(request)
       .filter((entry) => entry.type === itemType && isSpecificItemEntry(entry))
       .filter((entry) => !entry.categories?.includes?.("magic.staff"));
-    let candidates = pool.filter((entry) => levelAllowed(entry.level, request));
-    const warnings = [];
-
-    if (candidates.length === 0 && request.levelPolicy === "nearest" && pool.length > 0) {
-      const bestDistance = Math.min(...pool.map((entry) => distanceToLevelRequest(entry.level, request.level)));
-      candidates = pool.filter((entry) => distanceToLevelRequest(entry.level, request.level) === bestDistance);
-      warnings.push({
-        code: "LEVEL_TARGET_APPROXIMATED",
-        requested: { ...request.level },
-        actualLevels: [...new Set(candidates.map((entry) => entry.level))]
-      });
-    }
+    const selection = candidateLevelResolver.resolve(pool, request, { getLevel: (entry) => entry.level });
+    const candidates = selection.candidates;
+    const warnings = selection.warnings;
     if (candidates.length === 0) {
       const error = new Error("No predefined specific magic item matches the request");
       error.code = "NO_PREDEFINED_SPECIFIC_ITEM_CANDIDATE";
@@ -143,10 +134,6 @@ export class SpecificMagicEquipmentGenerator {
       throw error;
     }
 
-    if (request.level.target != null) {
-      const bestDistance = Math.min(...candidates.map((entry) => Math.abs(entry.level - request.level.target)));
-      candidates = candidates.filter((entry) => Math.abs(entry.level - request.level.target) === bestDistance);
-    }
 
     const rng = new SeededRng(request.seed);
     const selected = rng.pick(candidates);
@@ -185,6 +172,7 @@ export class SpecificMagicEquipmentGenerator {
         rarity: selected.rarity,
         category: request.category,
         candidateCount: candidates.length,
+        automation: { level: "native" },
         magic: { kind: `specific-${itemType}`, specificMode: "existing" },
         specificItem: { mode: "existing", itemType }
       }
@@ -238,17 +226,9 @@ export class SpecificMagicEquipmentGenerator {
       }
     }
 
-    let candidates = structural.filter((candidate) => levelAllowed(candidate.variant.level, request));
-    const warnings = [];
-    if (candidates.length === 0 && request.levelPolicy === "nearest" && structural.length > 0) {
-      const bestDistance = Math.min(...structural.map((candidate) => distanceToLevelRequest(candidate.variant.level, request.level)));
-      candidates = structural.filter((candidate) => distanceToLevelRequest(candidate.variant.level, request.level) === bestDistance);
-      warnings.push({
-        code: "LEVEL_TARGET_APPROXIMATED",
-        requested: { ...request.level },
-        actualLevels: [...new Set(candidates.map((candidate) => candidate.variant.level))]
-      });
-    }
+    const selection = candidateLevelResolver.resolve(structural, request, { getLevel: (candidate) => candidate.variant.level });
+    let candidates = selection.candidates;
+    const warnings = selection.warnings;
     if (!candidates.length) {
       const error = new Error("No generated specific magic item matches the request");
       error.code = "NO_SPECIFIC_PROFILE_CANDIDATE";
@@ -256,10 +236,6 @@ export class SpecificMagicEquipmentGenerator {
       throw error;
     }
 
-    if (request.level.target != null) {
-      const bestDistance = Math.min(...candidates.map((candidate) => Math.abs(candidate.variant.level - request.level.target)));
-      candidates = candidates.filter((candidate) => Math.abs(candidate.variant.level - request.level.target) === bestDistance);
-    }
 
     const rng = new SeededRng(request.seed);
     const selected = rng.pick(candidates);
@@ -306,6 +282,7 @@ export class SpecificMagicEquipmentGenerator {
         rarity: selected.rarity,
         category: request.category,
         candidateCount: candidates.length,
+        automation: { level: "rules-text" },
         magic: {
           kind: `specific-${itemType}`,
           specificMode: "generated",

@@ -20,3 +20,8 @@ test("wand profile registry rejects malformed and duplicate definitions", () => 
   registry.register({ id: "test", variants: [{ rank: 1, level: 4, price: 100 }] });
   assert.throws(() => registry.register({ id: "test", variants: [{ rank: 1, level: 4, price: 100 }] }), /Duplicate/);
 });
+
+test("core wand profiles expose reviewed balance provenance", () => {
+  const registry = registerCoreWandProfiles(new WandProfileRegistry());
+  assert.ok(registry.getAll().every((profile) => profile.balance.reviewed === true));
+});

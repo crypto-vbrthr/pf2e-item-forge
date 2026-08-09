@@ -22,7 +22,8 @@ export class ItemForgeApplication extends HandlebarsApplication {
       generate: ItemForgeApplication.#onGenerate,
       reroll: ItemForgeApplication.#onReroll,
       createItem: ItemForgeApplication.#onCreateItem,
-      refreshSources: ItemForgeApplication.#onRefreshSources
+      refreshSources: ItemForgeApplication.#onRefreshSources,
+      runMagicDiagnostics: ItemForgeApplication.#onRunMagicDiagnostics
     }
   };
 
@@ -41,6 +42,8 @@ export class ItemForgeApplication extends HandlebarsApplication {
     });
     this.api = api;
     this.editor = new ItemForgeEditor({ api, request });
+    this.magicDiagnostics = null;
+    this.diagnosticsBusy = false;
   }
 
   async _prepareContext(options) {
@@ -48,7 +51,9 @@ export class ItemForgeApplication extends HandlebarsApplication {
     return {
       ...context,
       hasPreview: Boolean(this.editor.getPreview()),
-      busy: this.editor.busy
+      busy: this.editor.busy,
+      diagnosticsBusy: this.diagnosticsBusy,
+      magicDiagnostics: this.magicDiagnostics
     };
   }
 
@@ -98,6 +103,30 @@ export class ItemForgeApplication extends HandlebarsApplication {
     };
     await Item.create(source, { renderSheet: true });
     ui.notifications.info(game.i18n.format("PF2E_ITEM_FORGE.Notifications.ItemCreated", { name: source.name }));
+  }
+
+
+  static async #onRunMagicDiagnostics() {
+    if (this.diagnosticsBusy) return;
+    this.diagnosticsBusy = true;
+    await this.render();
+    try {
+      this.magicDiagnostics = await this.api.runMagicDiagnostics();
+      console.group("PF2E Item Forge | Magic diagnostics");
+      console.table(this.magicDiagnostics.checks);
+      console.groupEnd();
+      ui.notifications.info(game.i18n.format("PF2E_ITEM_FORGE.Notifications.MagicDiagnosticsComplete", {
+        passed: this.magicDiagnostics.passed,
+        failed: this.magicDiagnostics.failed,
+        skipped: this.magicDiagnostics.skipped
+      }));
+    } catch (error) {
+      console.error("PF2E Item Forge | Magic diagnostics failed", error);
+      ui.notifications.warn(game.i18n.localize("PF2E_ITEM_FORGE.Notifications.GenerationFailed"));
+    } finally {
+      this.diagnosticsBusy = false;
+      await this.render();
+    }
   }
 
   static async #onRefreshSources() {

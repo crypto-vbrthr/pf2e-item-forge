@@ -372,6 +372,8 @@
           </div>
           <dl>
             <dt>{{localize "PF2E_ITEM_FORGE.Preview.Source"}}</dt><dd>{{preview.sourcePack}}</dd>
+            {{#if preview.contentSources}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.ContentSources"}}</dt><dd>{{preview.contentSources}}</dd>{{/if}}
+            {{#if preview.templateSource}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.TemplateSource"}}</dt><dd>{{preview.templateSource.uuid}}</dd>{{/if}}
             <dt>{{localize "PF2E_ITEM_FORGE.Preview.Candidates"}}</dt><dd>{{preview.candidateCount}}</dd>
             {{#if preview.spell}}
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.Spell"}}</dt><dd>{{preview.spell.name}}</dd>
@@ -380,6 +382,7 @@
             {{/if}}
             {{#if preview.magic}}
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.MagicKind"}}</dt><dd>{{preview.magic.kindLabel}}</dd>
+              {{#if preview.automation}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.Automation"}}</dt><dd>{{preview.automation.label}}</dd>{{/if}}
               {{#if preview.magic.wandModeLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.WandMode"}}</dt><dd>{{preview.magic.wandModeLabel}}</dd>{{/if}}
               {{#if preview.magic.wandProfileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.WandProfile"}}</dt><dd>{{preview.magic.wandProfileLabel}}</dd>{{/if}}
               {{#if preview.magic.staffModeLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.StaffMode"}}</dt><dd>{{preview.magic.staffModeLabel}}</dd>{{/if}}

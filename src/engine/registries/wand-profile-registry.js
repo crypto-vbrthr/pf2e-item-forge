@@ -1,3 +1,5 @@
+import { normalizeBalanceMetadata } from "./profile-balance.js";
+
 function uniqueStrings(values) {
   return [...new Set((Array.isArray(values) ? values : []).filter((value) => typeof value === "string" && value))];
 }
@@ -40,6 +42,7 @@ export class WandProfileRegistry {
 
     const profile = {
       id,
+      balance: normalizeBalanceMetadata(definition.balance, { basis: "unspecified", reviewed: false }),
       label: definition.label ?? id,
       description: definition.description ?? null,
       nameTemplate: definition.nameTemplate ?? null,
@@ -87,6 +90,7 @@ function rankVariants(prices) {
 export function registerCoreWandProfiles(registry = new WandProfileRegistry()) {
   registry.register({
     id: "core.reaching",
+    balance: { basis: "published-analogs", reviewed: true, notes: "Core profile patterned after published special wand families." },
     label: "PF2E_ITEM_FORGE.WandProfiles.Reaching",
     description: "PF2E_ITEM_FORGE.WandText.ReachingDescription",
     nameTemplate: "PF2E_ITEM_FORGE.WandText.ReachingName",
@@ -96,6 +100,7 @@ export function registerCoreWandProfiles(registry = new WandProfileRegistry()) {
 
   registry.register({
     id: "core.legerdemain",
+    balance: { basis: "published-analogs", reviewed: true, notes: "Core profile patterned after published special wand families." },
     label: "PF2E_ITEM_FORGE.WandProfiles.Legerdemain",
     description: "PF2E_ITEM_FORGE.WandText.LegerdemainDescription",
     nameTemplate: "PF2E_ITEM_FORGE.WandText.LegerdemainName",
@@ -105,6 +110,7 @@ export function registerCoreWandProfiles(registry = new WandProfileRegistry()) {
 
   registry.register({
     id: "core.mercy",
+    balance: { basis: "published-analogs", reviewed: true, notes: "Core profile patterned after published special wand families." },
     label: "PF2E_ITEM_FORGE.WandProfiles.Mercy",
     description: "PF2E_ITEM_FORGE.WandText.MercyDescription",
     nameTemplate: "PF2E_ITEM_FORGE.WandText.MercyName",

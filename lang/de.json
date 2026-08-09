@@ -12,7 +12,8 @@
       "Generate": "Generieren",
       "Reroll": "Neu würfeln",
       "CreateItem": "Item erstellen",
-      "RefreshSources": "Kompendienindex aktualisieren"
+      "RefreshSources": "Kompendienindex aktualisieren",
+      "RunMagicDiagnostics": "Magie-Diagnose"
     },
     "Editor": {
       "Parameters": "Parameter",
@@ -152,13 +153,16 @@
       "SpecificItemProfile": "Gegenstandsprofil",
       "SpecificItemVariant": "Variante",
       "SpecialAbility": "Besondere Fähigkeit",
-      "Automation": "Automatisierung"
+      "Automation": "Automatisierung",
+      "ContentSources": "Inhaltsquellen",
+      "TemplateSource": "Technische Vorlage"
     },
     "Notifications": {
       "GenerationFailed": "Für diese Parameter konnte kein Gegenstand erzeugt werden.",
       "NoPreview": "Erzeuge zuerst eine Vorschau.",
       "ItemCreated": "{name} wurde im Gegenstandsverzeichnis erstellt.",
-      "SourcesRefreshed": "Kompendienindex aktualisiert."
+      "SourcesRefreshed": "Kompendienindex aktualisiert.",
+      "MagicDiagnosticsComplete": "Magie-Diagnose abgeschlossen: {passed} bestanden, {failed} fehlgeschlagen, {skipped} übersprungen."
     },
     "Settings": {
       "DefaultSolverAttempts": {
@@ -373,7 +377,7 @@
       "VitalityArmor": "Du erhältst einen Gegenstandsbonus von +{saveBonus} auf Rettungswürfe gegen Todes- und Leereeffekte.",
       "VitalityWeapon": "Solange das Zauberherz verbunden ist, erhält die Waffe den Effekt der Rune {rune}.",
       "StandardActivation": "Aktivierung – Zauber wirken",
-      "SpellStatistics": "Zauber, die durch Aktivierung dieses Gegenstandes gewirkt werden, verwenden Zauberangriff {spellAttack} und Zauber-SG {spellDC}.",
+      "SpellStatistics": "Zauber, die durch Aktivierung dieses Gegenstandes gewirkt werden, verwenden Zauberangriff {spellAttack} und Zauber-SG {spellDC}. Beim Wirken des Zaubertricks darfst du stattdessen deinen eigenen Zauberangriff oder Zauber-SG verwenden, falls dieser höher ist.",
       "Armor": "Rüstung",
       "Weapon": "Waffe",
       "OncePerDay": "einmal pro Tag",
@@ -447,6 +451,18 @@
       "SpecialAbility": "Besondere Fähigkeit:",
       "PropertyRuneRestriction": "Als spezifischer magischer Gegenstand kann dieses Item keine Eigenschaftsrunen erhalten, die nicht bereits in seinem Profil enthalten sind. Seine Basisrunen können normal verbessert oder übertragen werden.",
       "RulesTextAutomation": "Regeltext / strukturierte Metadaten"
+    },
+    "Automation": {
+      "Native": "Nativ durch PF2e automatisiert",
+      "RulesText": "Regeltext / Item-Forge-Manifest"
+    },
+    "Diagnostics": {
+      "Title": "Magie-Diagnose",
+      "Passed": "Bestanden",
+      "Failed": "Fehlgeschlagen",
+      "Skipped": "Übersprungen",
+      "SystemVersion": "PF2e-Version",
+      "FoundryVersion": "Foundry-Version"
     }
   }
 }

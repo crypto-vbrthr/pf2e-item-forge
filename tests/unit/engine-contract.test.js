@@ -43,3 +43,20 @@ test("registered custom generation modes are accepted while unknown modes are re
   assert.equal(invalid.valid, false);
   assert.equal(invalid.errors.some((error) => error.code === "UNKNOWN_GENERATION_MODE"), true);
 });
+
+test("engine default options can be supplied dynamically without reconstructing the API", () => {
+  const categories = new CategoryRegistry();
+  categories.register({ id: "item" });
+  const generators = new GeneratorRegistry();
+  generators.register({ id: "capture", supports: (request) => request.mode === "custom", async generate(request) { return { request }; } }, { modes: ["custom"], priority: 1 });
+  let sourceMode = "system";
+  const engine = new ItemForgeEngine({
+    categories,
+    generators,
+    compendiumIndex: { async refresh() {} },
+    defaultOptions: () => ({ defaultSourceMode: sourceMode, defaultSolverAttempts: 9 })
+  });
+  assert.equal(engine.normalize({ mode: "custom", category: "item", seed: "a" }).source.mode, "system");
+  sourceMode = "all";
+  assert.equal(engine.normalize({ mode: "custom", category: "item", seed: "b" }).source.mode, "all");
+});

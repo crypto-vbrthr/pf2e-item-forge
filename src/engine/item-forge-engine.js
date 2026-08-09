@@ -8,19 +8,27 @@ export class ItemForgeEngine {
     this.defaultOptions = defaultOptions;
   }
 
+  getDefaultOptions() {
+    return typeof this.defaultOptions === "function" ? (this.defaultOptions() ?? {}) : (this.defaultOptions ?? {});
+  }
+
+  setDefaultOptions(defaultOptions = {}) {
+    this.defaultOptions = defaultOptions;
+  }
+
   async initialize() {
     await this.compendiumIndex.refresh();
   }
 
   normalize(request) {
-    return normalizeRequest(request, this.defaultOptions);
+    return normalizeRequest(request, this.getDefaultOptions());
   }
 
   validate(request) {
     return validateRequest(request, {
       categories: this.categories,
       generationModes: this.generators.getModes(),
-      defaultOptions: this.defaultOptions
+      defaultOptions: this.getDefaultOptions()
     });
   }
 

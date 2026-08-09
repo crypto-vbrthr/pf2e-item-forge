@@ -21,6 +21,8 @@ import { PropertyRuneRegistry, registerCorePropertyRunes } from "../src/engine/r
 import { ItemForgeEngine } from "../src/engine/item-forge-engine.js";
 import { ItemForgeApi } from "../src/api/item-forge-api.js";
 import { ItemForgeApplication } from "../src/app/item-forge-application.js";
+import { MagicItemTemplateResolver } from "../src/engine/magic-item-template-resolver.js";
+import { MagicItemDiagnostics } from "../src/engine/magic-item-diagnostics.js";
 
 let application = null;
 let api = null;
@@ -68,12 +70,13 @@ function createApi() {
   const staffProfiles = registerCoreStaffProfiles(new StaffProfileRegistry());
   const spellheartProfiles = registerCoreSpellheartProfiles(new SpellheartProfileRegistry());
   const specificItemProfiles = registerCoreSpecificItemProfiles(new SpecificItemProfileRegistry());
+  const templateResolver = new MagicItemTemplateResolver({ compendiumIndex });
   generators.register(new TreasureGenerator({ categories, treasure }), { priority: 200, modes: ["treasure"] });
-  generators.register(new WandGenerator({ compendiumIndex, wandProfiles }), { priority: 220, modes: ["magic"] });
-  generators.register(new StaffGenerator({ compendiumIndex, staffProfiles }), { priority: 210, modes: ["magic"] });
+  generators.register(new WandGenerator({ compendiumIndex, wandProfiles, templateResolver }), { priority: 220, modes: ["magic"] });
+  generators.register(new StaffGenerator({ compendiumIndex, staffProfiles, templateResolver }), { priority: 210, modes: ["magic"] });
   generators.register(new SpecificMagicEquipmentGenerator({ compendiumIndex, specificItemProfiles, propertyRunes }), { priority: 218, modes: ["magic"] });
-  generators.register(new SpellheartGenerator({ compendiumIndex, spellheartProfiles }), { priority: 215, modes: ["magic"] });
-  generators.register(new ScrollGenerator({ compendiumIndex }), { priority: 200, modes: ["existing"] });
+  generators.register(new SpellheartGenerator({ compendiumIndex, spellheartProfiles, templateResolver }), { priority: 215, modes: ["magic"] });
+  generators.register(new ScrollGenerator({ compendiumIndex, templateResolver }), { priority: 200, modes: ["existing"] });
   generators.register(new EquipmentGenerator({ compendiumIndex, propertyRunes }), { priority: 150, modes: ["equipment"] });
   generators.register(new ExistingItemGenerator({ compendiumIndex }), { priority: 0, modes: ["existing"] });
 
@@ -81,10 +84,10 @@ function createApi() {
     categories,
     generators,
     compendiumIndex,
-    defaultOptions: {
+    defaultOptions: () => ({
       defaultSourceMode: game.settings.get(MODULE_ID, "defaultSourceMode"),
       defaultSolverAttempts: game.settings.get(MODULE_ID, "defaultSolverAttempts")
-    }
+    })
   });
 
   const openApplication = (options = {}) => {
@@ -93,7 +96,9 @@ function createApi() {
     return application;
   };
 
-  return new ItemForgeApi({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes: getSelectableMagicThemes(), wandProfiles, staffProfiles, spellheartProfiles, specificItemProfiles, openApplication });
+  const itemForgeApi = new ItemForgeApi({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes: getSelectableMagicThemes(), wandProfiles, staffProfiles, spellheartProfiles, specificItemProfiles, openApplication });
+  itemForgeApi.diagnostics = new MagicItemDiagnostics({ api: itemForgeApi });
+  return itemForgeApi;
 }
 
 function exposeApi() {
