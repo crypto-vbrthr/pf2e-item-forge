@@ -16,8 +16,8 @@ ItemForgeEngine (canonical normalization, validation, generation)
         |
         +-- GeneratorRegistry (priority + declared generation modes)
         |     +-- WandGenerator
-        |     +-- SpecificMagicEquipmentGenerator
         |     +-- SpecificMagicShieldGenerator
+        |     +-- SpecificMagicEquipmentGenerator
         |     +-- SpellheartGenerator
         |     +-- StaffGenerator
         |     +-- TreasureGenerator
@@ -26,12 +26,18 @@ ItemForgeEngine (canonical normalization, validation, generation)
         |     +-- ExistingItemGenerator
         |     +-- extension generators
         |
+        +-- CandidateLevelResolver
+        +-- SpellCandidateService
+        +-- MagicItemTemplateResolver
+        +-- generation-result contract
+        +-- MagicItemDiagnostics
         +-- shared spell-item utilities / magic themes
         +-- ItemLevelResolver
         +-- PropertyRuneRegistry
         +-- StaffProfileRegistry
         +-- SpellheartProfileRegistry
         +-- SpecificItemProfileRegistry
+        +-- SpecificShieldProfileRegistry
         +-- ValueSolver
         +-- TreasureRegistry
               +-- types
@@ -77,7 +83,7 @@ Registered generation modes are exposed through the public capabilities API and 
 
 ## Spell-bound permanent magic items
 
-`mode: "magic"` owns `magic.wand`, `magic.staff`, `magic.spellheart`, `magic.weapon`, `magic.armor`, and `magic.shield`. Wands, generated staves, and generated spellhearts reuse the spell-support index and meaningful-heightening helpers. Specific weapons/armor instead use the physical-item index and a dedicated specific-item profile registry. Specific shields use their own shield profile registry because durability, reinforcing runes, and shield-specific activations are a distinct rules surface. Predefined items preserve complete native PF2e documents, while generated custom items compose from validated whole-effect profiles rather than arbitrary effect fragments.
+`mode: "magic"` owns `magic.wand`, `magic.staff`, `magic.spellheart`, `magic.weapon`, `magic.armor`, and `magic.shield`. Wands, generated staves, and generated spellhearts reuse the spell-support index and meaningful-heightening helpers. Specific weapons/armor and shields instead use the physical-item index and dedicated profile registries. Predefined items preserve complete native PF2e documents, while generated custom items compose from validated whole-effect profiles rather than arbitrary effect fragments.
 
 ### Wands
 
@@ -107,12 +113,28 @@ A real indexed spellheart is used only as a structural PF2e `equipment` template
 
 ### Specific magic weapons and armor
 
-`SpecificMagicEquipmentGenerator` resolves `magic.weapon` and `magic.armor`. `SpecificMagicShieldGenerator` separately resolves `magic.shield`. `magic.specificMode: "existing"` selects indexed PF2e weapons/armor whose non-null `system.specific` baseline data marks them as specific and clones the complete document, preserving published Rule Elements, activations, runes, price, and description.
+`SpecificMagicEquipmentGenerator` resolves `magic.weapon` and `magic.armor`. `magic.specificMode: "existing"` selects only indexed PF2e items whose `system.specific` marker is present. In PF2e v14 this is a non-null baseline object containing material/rune data; legacy boolean and `{ value: true }` markers remain readable for compatibility. The complete published document is cloned, preserving Rule Elements, activations, runes, price, and description.
 
-`magic.specificMode: "generated"` starts from a compatible non-specific, rune-free physical base and selects a `SpecificItemProfileRegistry` profile. Each profile owns the item type, allowed themes, compatibility constraints, a strict level/price variant progression, fundamental-rune profile, optional profile-owned property runes, and one special ability. The generated source is marked `system.specific.value = true`. Its fundamental runes remain ordinary PF2e runes, but its property-rune list is written exclusively from the profile and the normal free property-rune editor is not exposed for this path. This enforces the specific-item rule that new property runes cannot simply be added later unless the item already possesses them.
+`magic.specificMode: "generated"` starts from a compatible non-specific, rune-free physical base and selects a `SpecificItemProfileRegistry` profile. Each profile owns the item type, allowed themes, compatibility constraints, a strict level/price variant progression, fundamental-rune profile, optional profile-owned property runes, and one special ability. The generated source receives the PF2e-v14-style non-null `system.specific` baseline snapshot. Its fundamental runes remain ordinary PF2e runes, but its property-rune list is written exclusively from the profile and the normal free property-rune editor is not exposed for this path. This enforces the specific-item rule that new property runes cannot simply be added later unless the item already possesses them.
 
 Generated unique abilities are rendered into the description and stored in `flags.pf2e-item-forge.specificItem` with profile, variant, theme, base item, runes, level, price, seed, and automation status. They intentionally use `automation: "rules-text"` rather than guessed Rule Elements. Extension modules can register additional complete families through `game.pf2eItemForge.specificItemProfiles`.
 
+
+### Specific magic shields
+
+`SpecificMagicShieldGenerator` resolves `magic.shield` separately from weapon/armor specifics. Predefined mode clones the complete published PF2e shield. Generated mode starts from a mundane shield and applies one validated `SpecificShieldProfile` containing variant level, price, final Hardness/HP/Broken Threshold values, optional theme, compatibility constraints, and one rules-text special ability.
+
+Generated shield profiles currently use explicit final durability as their contract. Non-zero reinforcing runes are therefore rejected by the registry until their interaction with explicit profile durability has been verified against the live PF2e preparation pipeline. This avoids accidental double-scaling. Generated profile automation is always `rules-text`; only copied published items may report `native`.
+
+
+
+## Equipment/Magic result contracts
+
+`ItemForgeEngine` applies a shared post-generation contract before results leave the public API. `metadata.contentSources` is always an array, `metadata.templateSource` is either a structural-template descriptor or `null`, and automation uses `metadata.automation.level` with `native` or `rules-text`. Generated specific-item metadata is normalized to `rules-text` even if an extension profile attempts to claim native behavior; profile registries reject unsupported native declarations up front.
+
+World creation adds `flags.pf2e-item-forge.createdByForge = true` without erasing the engine's `generated` meaning. A copied published item therefore remains `generated: false`, while a composed/profile-generated item is `generated: true`. This distinction is intended for Loot Forge and other downstream consumers.
+
+The Embedded Editor may construct a temporary, non-persisted PF2e Item document for preview-only derived values. This is especially important for composed rune equipment because current PF2e preparation computes level/rarity/price from runes and other factors. The live diagnostics use the same principle to detect schema drift without creating world items. Failed compendium indexes are retained as structured diagnostics instead of disappearing behind a later “no candidates” result.
 
 ## Treasure generation
 
@@ -174,10 +196,3 @@ Generic scroll templates are infrastructure and are suppressed from ordinary pre
 ## Specific-item compatibility
 
 The compendium index treats PF2e v14's non-null `system.specific` object as the canonical specific weapon/armor marker, while retaining legacy marker support. Generated specific physical items snapshot their intrinsic material and rune state into `system.specific`.
-
-
-## Specific magic shields
-
-`magic.shield` is intentionally handled separately from specific weapons/armor. Published PF2e specific shields can define their own final Hardness, Hit Points, Broken Threshold, materials, shield weapons, passive benefits, and bespoke activations. The predefined path therefore copies the complete native PF2e shield document.
-
-Generated shields use `SpecificShieldProfileRegistry`. A profile owns a validated level/price progression, explicit final durability values, optional reinforcing rune, allowed themes, compatibility constraints, and one coherent rules-text ability. The generator starts from a mundane shield selected from the configured content sources, retains the shield's native AC/traits/base shape, then applies the profile's final durability and metadata. It does not invent a `system.specific` contract for shields or guessed Rule Elements. Generated shields are marked `automation: rules-text`; predefined shields remain `automation: native`.

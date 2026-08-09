@@ -65,6 +65,7 @@ export class CompendiumIndex {
     this.entries = [];
     this.spellEntries = [];
     this.packMetadata = new Map();
+    this.packErrors = [];
     this.ready = false;
   }
 
@@ -79,6 +80,7 @@ export class CompendiumIndex {
     const entries = [];
     const spellEntries = [];
     this.packMetadata.clear();
+    this.packErrors = [];
 
     for (const pack of packs) {
       try {
@@ -174,7 +176,14 @@ export class CompendiumIndex {
         entries.push(...physicalInPack);
         spellEntries.push(...spellsInPack);
       } catch (error) {
-        console.warn("PF2E Item Forge | Failed to index pack", pack.collection, error);
+        const packId = pack.collection ?? "unknown";
+        this.packErrors.push({
+          pack: packId,
+          label: pack.metadata?.label ?? pack.title ?? packId,
+          code: error?.code ?? null,
+          message: error?.message ?? String(error)
+        });
+        console.warn("PF2E Item Forge | Failed to index pack", packId, error);
       }
     }
 
@@ -182,6 +191,10 @@ export class CompendiumIndex {
     this.spellEntries = spellEntries.sort((a, b) => a.uuid.localeCompare(b.uuid));
     this.ready = true;
     return this.entries;
+  }
+
+  getPackErrors() {
+    return this.packErrors.map((entry) => ({ ...entry }));
   }
 
   getAvailablePacks({ includeSpellPacks = false } = {}) {

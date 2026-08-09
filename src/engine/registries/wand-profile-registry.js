@@ -1,4 +1,5 @@
 import { normalizeBalanceMetadata } from "./profile-balance.js";
+import { validateGeneratedProfileAutomation } from "../generation-contract.js";
 
 function uniqueStrings(values) {
   return [...new Set((Array.isArray(values) ? values : []).filter((value) => typeof value === "string" && value))];
@@ -47,7 +48,7 @@ export class WandProfileRegistry {
       description: definition.description ?? null,
       nameTemplate: definition.nameTemplate ?? null,
       effectText: definition.effectText ?? null,
-      automation: definition.automation ?? "rules-text",
+      automation: validateGeneratedProfileAutomation(definition.automation, { kind: "Wand profile", id }),
       compatibility: {
         requiresDamage: Boolean(definition.compatibility?.requiresDamage),
         castActions,

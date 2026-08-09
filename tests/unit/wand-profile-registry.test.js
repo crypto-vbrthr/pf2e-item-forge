@@ -25,3 +25,12 @@ test("core wand profiles expose reviewed balance provenance", () => {
   const registry = registerCoreWandProfiles(new WandProfileRegistry());
   assert.ok(registry.getAll().every((profile) => profile.balance.reviewed === true));
 });
+
+test("generated wand profiles cannot claim native automation", () => {
+  const registry = new WandProfileRegistry();
+  assert.throws(() => registry.register({
+    id: "fake-native",
+    automation: "native",
+    variants: [{ rank: 1, level: 4, price: 100 }]
+  }), /cannot declare native automation/);
+});

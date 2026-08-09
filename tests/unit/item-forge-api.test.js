@@ -17,7 +17,7 @@ function apiFixture() {
       getMetadata: () => [{ id: "test", priority: 10, modes: ["custom"] }],
       getModes: () => ["custom"]
     },
-    compendiumIndex: { refresh: async () => true, getAvailablePacks: () => [] },
+    compendiumIndex: { refresh: async () => true, getAvailablePacks: () => [], ready: true, entries: [{ id: 1 }], spellEntries: [{ id: 2 }], getPackErrors: () => [{ pack: "bad.pack" }] },
     treasure: {
       types: { getAll: () => [] }, materials: { getAll: () => [] }, components: { getAll: () => [] },
       motifs: { getAll: () => [] }, conditions: { getAll: () => [] }, craftsmanship: { getAll: () => [] }, styles: { getAll: () => [] }
@@ -58,4 +58,13 @@ test("ItemForgeApi capabilities expose generator priority metadata and registere
   assert.deepEqual(capabilities.specificItemModes, ["generated", "existing"]);
   assert.deepEqual(capabilities.specificItemProfiles, [{ id: "core.retributive-weapon", itemType: "weapon", label: "Retributive", themes: [], levels: [3, 10, 16] }]);
   assert.deepEqual(capabilities.specificShieldProfiles, [{ id: "core.restorative-shield", label: "Restorative", themes: [], levels: [5, 10, 15] }]);
+});
+
+
+test("ItemForgeApi exposes compendium index diagnostics", () => {
+  const diagnostics = apiFixture().getIndexDiagnostics();
+  assert.equal(diagnostics.ready, true);
+  assert.equal(diagnostics.physicalItems, 1);
+  assert.equal(diagnostics.spells, 1);
+  assert.deepEqual(diagnostics.packErrors, [{ pack: "bad.pack" }]);
 });

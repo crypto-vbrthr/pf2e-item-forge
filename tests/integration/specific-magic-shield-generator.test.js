@@ -126,3 +126,22 @@ test("generated specific shields are deterministic for the same seed", async () 
   assert.equal(a.itemSource.name, b.itemSource.name);
   assert.equal(a.metadata.specificItem.baseItem.uuid, b.metadata.specificItem.baseItem.uuid);
 });
+
+test("generated specific shield never lowers the rarity of its base shield", async () => {
+  const base = entry("rare-shield", { rarity: "rare" });
+  const registry = new SpecificShieldProfileRegistry();
+  registry.register({
+    id: "test.uncommon-profile",
+    rarity: "uncommon",
+    nameTemplate: "Profile {base}",
+    effectText: "Effect",
+    variants: [{ level: 5, price: 200, durability: { hardness: 6, hp: 30, bt: 15 } }]
+  });
+  const g = new SpecificMagicShieldGenerator({ compendiumIndex: makeIndex([base]), specificShieldProfiles: registry, formatter });
+  const result = await g.generate(request({
+    level: { min: 5, max: 5, target: 5 },
+    magic: { specificMode: "generated", specificProfile: "test.uncommon-profile", theme: "automatic" }
+  }));
+  assert.equal(result.metadata.rarity, "rare");
+  assert.equal(result.itemSource.system.traits.rarity, "rare");
+});

@@ -14,7 +14,20 @@ function localizeMaybe(key) {
   return localized === key ? key : localized;
 }
 
-/** Format a PF2e physical-item price for the preview without creating a document. */
+/** Prepare an in-memory PF2e document so derived values such as rune-adjusted price can be previewed. */
+export function prepareRuntimePreviewItem(itemSource) {
+  if (!itemSource) return null;
+  try {
+    const ItemClass = globalThis.CONFIG?.Item?.documentClass;
+    if (!ItemClass) return null;
+    return new ItemClass(clone(itemSource), { parent: null });
+  } catch (error) {
+    console.warn("PF2E Item Forge | Could not prepare runtime preview item", error);
+    return null;
+  }
+}
+
+/** Format a PF2e physical-item price for the preview without creating a persisted document. */
 export function formatItemPrice(itemSource, fallbackGp = null) {
   const raw = itemSource?.system?.price?.value;
 
@@ -144,6 +157,10 @@ export class ItemForgeEditor extends HandlebarsApplication {
         NO_SPECIFIC_BASE_ITEM: "PF2E_ITEM_FORGE.Errors.NoSpecificBaseItem",
         NO_SPECIFIC_PROFILE_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoSpecificProfileCandidate",
         UNKNOWN_SPECIFIC_ITEM_PROFILE: "PF2E_ITEM_FORGE.Errors.UnknownSpecificItemProfile",
+        NO_PREDEFINED_SPECIFIC_SHIELD_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoPredefinedSpecificShieldCandidate",
+        NO_SPECIFIC_SHIELD_BASE_ITEM: "PF2E_ITEM_FORGE.Errors.NoSpecificShieldBaseItem",
+        NO_SPECIFIC_SHIELD_PROFILE_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoSpecificShieldProfileCandidate",
+        UNKNOWN_SPECIFIC_SHIELD_PROFILE: "PF2E_ITEM_FORGE.Errors.UnknownSpecificShieldProfile",
         UNKNOWN_STAFF_PROFILE: "PF2E_ITEM_FORGE.Errors.UnknownStaffProfile",
         UNSUPPORTED_TREASURE_CATEGORY: "PF2E_ITEM_FORGE.Errors.UnsupportedTreasureCategory",
         NO_TREASURE_TYPE: "PF2E_ITEM_FORGE.Errors.NoTreasureType",
@@ -381,6 +398,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
     const treasureMotifs = treasureOption(this.api.treasure.motifs, this.request.treasure?.motif);
     const treasureStyles = treasureOption(this.api.treasure.styles, this.request.treasure?.style);
 
+    const runtimePreviewSource = this.previewResult ? prepareRuntimePreviewItem(this.previewResult.itemSource) : null;
     const preview = this.previewResult
       ? {
           name: this.previewResult.itemSource?.name,
@@ -481,7 +499,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
               }
             : null,
           value: this.previewResult.metadata?.value ?? null,
-          price: formatItemPrice(this.previewResult.itemSource, this.previewResult.metadata?.value),
+          price: formatItemPrice(runtimePreviewSource ?? this.previewResult.itemSource, this.previewResult.metadata?.value),
           solverAttempts: this.previewResult.metadata?.solverAttempts ?? null,
           solverExact: this.previewResult.metadata?.solverExact ?? null
         }

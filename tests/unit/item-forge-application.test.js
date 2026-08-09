@@ -84,6 +84,28 @@ test("ItemForgeApplication owns document creation while the embedded editor only
   assert.ok(createdSource);
   assert.equal(createdSource._id, undefined);
   assert.equal(createdSource.name, "Test Treasure");
+  assert.equal(createdSource.flags["pf2e-item-forge"].createdByForge, true);
   assert.equal(createdSource.flags["pf2e-item-forge"].generated, true);
   assert.equal(application.editor.getPreview().itemSource._id, "preview-id", "preview remains unchanged");
+});
+
+
+test("ItemForgeApplication preserves copied-item generated=false while recording Forge creation", async () => {
+  createdSource = null;
+  const application = new ItemForgeApplication({ api: apiFixture(), request: { seed: "copy" } });
+  application.editor.previewResult = {
+    itemSource: {
+      name: "Published Item",
+      type: "equipment",
+      system: { description: { value: "<p>Published</p>" } },
+      flags: { "pf2e-item-forge": { generated: false, sourceUuid: "Compendium.pf2e.items.Item.abc" } }
+    },
+    metadata: { generator: "existing-item", seed: "copy", sourceUuid: "Compendium.pf2e.items.Item.abc" },
+    plan: null
+  };
+
+  await ItemForgeApplication.DEFAULT_OPTIONS.actions.createItem.call(application);
+  assert.equal(createdSource.flags["pf2e-item-forge"].createdByForge, true);
+  assert.equal(createdSource.flags["pf2e-item-forge"].generated, false);
+  assert.equal(createdSource.flags["pf2e-item-forge"].sourceUuid, "Compendium.pf2e.items.Item.abc");
 });

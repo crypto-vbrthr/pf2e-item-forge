@@ -38,9 +38,19 @@ export class ExistingItemGenerator {
       throw error;
     }
 
+    const itemSource = document.toObject();
+    itemSource.flags ??= {};
+    itemSource.flags["pf2e-item-forge"] = {
+      ...(itemSource.flags["pf2e-item-forge"] ?? {}),
+      generated: false,
+      generator: this.id,
+      seed: request.seed,
+      sourceUuid: candidate.uuid
+    };
+
     return {
       request,
-      itemSource: document.toObject(),
+      itemSource,
       warnings,
       metadata: {
         seed: request.seed,

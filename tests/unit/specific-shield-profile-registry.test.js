@@ -25,3 +25,32 @@ test("specific shield profile registry rejects invalid durability", () => {
     variants: [{ level: 5, price: 100, durability: { hardness: 5, hp: 20, bt: 30 } }]
   }), /durability/);
 });
+
+test("specific shield profile registry rejects invalid or unverified reinforcing-rune contracts", () => {
+  const invalid = new SpecificShieldProfileRegistry();
+  assert.throws(() => invalid.register({
+    id: "bad-rune",
+    variants: [{ level: 20, price: 1000, reinforcing: 7, durability: { hardness: 10, hp: 40, bt: 20 } }]
+  }), /reinforcing rune value/);
+
+  const belowLevel = new SpecificShieldProfileRegistry();
+  assert.throws(() => belowLevel.register({
+    id: "too-early",
+    variants: [{ level: 3, price: 100, reinforcing: 1, durability: { hardness: 6, hp: 24, bt: 12 } }]
+  }), /below its reinforcing-rune level/);
+
+  const finalDurabilityConflict = new SpecificShieldProfileRegistry();
+  assert.throws(() => finalDurabilityConflict.register({
+    id: "double-scale-risk",
+    variants: [{ level: 4, price: 150, reinforcing: 1, durability: { hardness: 6, hp: 24, bt: 12 } }]
+  }), /cannot combine explicit final durability with a reinforcing rune/);
+});
+
+test("generated custom shield profiles cannot claim native automation", () => {
+  const registry = new SpecificShieldProfileRegistry();
+  assert.throws(() => registry.register({
+    id: "fake-native",
+    automation: "native",
+    variants: [{ level: 5, price: 100, durability: { hardness: 5, hp: 20, bt: 10 } }]
+  }), /cannot declare native automation/);
+});

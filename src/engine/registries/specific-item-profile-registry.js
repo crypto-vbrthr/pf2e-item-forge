@@ -1,4 +1,5 @@
 import { normalizeBalanceMetadata } from "./profile-balance.js";
+import { validateGeneratedProfileAutomation } from "../generation-contract.js";
 
 import {
   ARMOR_FUNDAMENTAL_PROFILES,
@@ -84,7 +85,7 @@ export class SpecificItemProfileRegistry {
       description: definition.description ?? null,
       nameTemplate: definition.nameTemplate ?? null,
       effectText: definition.effectText ?? null,
-      automation: definition.automation ?? "rules-text",
+      automation: validateGeneratedProfileAutomation(definition.automation, { kind: "Specific item profile", id }),
       rarity: definition.rarity ?? "common",
       allowedThemes,
       itemTraitsByTheme: structuredClone(definition.itemTraitsByTheme ?? {}),

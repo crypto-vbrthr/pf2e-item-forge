@@ -1,4 +1,5 @@
 import { normalizeRequest, validateRequest } from "./request-normalizer.js";
+import { applyGenerationContract } from "./generation-contract.js";
 
 export class ItemForgeEngine {
   constructor({ categories, generators, compendiumIndex, defaultOptions = {} }) {
@@ -48,7 +49,8 @@ export class ItemForgeEngine {
       error.code = "NO_GENERATOR";
       throw error;
     }
-    return generator.generate(request, { engine: this });
+    const result = await generator.generate(request, { engine: this });
+    return applyGenerationContract(result);
   }
 
   async preview(request) {

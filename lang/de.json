@@ -165,7 +165,7 @@
       "NoPreview": "Erzeuge zuerst eine Vorschau.",
       "ItemCreated": "{name} wurde im Gegenstandsverzeichnis erstellt.",
       "SourcesRefreshed": "Kompendienindex aktualisiert.",
-      "MagicDiagnosticsComplete": "Magie-Diagnose abgeschlossen: {passed} bestanden, {failed} fehlgeschlagen, {skipped} übersprungen."
+      "MagicDiagnosticsComplete": "Magie-Diagnose abgeschlossen: {passed} bestanden, {failed} fehlgeschlagen, {warnings} Warnungen, {skipped} übersprungen."
     },
     "Settings": {
       "DefaultSolverAttempts": {
@@ -239,7 +239,7 @@
       "NoTreasureType": "Für die gewählte Schatzkategorie ist keine passende Schatzart registriert.",
       "NoTreasureCandidate": "Mit den gewählten Material-, Zustands- und Wertvorgaben konnte kein gültiger Schatz erzeugt werden.",
       "UnknownTreasureContent": "Eine angeforderte Schatzdefinition ist nicht registriert oder nicht mehr verfügbar.",
-      "UnsupportedMagicCategory": "Diese Erzeugungsart unterstützt Zauberstäbe, Zauberstecken, Zauberherzen sowie spezifische magische Waffen und Rüstungen.",
+      "UnsupportedMagicCategory": "Diese Erzeugungsart unterstützt Zauberstäbe, Zauberstecken, Zauberherzen sowie spezifische magische Waffen, Rüstungen und Schilde.",
       "NoWandSpellCandidate": "In den gewählten Quellen wurde kein für einen Zauberstab geeigneter Zauber gefunden.",
       "NoStaffSpellCandidate": "Für die gewählte Stufe und das gewählte Thema konnte keine passende Zauberliste für einen Zauberstecken zusammengestellt werden.",
       "NoStaffBaseItem": "Die PF2e-Basiswaffe für einen Zauberstecken konnte nicht gefunden werden.",
@@ -254,7 +254,11 @@
       "NoPredefinedSpecificItemCandidate": "In den gewählten Kompendien wurde kein vordefinierter spezifischer Gegenstand für die Stufenvorgabe gefunden.",
       "NoSpecificBaseItem": "In den gewählten Quellen wurde kein geeigneter nicht-spezifischer Basisgegenstand gefunden.",
       "NoSpecificProfileCandidate": "Für Stufe, Profil, Thema und Basisgegenstand konnte kein gültiger spezifischer magischer Gegenstand erzeugt werden.",
-      "UnknownSpecificItemProfile": "Das ausgewählte Profil für einen spezifischen magischen Gegenstand ist nicht registriert."
+      "UnknownSpecificItemProfile": "Das ausgewählte Profil für einen spezifischen magischen Gegenstand ist nicht registriert.",
+      "NoPredefinedSpecificShieldCandidate": "In den gewählten Kompendien wurde kein vordefinierter spezifischer magischer Schild für die Stufenvorgabe gefunden.",
+      "NoSpecificShieldBaseItem": "In den gewählten Quellen wurde kein geeigneter nichtmagischer Basisschild gefunden.",
+      "NoSpecificShieldProfileCandidate": "Für Stufe, Profil, Thema und Basisschild konnte kein gültiger spezifischer magischer Schild erzeugt werden.",
+      "UnknownSpecificShieldProfile": "Das ausgewählte Profil für einen spezifischen magischen Schild ist nicht registriert."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatisch stufengerecht",
@@ -466,7 +470,8 @@
       "Failed": "Fehlgeschlagen",
       "Skipped": "Übersprungen",
       "SystemVersion": "PF2e-Version",
-      "FoundryVersion": "Foundry-Version"
+      "FoundryVersion": "Foundry-Version",
+      "Warnings": "Warnungen"
     },
     "SpecificShieldProfiles": {
       "Automatic": "Automatisch passend zur Stufe",

@@ -1,6 +1,7 @@
 import { SeededRng } from "../seeded-rng.js";
 import { candidateLevelResolver } from "../candidate-level-resolver.js";
 import { getMagicTheme } from "../magic-themes.js";
+import { RARITY_ORDER } from "../registries/property-rune-registry.js";
 
 function clone(value) {
   if (globalThis.foundry?.utils?.deepClone) return globalThis.foundry.utils.deepClone(value);
@@ -32,6 +33,12 @@ function hasShieldRunes(entry) {
 
 function isMundaneShield(entry) {
   return entry?.type === "shield" && !entry?.traits?.includes?.("magical") && !hasShieldRunes(entry);
+}
+
+function rarityMax(...values) {
+  return values.filter(Boolean).reduce((current, rarity) =>
+    (RARITY_ORDER[rarity] ?? 0) > (RARITY_ORDER[current] ?? 0) ? rarity : current,
+  "common");
 }
 
 function compatibilityMatches(entry, profile) {
@@ -164,7 +171,7 @@ export class SpecificMagicShieldGenerator {
         for (const themeId of themes) {
           for (const base of bases) {
             if (base.level > variant.level || !compatibilityMatches(base, profile)) continue;
-            const rarity = profile.rarity === "common" ? (base.rarity ?? "common") : profile.rarity;
+            const rarity = rarityMax(base.rarity ?? "common", profile.rarity ?? "common");
             if (request.rarity.length && !request.rarity.includes(rarity)) continue;
             structural.push({ profile, variant, themeId, base, rarity });
           }

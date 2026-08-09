@@ -36,3 +36,13 @@ test("core specific-item profiles expose reviewed balance provenance", () => {
   const registry = registerCoreSpecificItemProfiles(new SpecificItemProfileRegistry());
   assert.ok(registry.getAll().every((profile) => profile.balance.reviewed === true));
 });
+
+test("generated specific item profiles cannot claim native automation", () => {
+  const registry = new SpecificItemProfileRegistry();
+  assert.throws(() => registry.register({
+    id: "fake-native",
+    itemType: "weapon",
+    automation: "native",
+    variants: [{ level: 4, price: 100, fundamentalProfile: "potency-1-striking" }]
+  }), /cannot declare native automation/);
+});

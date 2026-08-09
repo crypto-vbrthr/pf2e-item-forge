@@ -1,4 +1,9 @@
 import { normalizeBalanceMetadata } from "./profile-balance.js";
+import { validateGeneratedProfileAutomation } from "../generation-contract.js";
+import { SHIELD_REINFORCING_PROFILES } from "../equipment-rune-profiles.js";
+
+
+const REINFORCING_BY_VALUE = new Map(SHIELD_REINFORCING_PROFILES.map((profile) => [profile.reinforcing, profile]));
 
 function uniqueStrings(values) {
   return [...new Set((Array.isArray(values) ? values : []).filter((value) => typeof value === "string" && value))];
@@ -27,7 +32,7 @@ export class SpecificShieldProfileRegistry {
           label: variant.label ?? null,
           level: Number(variant.level),
           price: Number(variant.price),
-          reinforcing: Math.max(0, Number(variant.reinforcing ?? 0) || 0),
+          reinforcing: Number(variant.reinforcing ?? 0),
           durability: {
             hardness: Number(variant.durability?.hardness),
             hp: Number(variant.durability?.hp),
@@ -44,6 +49,19 @@ export class SpecificShieldProfileRegistry {
       if (variant.level <= lastLevel) throw new Error(`Specific shield profile ${id} variants must increase in level`);
       if (!Number.isFinite(variant.price) || variant.price <= 0) throw new Error(`Invalid specific shield price in ${id}`);
       if (!validDurability(variant.durability)) throw new Error(`Invalid specific shield durability in ${id}:${variant.id}`);
+      if (!Number.isInteger(variant.reinforcing) || !REINFORCING_BY_VALUE.has(variant.reinforcing)) {
+        throw new Error(`Invalid reinforcing rune value in ${id}:${variant.id}`);
+      }
+      const reinforcingProfile = REINFORCING_BY_VALUE.get(variant.reinforcing);
+      if (variant.level < reinforcingProfile.level) {
+        throw new Error(`Specific shield variant ${id}:${variant.id} is below its reinforcing-rune level`);
+      }
+      // Custom shield profiles currently store explicit final durability values.
+      // Until PF2e runtime behavior for combining those values with a reinforcing
+      // rune is verified, reject non-zero runes rather than risk double-scaling.
+      if (variant.reinforcing > 0) {
+        throw new Error(`Specific shield variant ${id}:${variant.id} cannot combine explicit final durability with a reinforcing rune`);
+      }
       lastLevel = variant.level;
     }
 
@@ -55,7 +73,7 @@ export class SpecificShieldProfileRegistry {
       description: definition.description ?? null,
       nameTemplate: definition.nameTemplate ?? null,
       effectText: definition.effectText ?? null,
-      automation: definition.automation ?? "rules-text",
+      automation: validateGeneratedProfileAutomation(definition.automation, { kind: "Specific shield profile", id }),
       rarity: definition.rarity ?? "common",
       allowedThemes,
       itemTraitsByTheme: structuredClone(definition.itemTraitsByTheme ?? {}),

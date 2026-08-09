@@ -165,7 +165,7 @@
       "NoPreview": "Generate a preview first.",
       "ItemCreated": "{name} was created in the Item Directory.",
       "SourcesRefreshed": "Compendium index refreshed.",
-      "MagicDiagnosticsComplete": "Magic diagnostics complete: {passed} passed, {failed} failed, {skipped} skipped."
+      "MagicDiagnosticsComplete": "Magic diagnostics complete: {passed} passed, {failed} failed, {warnings} warnings, {skipped} skipped."
     },
     "Settings": {
       "DefaultSolverAttempts": {
@@ -239,7 +239,7 @@
       "NoTreasureType": "No registered treasure type matches the selected treasure category.",
       "NoTreasureCandidate": "No valid treasure could be generated with the selected material, condition, and value constraints.",
       "UnknownTreasureContent": "A requested treasure definition is not registered or is no longer available.",
-      "UnsupportedMagicCategory": "This generation mode supports wands, staves, spellhearts, and specific magic weapons and armor.",
+      "UnsupportedMagicCategory": "This generation mode supports wands, staves, spellhearts, and specific magic weapons, armor, and shields.",
       "NoWandSpellCandidate": "No spell suitable for a wand was found in the selected sources.",
       "NoStaffSpellCandidate": "No suitable staff spell list could be assembled for the selected level and theme.",
       "NoStaffBaseItem": "The PF2e base weapon required for a staff could not be found.",
@@ -254,7 +254,11 @@
       "NoPredefinedSpecificItemCandidate": "No predefined specific item in the selected compendia matches the requested level.",
       "NoSpecificBaseItem": "No suitable non-specific base item was found in the selected sources.",
       "NoSpecificProfileCandidate": "No valid specific magic item could be generated for the requested level, profile, theme, and base item.",
-      "UnknownSpecificItemProfile": "The selected specific magic item profile is not registered."
+      "UnknownSpecificItemProfile": "The selected specific magic item profile is not registered.",
+      "NoPredefinedSpecificShieldCandidate": "No predefined specific magic shield in the selected compendia matches the requested level.",
+      "NoSpecificShieldBaseItem": "No suitable mundane base shield was found in the selected sources.",
+      "NoSpecificShieldProfileCandidate": "No valid specific magic shield could be generated for the requested level, profile, theme, and base shield.",
+      "UnknownSpecificShieldProfile": "The selected specific magic shield profile is not registered."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatic level-appropriate",
@@ -466,7 +470,8 @@
       "Failed": "Failed",
       "Skipped": "Skipped",
       "SystemVersion": "PF2e version",
-      "FoundryVersion": "Foundry version"
+      "FoundryVersion": "Foundry version",
+      "Warnings": "Warnings"
     },
     "SpecificShieldProfiles": {
       "Automatic": "Automatic for requested level",

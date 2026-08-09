@@ -2,9 +2,9 @@
 
 Reusable Item Forge architecture for Foundry VTT v14 and Pathfinder 2e.
 
-## v0.0.21 scope
+## v0.0.22 scope
 
-This release adds specific magic shields with native predefined-item preservation and registry-driven custom shield families, building on the hardened magic-item, rune, compendium, and embedded-editor architecture.
+This release hardens the shared Equipment/Magic contracts after adding specific magic shields. It focuses on stable metadata for downstream modules, live PF2e schema diagnostics, safe custom-profile contracts, correct copied-vs-generated provenance, and runtime-derived preview values.
 
 Implemented:
 
@@ -23,7 +23,7 @@ Implemented:
 - Staves can either be copied exactly from selected compendia or generated as rulebook-style variant families with inherited lower variants
 - Spellhearts can either be selected as complete predefined PF2e items or generated from validated custom Spellheart profiles with coherent armor/weapon benefits, spell progressions, prices, and themes
 - Specific magic weapons and armor can either be copied exactly from selected compendia or generated from validated profiles that own level, price, runes, theme, and special ability as one unit
-- Specific magic shields can either be copied exactly from selected compendia or generated from dedicated shield profiles that own level, price, Hardness, HP, Broken Threshold, theme, and special ability
+- Specific magic shields have their own predefined/generated paths plus a dedicated `specificShieldProfiles` registry and explicit Hardness/HP/Broken Threshold contracts
 - Public `specificItemProfiles` and `specificShieldProfiles` registries for extension modules and campaign content
 - Magic themes for fire, cold, electricity, healing, illusion, mental, vitality, void, arcane, divine, occult, primal, and summoning
 - Composed weapons, armor, and shields with fundamental runes
@@ -41,14 +41,18 @@ Implemented:
 - Material-aware wear such as fading, patina, water/smoke damage, cracking, worm damage, and restoration
 - Type-specific Bulk, reproducible generation flags, and detailed valuation breakdown metadata
 - Registration-time validation for extension treasure content
-- Embedded `ItemForgeEditor` with request editing, preview, reroll, description display, and no persistence side effects
-- Standalone `ItemForgeApplication` container owning Foundry document creation
+- Embedded `ItemForgeEditor` with request editing, preview, reroll, description display, runtime-derived PF2e price preview, and no persistence side effects
+- Standalone `ItemForgeApplication` container owning Foundry document creation and preserving `createdByForge` versus `generated` provenance
 - German and English localization
-- 159 automated unit/integration/statistical/contract tests
+- Shared generation-result contract for `contentSources`, `templateSource`, and automation level
+- Live Magic diagnostics for predefined and generated magic paths, strict source-shape checks, pack-index failures, and composed-equipment price preparation
+- 172 automated unit/integration/statistical/contract tests
 
 Not yet implemented:
 
 - Native PF2e staff-preparation/casting automation for generated custom staff-family manifests (predefined staves preserve their native PF2e data unchanged)
+- Verified native automation builders for generated custom wands/staves/spellhearts/specific items
+- Non-zero reinforcing runes inside generated specific-shield profiles (blocked until final-durability interaction is verified against PF2e runtime)
 - Precious-material composition for functional weapons/armor
 - Presets
 - Actor/folder output targets

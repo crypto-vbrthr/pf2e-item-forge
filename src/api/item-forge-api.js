@@ -48,6 +48,15 @@ export class ItemForgeApi {
     return this.compendiumIndex.getAvailablePacks(options);
   }
 
+  getIndexDiagnostics() {
+    return {
+      ready: Boolean(this.compendiumIndex.ready),
+      physicalItems: this.compendiumIndex.entries?.length ?? 0,
+      spells: this.compendiumIndex.spellEntries?.length ?? 0,
+      packErrors: this.compendiumIndex.getPackErrors?.() ?? []
+    };
+  }
+
   getCapabilities() {
     return {
       apiVersion: this.apiVersion,
@@ -62,6 +71,7 @@ export class ItemForgeApi {
       magicItemKinds: ["wand", "staff", "spellheart", "specific-weapon", "specific-armor", "specific-shield"],
       automationLevels: ["native", "rules-text"],
       magicDiagnostics: Boolean(this.diagnostics),
+      indexDiagnostics: true,
       wandModes: ["standard", "special"],
       wandProfiles: this.wandProfiles?.getAll?.().map((profile) => ({ id: profile.id, label: profile.label, ranks: profile.variants.map((variant) => variant.rank), levels: profile.variants.map((variant) => variant.level), ...(profile.balance ? { balance: profile.balance } : {}) })) ?? [],
       staffModes: ["generated", "existing"],

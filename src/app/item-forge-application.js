@@ -92,9 +92,11 @@ export class ItemForgeApplication extends HandlebarsApplication {
     const source = foundry.utils.deepClone(preview.itemSource);
     delete source._id;
     source.flags ??= {};
+    const engineGenerated = source.flags[MODULE_ID]?.generated;
     source.flags[MODULE_ID] = {
       ...(source.flags[MODULE_ID] ?? {}),
-      generated: true,
+      createdByForge: true,
+      generated: engineGenerated === false ? false : true,
       generator: preview.metadata?.generator ?? "unknown",
       seed: preview.metadata?.seed ?? null,
       sourceUuid: preview.metadata?.sourceUuid ?? null,
@@ -118,6 +120,7 @@ export class ItemForgeApplication extends HandlebarsApplication {
       ui.notifications.info(game.i18n.format("PF2E_ITEM_FORGE.Notifications.MagicDiagnosticsComplete", {
         passed: this.magicDiagnostics.passed,
         failed: this.magicDiagnostics.failed,
+        warnings: this.magicDiagnostics.warnings ?? 0,
         skipped: this.magicDiagnostics.skipped
       }));
     } catch (error) {

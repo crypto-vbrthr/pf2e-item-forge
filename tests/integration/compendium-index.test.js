@@ -243,3 +243,26 @@ test("CompendiumIndex classifies magical shields separately and records shield d
   assert.equal(magical.brokenThreshold, 20);
   assert.equal(mundane.categories.includes("magic.shield"), false);
 });
+
+test("CompendiumIndex records pack indexing failures for diagnostics", async () => {
+  const good = makePack("pf2e.good", [raw("weapon", "weapon", 1)]);
+  const broken = {
+    collection: "thirdparty.broken",
+    documentName: "Item",
+    metadata: { label: "Broken Pack", packageType: "module", packageName: "thirdparty" },
+    async getIndex() { throw new Error("index exploded"); }
+  };
+  const categories = registerCoreCategories(new CategoryRegistry());
+  const game = { system: { id: "pf2e" }, packs: new FakePackCollection([good, broken]) };
+  const index = new CompendiumIndex({ categoryRegistry: categories, gameProvider: () => game });
+  await index.refresh();
+
+  assert.equal(index.entries.length, 1);
+  assert.equal(index.getPackErrors().length, 1);
+  assert.deepEqual(index.getPackErrors()[0], {
+    pack: "thirdparty.broken",
+    label: "Broken Pack",
+    code: null,
+    message: "index exploded"
+  });
+});

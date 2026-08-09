@@ -262,3 +262,4 @@
 .item-forge-diagnostics__checks { margin: 0.45rem 0 0; padding-left: 1.25rem; }
 .item-forge-diagnostics__checks li { margin: 0.15rem 0; }
 .item-forge-diagnostics .diagnostic-failed { font-weight: 600; }
+.item-forge-diagnostics .diagnostic-warning { font-style: italic; }

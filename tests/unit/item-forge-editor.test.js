@@ -168,3 +168,21 @@ test("ItemForgeEditor preserves specific weapon and armor magic categories", () 
     assert.equal(editor.getRequest().category, category);
   }
 });
+
+test("runtime preview preparation can expose PF2e-derived price without persisting an item", async () => {
+  const previousConfig = globalThis.CONFIG;
+  class ItemDocumentStub {
+    constructor(source) {
+      this.system = structuredClone(source.system);
+      this.system.price.value = { gp: 65 };
+    }
+  }
+  globalThis.CONFIG = { Item: { documentClass: ItemDocumentStub } };
+  try {
+    const { prepareRuntimePreviewItem } = await import("../../src/app/item-forge-editor.js");
+    const prepared = prepareRuntimePreviewItem({ type: "weapon", system: { price: { value: { gp: 1 } } } });
+    assert.deepEqual(prepared.system.price.value, { gp: 65 });
+  } finally {
+    globalThis.CONFIG = previousConfig;
+  }
+});
