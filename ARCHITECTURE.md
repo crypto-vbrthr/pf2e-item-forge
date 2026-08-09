@@ -15,12 +15,15 @@ ItemForgeEngine (canonical normalization, validation, generation)
         |     +-- spell index (support data for spell consumables)
         |
         +-- GeneratorRegistry (priority + declared generation modes)
+        |     +-- WandGenerator
+        |     +-- StaffGenerator
         |     +-- TreasureGenerator
         |     +-- ScrollGenerator
         |     +-- EquipmentGenerator
         |     +-- ExistingItemGenerator
         |     +-- extension generators
         |
+        +-- shared spell-item utilities / magic themes
         +-- ItemLevelResolver
         +-- PropertyRuneRegistry
         +-- ValueSolver
@@ -43,7 +46,7 @@ ItemForgeEngine (canonical normalization, validation, generation)
 - Other modules should use the public engine API and may embed `ItemForgeEditor` without the standalone Item Forge window.
 - Future Loot Forge integration should distribute budgets/counts/themes and issue individual Item Forge requests.
 - Built-in and external treasure content use the same validated registries.
-- Spell documents are support data, not directly generatable physical items. `ScrollGenerator` may select an eligible spell and embed it into a physical scroll result.
+- Spell documents are support data, not directly generatable physical items. `ScrollGenerator` and `WandGenerator` may select eligible spells and embed them into physical item results; `StaffGenerator` uses the spell index to build a structured thematic staff manifest.
 
 ## Generator resolution
 
@@ -52,6 +55,8 @@ Generators are registered with a declared generation mode and priority. Resoluti
 Core priorities:
 
 ```text
+WandGenerator         220  mode magic
+StaffGenerator        210  mode magic
 TreasureGenerator     200  mode treasure
 ScrollGenerator       200  mode existing
 EquipmentGenerator    150  mode equipment
@@ -59,6 +64,21 @@ ExistingItemGenerator   0  mode existing
 ```
 
 Registered generation modes are exposed through the public capabilities API and are validated dynamically rather than being hard-coded in the request normalizer.
+
+
+## Spell-bound permanent magic items
+
+`mode: "magic"` currently owns two generated categories: `magic.wand` and `magic.staff`. Both reuse the same spell-support index and the same meaningful-heightening helper used by scroll generation. Magic themes are data-driven filters/weighting hints rather than hard-coded spell lists.
+
+### Wands
+
+`WandGenerator` selects one eligible non-cantrip, non-focus, non-ritual spell from the configured spell sources. The spell rank must correspond to a legal base rank or to heightening data actually present on the spell when `magic.allowHeightened` is enabled. The generator resolves the PF2e generic wand template for that rank, clones it, transfers rarity/traits, and embeds the selected spell into `system.spell` with the chosen `heightenedLevel`. The physical wand level and price therefore come from PF2e's own rank-specific wand templates.
+
+### Staves
+
+`StaffGenerator` builds one thematic custom staff around an ordinary PF2e staff weapon source. A level profile determines the highest spell rank and generated sale price. The generator attempts to include one cantrip and spell entries from rank 1 through the profile maximum, with extra density near the top ranks. Previously chosen spells may reappear at a higher rank only when the indexed spell heightening data supports that rank.
+
+Generated staff spell lists are stored twice: as enriched `@UUID` spell links in the item description for immediate Foundry usability, and as a complete structured manifest in `flags.pf2e-item-forge.staff` for deterministic regeneration and future integrations. The current implementation deliberately does not invent an undocumented PF2e-native custom-staff storage schema; native staff-preparation/casting automation can be wired to the structured manifest once its live-system contract is verified.
 
 ## Treasure generation
 

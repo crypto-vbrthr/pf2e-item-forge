@@ -18,3 +18,11 @@ test("CategoryRegistry supports multiple parents", () => {
   assert.equal(registry.isDescendant("combination", "melee"), true);
   assert.equal(registry.isDescendant("combination", "ranged"), true);
 });
+
+test("core categories expose wand and staff as magic items", async () => {
+  const { registerCoreCategories } = await import("../../src/engine/category-registry.js");
+  const registry = registerCoreCategories(new CategoryRegistry());
+  assert.equal(registry.isDescendant("magic.wand", "magic"), true);
+  assert.equal(registry.isDescendant("magic.staff", "magic"), true);
+  assert.equal(registry.isDescendant("magic.staff", "item"), true);
+});

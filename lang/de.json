@@ -44,7 +44,9 @@
       "Condition": "Zustand",
       "Motif": "Motiv",
       "Style": "Stil",
-      "TreasureType": "Schatzart"
+      "TreasureType": "Schatzart",
+      "MagicTheme": "Magisches Thema",
+      "AllowHeightenedSpells": "Passende Zauber erhöht verwenden"
     },
     "LevelMode": {
       "Single": "Einzelne Stufe",
@@ -79,7 +81,11 @@
       "ScrollSources": "Bei Schriftrollen werden zusätzlich Zauber-Kompendien als Quellen angeboten. Die generische Schriftrolle dient nur als Vorlage; der erzeugte Gegenstand erhält einen passenden Zauber.",
       "TreasureMode": "Erzeugt genau einen nichtmagischen Verkaufs- oder Kunstschatz. Material, Verarbeitung und Zustand beeinflussen seinen Wert.",
       "ValueTolerance": "0,15 entspricht ±15 % um den Zielwert. Wird kein Treffer gefunden, liefert der ValueSolver das nächstgelegene gültige Ergebnis mit Warnung.",
-      "TreasureType": "Optional kann eine konkrete Schatzart gewählt werden. „Beliebig“ lässt die Item Forge innerhalb der gewählten Kategorie würfeln."
+      "TreasureType": "Optional kann eine konkrete Schatzart gewählt werden. „Beliebig“ lässt die Item Forge innerhalb der gewählten Kategorie würfeln.",
+      "MagicMode": "Erzeugt zaubergebundene magische Gegenstände. Zauberstäbe enthalten einen einzelnen passenden Zauber; Zauberstecken erhalten eine thematische Zauberliste über mehrere Grade.",
+      "MagicSources": "Die ausgewählten Kompendien bestimmen den Zauberpool. Systemvorlagen für den Gegenstand selbst werden nur als technische Basis verwendet.",
+      "MagicTheme": "Automatisch wählt ein Thema mit genügend passenden Zaubern. Ein festes Thema ist eine harte Vorgabe.",
+      "AllowHeightenedSpells": "Nur Zauber mit einer echten Erhöhungsdefinition dürfen auf höheren Graden erneut in Zauberstäben oder Zauberstecken auftauchen."
     },
     "Preview": {
       "Empty": "Noch nichts geschmiedet. Parameter wählen und Generieren drücken.",
@@ -104,7 +110,11 @@
       "TreasureType": "Schatzart",
       "SolverAttempts": "ValueSolver-Versuche",
       "Components": "Besondere Bestandteile",
-      "Details": "Details"
+      "Details": "Details",
+      "MagicKind": "Magischer Gegenstandstyp",
+      "MagicTheme": "Thema",
+      "HighestSpellRank": "Höchster Zaubergrad",
+      "SpellList": "Zauberliste"
     },
     "Notifications": {
       "GenerationFailed": "Für diese Parameter konnte kein Gegenstand erzeugt werden.",
@@ -153,12 +163,16 @@
       "TreasureBeverageWine": "Wein",
       "TreasureBeverageBeer": "Bier",
       "TreasureBeverageMead": "Met",
-      "TreasureBeverageSpirit": "Spirituosen"
+      "TreasureBeverageSpirit": "Spirituosen",
+      "Magic": "Magischer Gegenstand",
+      "MagicWand": "Zauberstab",
+      "MagicStaff": "Zauberstecken"
     },
     "GenerationMode": {
       "Existing": "Vordefinierten Gegenstand auswählen",
       "Equipment": "Waffe, Rüstung oder Schild zusammensetzen",
-      "Treasure": "Schatzgegenstand generieren"
+      "Treasure": "Schatzgegenstand generieren",
+      "Magic": "Zaubergebundenen magischen Gegenstand erzeugen"
     },
     "FundamentalRunes": {
       "Automatic": "Automatisch stufengerecht",
@@ -175,7 +189,11 @@
       "UnsupportedTreasureCategory": "Die Schatzgenerierung unterstützt nur Kategorien innerhalb von „Schatz“.",
       "NoTreasureType": "Für die gewählte Schatzkategorie ist keine passende Schatzart registriert.",
       "NoTreasureCandidate": "Mit den gewählten Material-, Zustands- und Wertvorgaben konnte kein gültiger Schatz erzeugt werden.",
-      "UnknownTreasureContent": "Eine angeforderte Schatzdefinition ist nicht registriert oder nicht mehr verfügbar."
+      "UnknownTreasureContent": "Eine angeforderte Schatzdefinition ist nicht registriert oder nicht mehr verfügbar.",
+      "UnsupportedMagicCategory": "Diese Erzeugungsart unterstützt derzeit Zauberstäbe und Zauberstecken.",
+      "NoWandSpellCandidate": "In den gewählten Quellen wurde kein für einen Zauberstab geeigneter Zauber gefunden.",
+      "NoStaffSpellCandidate": "Für die gewählte Stufe und das gewählte Thema konnte keine passende Zauberliste für einen Zauberstecken zusammengestellt werden.",
+      "NoStaffBaseItem": "Die PF2e-Basiswaffe für einen Zauberstecken konnte nicht gefunden werden."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatisch stufengerecht",
@@ -215,6 +233,31 @@
       "DetailsHeading": "Gestaltung",
       "ValueTarget": "Zielwert mit Toleranz",
       "ValueRange": "Wertbereich"
+    },
+    "Magic": {
+      "SettingsHeading": "Zaubermagie",
+      "StaffName": "Zauberstecken: {theme}",
+      "Cantrip": "Zaubertrick",
+      "SpellRankLabel": "Grad {rank}",
+      "HeightenedShort": "erhöht auf Grad {rank}",
+      "GeneratedStaffDescription": "Dieser Zauberstecken bündelt Magie mit dem Thema „{theme}“. Seine Zauberliste wurde stufengerecht aus den gewählten Zauberquellen zusammengestellt.",
+      "StaffActivation": "Aktivierung – Zauber wirken: Wende Ladungen in Höhe des Zaubergrades auf, um einen Zauber aus der Liste zu wirken. Zaubertricks verbrauchen keine Ladungen."
+    },
+    "MagicThemes": {
+      "Automatic": "Automatisch",
+      "Fire": "Feuer",
+      "Cold": "Kälte",
+      "Electricity": "Elektrizität",
+      "Healing": "Heilung",
+      "Illusion": "Illusion",
+      "Mental": "Mental",
+      "Vitality": "Vitalität",
+      "Void": "Leere",
+      "Arcane": "Arkan",
+      "Divine": "Göttlich",
+      "Occult": "Okkult",
+      "Primal": "Naturmagie",
+      "Summoning": "Beschwörung"
     }
   }
 }

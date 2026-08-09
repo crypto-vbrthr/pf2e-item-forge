@@ -21,6 +21,10 @@ function decimal(value, fallback) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function boolean(value, fallback) {
+  return typeof value === "boolean" ? value : fallback;
+}
+
 function uniqueStrings(values) {
   return [...new Set(Array.isArray(values) ? values.filter((value) => typeof value === "string" && value) : [])];
 }
@@ -107,6 +111,10 @@ export function normalizeRequest(request = {}, options = {}) {
         selected: uniqueStrings(request.equipment?.propertyRunes?.selected)
       }
     },
+    magic: {
+      theme: typeof request.magic?.theme === "string" && request.magic.theme ? request.magic.theme : "automatic",
+      allowHeightened: boolean(request.magic?.allowHeightened, true)
+    },
     seed: String(request.seed ?? createSeed()),
     filters: request.filters && typeof request.filters === "object" ? request.filters : {},
     metadata: request.metadata && typeof request.metadata === "object" ? request.metadata : {}
@@ -169,6 +177,11 @@ export function validateRequest(request, {
     const category = normalized.category;
     const supported = category === "treasure" || categories?.isDescendant?.(category, "treasure");
     if (!supported) errors.push({ code: "UNSUPPORTED_TREASURE_CATEGORY", field: "category", value: category });
+  }
+  if (normalized.mode === "magic") {
+    const category = normalized.category;
+    const supported = category === "magic.wand" || category === "magic.staff";
+    if (!supported) errors.push({ code: "UNSUPPORTED_MAGIC_CATEGORY", field: "category", value: category });
   }
   return { valid: errors.length === 0, errors, request: normalized };
 }

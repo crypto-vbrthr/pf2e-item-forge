@@ -1,7 +1,7 @@
 import { API_VERSION } from "../constants.js";
 
 export class ItemForgeApi {
-  constructor({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, openApplication }) {
+  constructor({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes = [], openApplication }) {
     this.apiVersion = API_VERSION;
     this.engine = engine;
     this.categories = categories;
@@ -9,6 +9,7 @@ export class ItemForgeApi {
     this.compendiumIndex = compendiumIndex;
     this.treasure = treasure;
     this.propertyRunes = propertyRunes;
+    this.magicThemes = magicThemes;
     this.openApplication = openApplication;
   }
 
@@ -46,6 +47,8 @@ export class ItemForgeApi {
       generationModes: this.generators.getModes(),
       fundamentalRuneModes: ["automatic", "none"],
       propertyRuneModes: ["automatic", "random", "fixed", "none"],
+      magicThemes: this.magicThemes.map((theme) => theme.id),
+      magicItemKinds: ["wand", "staff"],
       propertyRunes: this.propertyRunes.getAll().map((rune) => ({ id: rune.id, slug: rune.slug, itemType: rune.itemType, level: rune.level, rarity: rune.rarity })),
       levelPolicies: ["strict", "nearest", "notAbove", "notBelow"],
       embeddedEditor: true,

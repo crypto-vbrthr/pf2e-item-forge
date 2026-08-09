@@ -11,6 +11,7 @@
       </select>
       {{#if isEquipmentMode}}<p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.EquipmentMode"}}</p>{{/if}}
       {{#if isTreasureMode}}<p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.TreasureMode"}}</p>{{/if}}
+      {{#if isMagicMode}}<p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.MagicMode"}}</p>{{/if}}
     </div>
 
     <div class="form-group">
@@ -59,6 +60,24 @@
     </fieldset>
     {{/if}}
     {{/if}}
+    {{/if}}
+
+    {{#if isMagicMode}}
+      <fieldset class="magic-settings">
+        <legend>{{localize "PF2E_ITEM_FORGE.Magic.SettingsHeading"}}</legend>
+        <div class="form-group">
+          <label>{{localize "PF2E_ITEM_FORGE.Fields.MagicTheme"}}</label>
+          <select name="magic.theme">
+            {{#each magicThemes}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+          </select>
+          <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.MagicTheme"}}</p>
+        </div>
+        <label class="checkbox">
+          <input type="checkbox" name="magic.allowHeightened" {{#if request.magic.allowHeightened}}checked{{/if}}>
+          {{localize "PF2E_ITEM_FORGE.Fields.AllowHeightenedSpells"}}
+        </label>
+        <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.AllowHeightenedSpells"}}</p>
+      </fieldset>
     {{/if}}
 
     {{#if isTreasureMode}}
@@ -184,6 +203,7 @@
       <fieldset>
         <legend>{{localize "PF2E_ITEM_FORGE.Fields.Sources"}}</legend>
         {{#if isScrollCategory}}<p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.ScrollSources"}}</p>{{/if}}
+        {{#if isMagicMode}}<p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.MagicSources"}}</p>{{/if}}
         <div class="form-group">
           <select name="source.mode">
             {{#each sourceModes}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
@@ -251,7 +271,22 @@
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.SpellRank"}}</dt>
               <dd>{{preview.spell.rank}}{{#if preview.spell.heightened}} ({{localize "PF2E_ITEM_FORGE.Preview.HeightenedFrom"}} {{preview.spell.baseRank}}){{/if}}</dd>
             {{/if}}
-            {{#if preview.baseItem}}
+            {{#if preview.magic}}
+              <dt>{{localize "PF2E_ITEM_FORGE.Preview.MagicKind"}}</dt><dd>{{#if preview.spell}}{{localize "PF2E_ITEM_FORGE.Categories.MagicWand"}}{{else}}{{localize "PF2E_ITEM_FORGE.Categories.MagicStaff"}}{{/if}}</dd>
+              <dt>{{localize "PF2E_ITEM_FORGE.Preview.MagicTheme"}}</dt><dd>{{preview.magic.themeLabel}}</dd>
+              {{#if preview.magic.maxRank}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.HighestSpellRank"}}</dt><dd>{{preview.magic.maxRank}}</dd>{{/if}}
+            {{/if}}
+            {{#if preview.spells.length}}
+              <dt>{{localize "PF2E_ITEM_FORGE.Preview.SpellList"}}</dt>
+              <dd class="staff-spell-list">
+                {{#each preview.spells}}
+                  <span class="property-rune-chip">
+                    {{#if cantrip}}{{localize "PF2E_ITEM_FORGE.Magic.Cantrip"}}{{else}}{{localize "PF2E_ITEM_FORGE.Preview.SpellRank"}} {{rank}}{{/if}} · {{name}}{{#if heightened}} ({{localize "PF2E_ITEM_FORGE.Preview.HeightenedFrom"}} {{baseRank}}){{/if}}
+                  </span>
+                {{/each}}
+              </dd>
+            {{/if}}
+            {{#if preview.runeProfile}}
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.BaseItem"}}</dt><dd>{{preview.baseItem.name}} ({{localize "PF2E_ITEM_FORGE.Preview.Level"}} {{preview.baseItem.level}})</dd>
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.RuneProfile"}}</dt><dd>{{preview.runeSummary}}</dd>
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.PropertySlots"}}</dt><dd>{{preview.propertyRuneCapacity}}</dd>

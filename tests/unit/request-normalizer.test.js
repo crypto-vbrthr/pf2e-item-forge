@@ -60,3 +60,18 @@ test("normalizeRequest keeps registered future generation modes and normalizes e
   assert.equal(request.mode, "custom-mode");
   assert.equal(request.treasure.type, "custom.type");
 });
+
+test("normalizeRequest hydrates magic item settings", () => {
+  const defaults = normalizeRequest({ mode: "magic", category: "magic.staff", seed: "x" });
+  assert.equal(defaults.magic.theme, "automatic");
+  assert.equal(defaults.magic.allowHeightened, true);
+
+  const explicit = normalizeRequest({
+    mode: "magic",
+    category: "magic.wand",
+    magic: { theme: "fire", allowHeightened: false },
+    seed: "x"
+  });
+  assert.equal(explicit.magic.theme, "fire");
+  assert.equal(explicit.magic.allowHeightened, false);
+});

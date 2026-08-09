@@ -44,7 +44,9 @@
       "Condition": "Condition",
       "Motif": "Motif",
       "Style": "Style",
-      "TreasureType": "Treasure type"
+      "TreasureType": "Treasure type",
+      "MagicTheme": "Magical theme",
+      "AllowHeightenedSpells": "Use eligible heightened spells"
     },
     "LevelMode": {
       "Single": "Single level",
@@ -79,7 +81,11 @@
       "ScrollSources": "For scrolls, spell compendiums are also offered as sources. The generic scroll is only a template; the generated item receives a suitable spell.",
       "TreasureMode": "Generates exactly one nonmagical sale or art treasure. Material, craftsmanship, and condition affect its value.",
       "ValueTolerance": "0.15 means ±15% around the target value. If no match is found, the ValueSolver returns the closest valid result with a warning.",
-      "TreasureType": "Optionally select one exact treasure type. “Any” lets Item Forge roll within the selected category."
+      "TreasureType": "Optionally select one exact treasure type. “Any” lets Item Forge roll within the selected category.",
+      "MagicMode": "Generates spell-bound magic items. Wands contain one suitable spell; staves receive a thematic spell list across multiple ranks.",
+      "MagicSources": "Selected compendiums define the spell pool. System item templates are used only as structural bases.",
+      "MagicTheme": "Automatic chooses a theme with enough eligible spells. A selected theme is a hard constraint.",
+      "AllowHeightenedSpells": "Only spells with actual heightening data may reappear at higher ranks in generated wands or staves."
     },
     "Preview": {
       "Empty": "Nothing forged yet. Choose parameters and press Generate.",
@@ -104,7 +110,11 @@
       "TreasureType": "Treasure type",
       "SolverAttempts": "ValueSolver attempts",
       "Components": "Special components",
-      "Details": "Details"
+      "Details": "Details",
+      "MagicKind": "Magic item type",
+      "MagicTheme": "Theme",
+      "HighestSpellRank": "Highest spell rank",
+      "SpellList": "Spell list"
     },
     "Notifications": {
       "GenerationFailed": "No item could be generated for these parameters.",
@@ -153,12 +163,16 @@
       "TreasureBeverageWine": "Wine",
       "TreasureBeverageBeer": "Beer",
       "TreasureBeverageMead": "Mead",
-      "TreasureBeverageSpirit": "Spirits"
+      "TreasureBeverageSpirit": "Spirits",
+      "Magic": "Magic item",
+      "MagicWand": "Wand",
+      "MagicStaff": "Staff"
     },
     "GenerationMode": {
       "Existing": "Select a predefined item",
       "Equipment": "Compose a weapon, armor, or shield",
-      "Treasure": "Generate treasure object"
+      "Treasure": "Generate treasure object",
+      "Magic": "Generate spell-bound magic item"
     },
     "FundamentalRunes": {
       "Automatic": "Automatic level-appropriate progression",
@@ -175,7 +189,11 @@
       "UnsupportedTreasureCategory": "Treasure generation supports only categories under Treasure.",
       "NoTreasureType": "No registered treasure type matches the selected treasure category.",
       "NoTreasureCandidate": "No valid treasure could be generated with the selected material, condition, and value constraints.",
-      "UnknownTreasureContent": "A requested treasure definition is not registered or is no longer available."
+      "UnknownTreasureContent": "A requested treasure definition is not registered or is no longer available.",
+      "UnsupportedMagicCategory": "This generation mode currently supports wands and staves.",
+      "NoWandSpellCandidate": "No spell suitable for a wand was found in the selected sources.",
+      "NoStaffSpellCandidate": "No suitable staff spell list could be assembled for the selected level and theme.",
+      "NoStaffBaseItem": "The PF2e base weapon required for a staff could not be found."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatic level-appropriate",
@@ -215,6 +233,31 @@
       "DetailsHeading": "Design",
       "ValueTarget": "Target value with tolerance",
       "ValueRange": "Value range"
+    },
+    "Magic": {
+      "SettingsHeading": "Spell magic",
+      "StaffName": "Staff: {theme}",
+      "Cantrip": "Cantrip",
+      "SpellRankLabel": "Rank {rank}",
+      "HeightenedShort": "heightened to rank {rank}",
+      "GeneratedStaffDescription": "This staff gathers magic around the theme “{theme}”. Its spell list was assembled from the selected spell sources to match the requested item level.",
+      "StaffActivation": "Activate – Cast a Spell: Expend charges equal to the spell rank to cast a spell from the list. Cantrips expend no charges."
+    },
+    "MagicThemes": {
+      "Automatic": "Automatic",
+      "Fire": "Fire",
+      "Cold": "Cold",
+      "Electricity": "Electricity",
+      "Healing": "Healing",
+      "Illusion": "Illusion",
+      "Mental": "Mental",
+      "Vitality": "Vitality",
+      "Void": "Void",
+      "Arcane": "Arcane",
+      "Divine": "Divine",
+      "Occult": "Occult",
+      "Primal": "Primal",
+      "Summoning": "Summoning"
     }
   }
 }

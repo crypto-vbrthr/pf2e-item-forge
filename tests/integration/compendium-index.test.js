@@ -94,3 +94,19 @@ test("CompendiumIndex keeps supported physical PF2e item document types", async 
     assert.equal(SUPPORTED_ITEM_TYPES.has(type), false, `${type} should not be supported`);
   }
 });
+
+
+test("CompendiumIndex classifies PF2e wands and magical staves for magic generation", async () => {
+  const pack = makePack("pf2e.magic", [
+    raw("wand", "consumable", 7, { category: "wand", traits: { value: ["magical", "wand"], rarity: "common" } }),
+    raw("magic-staff", "weapon", 8, { traits: { value: ["magical", "staff"], rarity: "common" }, slug: "staff-of-test" }),
+    raw("mundane-staff", "weapon", 0, { traits: { value: [], rarity: "common" }, slug: "staff", baseItem: "staff" })
+  ]);
+  const categories = registerCoreCategories(new CategoryRegistry());
+  const game = { system: { id: "pf2e" }, packs: new FakePackCollection([pack]) };
+  const index = new CompendiumIndex({ categoryRegistry: categories, gameProvider: () => game });
+  await index.refresh();
+  assert.ok(index.entries.find((entry) => entry.id === "wand").categories.includes("magic.wand"));
+  assert.ok(index.entries.find((entry) => entry.id === "magic-staff").categories.includes("magic.staff"));
+  assert.equal(index.entries.find((entry) => entry.id === "mundane-staff").categories.includes("magic.staff"), false);
+});

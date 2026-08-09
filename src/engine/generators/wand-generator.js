@@ -1,6 +1,7 @@
 import { SeededRng } from "../seeded-rng.js";
 import { distanceToLevelRequest, levelAllowed } from "../item-level-resolver.js";
-import { getMeaningfulSpellRanks } from "../spell-item-utils.js";
+import { getMeaningfulSpellRanks, getHighestRarity, isNormalSlottedSpell, spellSourceAtRank } from "../spell-item-utils.js";
+import { spellMatchesMagicTheme } from "../magic-themes.js";
 
 function clone(value) {
   if (globalThis.foundry?.utils?.deepClone) return globalThis.foundry.utils.deepClone(value);
@@ -14,9 +15,7 @@ function fallbackRandomId() {
   return value;
 }
 
-export { getMeaningfulSpellRanks } from "../spell-item-utils.js";
-
-export class ScrollGenerator {
+export class WandGenerator {
   constructor({
     compendiumIndex,
     configProvider = () => globalThis.CONFIG,
@@ -24,9 +23,9 @@ export class ScrollGenerator {
     randomId = () => globalThis.foundry?.utils?.randomID?.() ?? fallbackRandomId(),
     formatter = (key, data) => globalThis.game?.i18n?.format?.(key, data) ?? null
   } = {}) {
-    this.id = "scroll";
-    this.mode = "existing";
-    this.priority = 200;
+    this.id = "wand";
+    this.mode = "magic";
+    this.priority = 220;
     this.index = compendiumIndex;
     this.configProvider = configProvider;
     this.uuidResolver = uuidResolver;
@@ -36,17 +35,23 @@ export class ScrollGenerator {
   }
 
   supports(request) {
-    return request.mode === "existing" && request.category === "consumable.scroll";
+    return request.mode === "magic" && request.category === "magic.wand";
   }
 
   async generate(request) {
     if (!this.index.ready) await this.index.refresh();
 
-    const spellPool = this.index.querySpells(request).filter((spell) => this.#isScrollSpell(spell));
+    const theme = request.magic?.theme ?? "automatic";
+    const allowHeightened = request.magic?.allowHeightened !== false;
+    const spellPool = this.index.querySpells(request)
+      .filter(isNormalSlottedSpell)
+      .filter((spell) => spellMatchesMagicTheme(spell, theme));
     const allCandidates = [];
 
     for (const spell of spellPool) {
-      for (const rank of getMeaningfulSpellRanks(spell)) {
+      const ranks = allowHeightened ? getMeaningfulSpellRanks(spell, { maxRank: 9 }) : [spell.baseRank];
+      for (const rank of ranks) {
+        if (rank < 1 || rank > 9) continue;
         const template = await this.#getTemplate(rank);
         if (!template) continue;
         allCandidates.push({
@@ -60,14 +65,9 @@ export class ScrollGenerator {
 
     let candidates = allCandidates.filter((candidate) => levelAllowed(candidate.itemLevel, request));
     const warnings = [];
-
     if (candidates.length === 0 && request.levelPolicy === "nearest" && allCandidates.length > 0) {
-      const bestDistance = Math.min(
-        ...allCandidates.map((candidate) => distanceToLevelRequest(candidate.itemLevel, request.level))
-      );
-      candidates = allCandidates.filter(
-        (candidate) => distanceToLevelRequest(candidate.itemLevel, request.level) === bestDistance
-      );
+      const bestDistance = Math.min(...allCandidates.map((candidate) => distanceToLevelRequest(candidate.itemLevel, request.level)));
+      candidates = allCandidates.filter((candidate) => distanceToLevelRequest(candidate.itemLevel, request.level) === bestDistance);
       warnings.push({
         code: "LEVEL_TARGET_APPROXIMATED",
         requested: { ...request.level },
@@ -76,9 +76,9 @@ export class ScrollGenerator {
     }
 
     if (candidates.length === 0) {
-      const error = new Error("No scroll spell candidate matches the request");
-      error.code = allCandidates.length === 0 ? "NO_SCROLL_SPELL_CANDIDATE" : "NO_ITEM_IN_LEVEL_RANGE";
-      error.details = { category: request.category, level: request.level, source: request.source };
+      const error = new Error("No wand spell candidate matches the request");
+      error.code = allCandidates.length === 0 ? "NO_WAND_SPELL_CANDIDATE" : "NO_ITEM_IN_LEVEL_RANGE";
+      error.details = { category: request.category, level: request.level, source: request.source, theme };
       throw error;
     }
 
@@ -94,13 +94,15 @@ export class ScrollGenerator {
     const spellSource = typeof spellDocument.toObject === "function"
       ? spellDocument.toObject()
       : clone(spellDocument._source ?? spellDocument);
-    const itemSource = this.#composeScroll(candidate, spellSource);
+    const itemSource = this.#composeWand(candidate, spellSource);
 
     return {
       request,
       itemSource,
       warnings,
       plan: {
+        kind: "wand",
+        theme,
         spell: {
           name: candidate.spell.name,
           sourceUuid: candidate.spell.uuid,
@@ -119,6 +121,7 @@ export class ScrollGenerator {
         rarity: candidate.spell.rarity,
         category: request.category,
         candidateCount: candidates.length,
+        magic: { kind: "wand", theme },
         spell: {
           name: candidate.spell.name,
           sourcePack: candidate.spell.pack,
@@ -131,27 +134,15 @@ export class ScrollGenerator {
     };
   }
 
-  #isScrollSpell(spell) {
-    const rank = Number(spell.baseRank);
-    return Number.isInteger(rank)
-      && rank >= 1
-      && rank <= 10
-      && !spell.cantrip
-      && !spell.focus
-      && !spell.ritual;
-  }
-
   async #getTemplate(rank) {
     if (this.templateCache.has(rank)) return this.templateCache.get(rank);
-
     const config = this.configProvider?.();
-    const scrollConfig = config?.PF2E?.spellcastingItems?.scroll;
-    const uuid = scrollConfig?.compendiumUuids?.[rank] ?? scrollConfig?.compendiumUuids?.[String(rank)] ?? null;
+    const wandConfig = config?.PF2E?.spellcastingItems?.wand;
+    const uuid = wandConfig?.compendiumUuids?.[rank] ?? wandConfig?.compendiumUuids?.[String(rank)] ?? null;
     if (!uuid) {
       this.templateCache.set(rank, null);
       return null;
     }
-
     const document = await this.uuidResolver?.(uuid);
     const source = document?.type === "consumable" && typeof document.toObject === "function"
       ? document.toObject()
@@ -161,7 +152,7 @@ export class ScrollGenerator {
     return template;
   }
 
-  #composeScroll(candidate, spellSource) {
+  #composeWand(candidate, spellSource) {
     const itemSource = clone(candidate.template.source);
     itemSource._id = null;
     itemSource.system ??= {};
@@ -170,29 +161,21 @@ export class ScrollGenerator {
 
     const spellTraits = spellSource.system?.traits?.value ?? [];
     itemSource.system.traits.value = [...new Set([...itemSource.system.traits.value, ...spellTraits])].sort();
-
-    const rarity = candidate.spell.rarity ?? "common";
+    const rarity = getHighestRarity([candidate.spell.rarity]);
     if (Object.hasOwn(itemSource.system.traits, "rarity")) itemSource.system.traits.rarity = rarity;
     if (itemSource.system.rarity?.value !== undefined) itemSource.system.rarity.value = rarity;
 
-    const scrollConfig = this.configProvider?.()?.PF2E?.spellcastingItems?.scroll;
-    const formattedName = scrollConfig?.nameTemplate
-      ? this.formatter?.(scrollConfig.nameTemplate, { name: candidate.spell.name, level: candidate.rank })
+    const wandConfig = this.configProvider?.()?.PF2E?.spellcastingItems?.wand;
+    const formattedName = wandConfig?.nameTemplate
+      ? this.formatter?.(wandConfig.nameTemplate, { name: candidate.spell.name, level: candidate.rank })
       : null;
-    itemSource.name = formattedName || `Scroll of ${candidate.spell.name} (Rank ${candidate.rank})`;
+    itemSource.name = formattedName || `Wand: ${candidate.spell.name} (Rank ${candidate.rank})`;
 
     const genericDescription = itemSource.system.description?.value ?? "";
     const spellLink = `@UUID[${candidate.spell.uuid}]{${candidate.spell.name}}`;
     itemSource.system.description ??= { value: "" };
     itemSource.system.description.value = `<p>${spellLink}</p><hr>${genericDescription}`;
-
-    const embeddedSpell = clone(spellSource);
-    embeddedSpell._id = this.randomId();
-    embeddedSpell.system ??= {};
-    embeddedSpell.system.location ??= {};
-    embeddedSpell.system.location.value = null;
-    embeddedSpell.system.location.heightenedLevel = candidate.rank;
-    itemSource.system.spell = embeddedSpell;
+    itemSource.system.spell = spellSourceAtRank({ toObject: () => spellSource }, candidate.rank, this.randomId);
 
     return itemSource;
   }

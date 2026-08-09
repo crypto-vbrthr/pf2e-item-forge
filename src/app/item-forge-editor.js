@@ -97,6 +97,10 @@ export class ItemForgeEditor extends HandlebarsApplication {
         INVALID_PROPERTY_RUNE_SELECTION: "PF2E_ITEM_FORGE.Errors.InvalidPropertyRuneSelection",
         NO_SCROLL_SPELL_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoScrollSpellCandidate",
         SPELL_DOCUMENT_NOT_FOUND: "PF2E_ITEM_FORGE.Errors.SpellDocumentNotFound",
+        UNSUPPORTED_MAGIC_CATEGORY: "PF2E_ITEM_FORGE.Errors.UnsupportedMagicCategory",
+        NO_WAND_SPELL_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoWandSpellCandidate",
+        NO_STAFF_SPELL_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoStaffSpellCandidate",
+        NO_STAFF_BASE_ITEM: "PF2E_ITEM_FORGE.Errors.NoStaffBaseItem",
         UNSUPPORTED_TREASURE_CATEGORY: "PF2E_ITEM_FORGE.Errors.UnsupportedTreasureCategory",
         NO_TREASURE_TYPE: "PF2E_ITEM_FORGE.Errors.NoTreasureType",
         NO_TREASURE_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoTreasureCandidate",
@@ -131,6 +135,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
       .filter((category) => {
         if (this.request.mode === "equipment") return this.#isEquipmentCategory(category.id);
         if (this.request.mode === "treasure") return this.#isTreasureCategory(category.id);
+        if (this.request.mode === "magic") return this.#isMagicCategory(category.id);
         return true;
       })
       .map((category) => {
@@ -143,7 +148,9 @@ export class ItemForgeEditor extends HandlebarsApplication {
       });
 
     const isScrollCategory = this.request.mode === "existing" && this.request.category === "consumable.scroll";
-    const packs = this.api.getAvailableItemPacks({ includeSpellPacks: isScrollCategory }).map((pack) => ({
+    const isMagicMode = this.request.mode === "magic";
+    const usesSpellSources = isScrollCategory || isMagicMode;
+    const packs = this.api.getAvailableItemPacks({ includeSpellPacks: usesSpellSources }).map((pack) => ({
       ...pack,
       checked: selectedPacks.has(pack.id),
       contentSummary: [
@@ -157,8 +164,8 @@ export class ItemForgeEditor extends HandlebarsApplication {
       selected: this.request.levelPolicy === id,
       label: localizeMaybe(`PF2E_ITEM_FORGE.LevelPolicy.${{ strict: "Strict", nearest: "Nearest", notAbove: "NotAbove", notBelow: "NotBelow" }[id]}`)
     }));
-    const modeLabelKeys = { existing: "Existing", equipment: "Equipment", treasure: "Treasure" };
-    const availableModes = this.api.getCapabilities?.().generationModes ?? ["existing", "equipment", "treasure"];
+    const modeLabelKeys = { existing: "Existing", equipment: "Equipment", treasure: "Treasure", magic: "Magic" };
+    const availableModes = this.api.getCapabilities?.().generationModes ?? ["existing", "equipment", "magic", "treasure"];
     const generationModes = availableModes.map((id) => ({
       id,
       selected: this.request.mode === id,
@@ -190,6 +197,11 @@ export class ItemForgeEditor extends HandlebarsApplication {
       id,
       selected: this.request.source.mode === id,
       label: localizeMaybe(`PF2E_ITEM_FORGE.SourceMode.${{ all: "All", system: "System", selected: "Selected" }[id]}`)
+    }));
+    const magicThemes = (this.api.magicThemes ?? []).map((theme) => ({
+      id: theme.id,
+      label: localizeMaybe(theme.label),
+      selected: this.request.magic?.theme === theme.id
     }));
 
     const categoryTreasureTypes = this.request.mode === "treasure"
@@ -241,7 +253,14 @@ export class ItemForgeEditor extends HandlebarsApplication {
           warnings: this.previewResult.warnings ?? [],
           description: await enrichHtml(this.previewResult.itemSource?.system?.description?.value ?? ""),
           spell: this.previewResult.metadata?.spell ?? null,
-          baseItem: this.previewResult.plan?.baseItem ?? null,
+          spells: this.previewResult.metadata?.spells ?? [],
+          magic: this.previewResult.metadata?.magic
+            ? {
+                ...this.previewResult.metadata.magic,
+                themeLabel: localizeMaybe((this.api.magicThemes ?? []).find((theme) => theme.id === this.previewResult.metadata.magic.theme)?.label ?? this.previewResult.metadata.magic.theme)
+              }
+            : null,
+          baseItem: this.previewResult.plan?.baseItem ?? this.previewResult.metadata?.baseItem ?? null,
           runeProfile: this.previewResult.metadata?.runeProfile ?? null,
           runes: this.previewResult.metadata?.runes ?? null,
           propertyRuneCapacity: this.previewResult.metadata?.propertyRuneCapacity ?? null,
@@ -273,6 +292,8 @@ export class ItemForgeEditor extends HandlebarsApplication {
       propertyRunes,
       isEquipmentMode: this.request.mode === "equipment",
       isTreasureMode: this.request.mode === "treasure",
+      isMagicMode,
+      magicThemes,
       treasureValueRange: this.request.value?.mode === "range",
       treasureTypes,
       treasureMaterials,
@@ -291,6 +312,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
       isRange: this.request.levelMode === "range",
       selectedSources: this.request.source.mode === "selected",
       isScrollCategory,
+      usesSpellSources,
       rarity: {
         common: rarity.has("common"),
         uncommon: rarity.has("uncommon"),
@@ -380,6 +402,10 @@ export class ItemForgeEditor extends HandlebarsApplication {
     return category === "treasure" || this.api.categories.isDescendant(category, "treasure");
   }
 
+  #isMagicCategory(category) {
+    return category === "magic.wand" || category === "magic.staff";
+  }
+
   #equipmentType(category) {
     for (const root of ["weapon", "armor", "shield"]) {
       if (category === root || this.api.categories.isDescendant(category, root)) return root;
@@ -393,6 +419,9 @@ export class ItemForgeEditor extends HandlebarsApplication {
     }
     if (this.request.mode === "treasure" && !this.#isTreasureCategory(this.request.category)) {
       this.request.category = "treasure";
+    }
+    if (this.request.mode === "magic" && !this.#isMagicCategory(this.request.category)) {
+      this.request.category = "magic.wand";
     }
   }
 
@@ -449,6 +478,10 @@ export class ItemForgeEditor extends HandlebarsApplication {
     this.request.treasure.craftsmanship = value("treasure.craftsmanship", this.request.treasure.craftsmanship ?? "any");
     this.request.treasure.motif = value("treasure.motif", this.request.treasure.motif ?? "any");
     this.request.treasure.style = value("treasure.style", this.request.treasure.style ?? "any");
+    this.request.magic ??= {};
+    this.request.magic.theme = value("magic.theme", this.request.magic.theme ?? "automatic");
+    const heightenedInput = root.querySelector('[name="magic.allowHeightened"]');
+    if (heightenedInput) this.request.magic.allowHeightened = Boolean(heightenedInput.checked);
 
     this.request.rarity = [...root.querySelectorAll('[name="rarity"]:checked')].map((input) => input.value);
     this.request.source.includePacks = [...root.querySelectorAll('[name="sourcePack"]:checked')].map((input) => input.value);

@@ -2,9 +2,9 @@
 
 Reusable Item Forge architecture for Foundry VTT v14 and Pathfinder 2e.
 
-## v0.0.11 scope
+## v0.0.12 scope
 
-This release deepens the TreasureGenerator on top of the hardened reusable API/editor architecture.
+This release adds the first generated spell-bound permanent magic-item family on top of the hardened reusable API/editor architecture: spell-bearing wands and thematic generated staves.
 
 Implemented:
 
@@ -18,6 +18,10 @@ Implemented:
 - Deterministic seeded generation
 - Existing physical compendium items, excluding feats/spells/rule documents
 - Spell-bearing scroll generation with meaningful legal heightening
+- Generated spell-bound magic-item mode for wands and staves
+- Wands use the PF2e generic wand templates and embed one real spell at a legal base or meaningful heightened rank
+- Generated staves build thematic multi-rank spell lists, including cantrips and meaningful heightened repetitions when supported by the spell data
+- Magic themes for fire, cold, electricity, healing, illusion, mental, vitality, void, arcane, divine, occult, primal, and summoning
 - Composed weapons, armor, and shields with fundamental runes
 - Registry-driven property runes with automatic/random/fixed/none modes and compatibility rules
 - Effective-level resolution including base item and rune levels
@@ -36,10 +40,11 @@ Implemented:
 - Embedded `ItemForgeEditor` with request editing, preview, reroll, description display, and no persistence side effects
 - Standalone `ItemForgeApplication` container owning Foundry document creation
 - German and English localization
-- 78 automated unit/integration/statistical/contract tests
+- 92 automated unit/integration/statistical/contract tests
 
 Not yet implemented:
 
+- Native PF2e staff-preparation/casting automation for generated custom staff spell manifests (generated staves currently use a real PF2e staff weapon source, linked spell list, and structured Item Forge flags)
 - Precious-material composition for functional weapons/armor
 - Presets
 - Actor/folder output targets
@@ -72,6 +77,38 @@ await game.pf2eItemForge.generate({
   equipment: {
     fundamentalRunes: "automatic",
     propertyRunes: { mode: "automatic" }
+  }
+});
+```
+
+Generate a spell-bearing wand:
+
+```js
+await game.pf2eItemForge.generate({
+  mode: "magic",
+  category: "magic.wand",
+  level: { min: 7, max: 9 },
+  levelPolicy: "strict",
+  source: { mode: "system" },
+  magic: {
+    theme: "fire",
+    allowHeightened: true
+  }
+});
+```
+
+Generate one thematic staff:
+
+```js
+await game.pf2eItemForge.generate({
+  mode: "magic",
+  category: "magic.staff",
+  level: 10,
+  levelPolicy: "strict",
+  source: { mode: "system" },
+  magic: {
+    theme: "illusion",
+    allowHeightened: true
   }
 });
 ```

@@ -220,6 +220,10 @@ export class CompendiumIndex {
       if (system.group === "firearm" || system.traits?.value?.includes?.("firearm")) {
         categories.push("weapon.ranged", "weapon.ranged.firearm");
       }
+      const weaponTraits = system.traits?.value ?? [];
+      if (weaponTraits.includes("staff") && weaponTraits.includes("magical")) {
+        categories.push("magic", "magic.staff");
+      }
     } else if (type === "armor") {
       categories.push("armor");
       const armorCategory = system.category;
@@ -229,9 +233,11 @@ export class CompendiumIndex {
     } else if (type === "consumable") {
       categories.push("consumable");
       const category = system.category;
+      const traits = system.traits?.value ?? [];
       if (category === "potion") categories.push("consumable.potion");
       if (category === "scroll") categories.push("consumable.scroll");
       if (["ammo", "ammunition"].includes(category)) categories.push("consumable.ammunition");
+      if (category === "wand" || traits.includes("wand")) categories.push("magic", "magic.wand");
     } else if (["equipment", "backpack", "book", "kit"].includes(type)) {
       categories.push("equipment");
     } else if (type === "treasure") {

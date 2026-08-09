@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.0.12
+
+- Adds a new `magic` generation mode for generated spell-bound permanent magic items.
+- Adds `magic.wand` generation using PF2e's rank-specific generic wand templates and a real embedded spell.
+- Wand spells exclude cantrips, focus spells, and rituals, and may be heightened only to ranks supported by the spell's actual heightening data.
+- Adds `magic.staff` generation using a real PF2e staff weapon base plus a thematic multi-rank spell manifest.
+- Generated staves can include cantrips and may repeat a spell at higher ranks only when that spell supports the selected heightened rank.
+- Adds data-driven magic themes for fire, cold, electricity, healing, illusion, mental, vitality, void, arcane, divine, occult, primal, and summoning.
+- Adds `magic.theme` and `magic.allowHeightened` to the canonical request schema and embedded editor.
+- Extends the source picker so spell compendiums are available for magic-item generation without making spells directly generatable items.
+- Adds magic-item category hierarchy (`magic`, `magic.wand`, `magic.staff`) and public capability metadata for supported magic themes/item kinds.
+- Extends previews with contained spell, staff spell list, spell ranks, heightening information, theme, and highest staff spell rank.
+- Stores generated staff spell manifests in `flags.pf2e-item-forge.staff` and renders enriched spell links into the description for immediate inspection/use.
+- Keeps custom staff spell storage deliberately Item-Forge-owned until the PF2e live-system contract for native custom-staff preparation/casting automation is verified.
+- Adds integration/regression coverage for wand embedding, legal heightening, magic themes, staff profiles, staff spell-list generation, deterministic seeds, unsupported levels, base-template failures, category classification, request hydration, and localization.
+- Automated suite now contains 92 passing tests.
+
 ## 0.0.11
 
 - Fixed treasure-type labels for books: the selector now shows concrete types such as Chronik, Atlas, Bestiarium, Kochbuch, and Manuskript instead of repeated "Buch" entries.
