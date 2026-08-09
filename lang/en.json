@@ -50,7 +50,9 @@
       "StaffMode": "Staff generation",
       "StaffProfile": "Family profile",
       "SpellheartMode": "Spellheart generation",
-      "SpellheartProfile": "Spellheart profile"
+      "SpellheartProfile": "Spellheart profile",
+      "WandMode": "Wand generation",
+      "WandProfile": "Special wand profile"
     },
     "LevelMode": {
       "Single": "Single level",
@@ -94,7 +96,9 @@
       "StaffProfile": "The profile defines the levels of the base, greater, and major variants and which new spell ranks each variant adds. Earlier variants are inherited in full.",
       "SpellheartMode": "Predefined copies a complete PF2e spellheart from the selected compendia. Generated creates a new spellheart from one coherent, rules-style effect profile.",
       "SpellheartProfile": "A profile defines levels, prices, armor and weapon benefits, and spell structure as one balance unit. Effects from unrelated profiles are not freely mixed.",
-      "SpellheartTheme": "The theme defines the spell pool and thematic damage or protection type. A fixed profile only offers compatible themes."
+      "SpellheartTheme": "The theme defines the spell pool and thematic damage or protection type. A fixed profile only offers compatible themes.",
+      "WandMode": "Standard creates an ordinary single-spell wand. Special adds a rules-grounded modifier profile with its own level and price progression, so a matching special wand does not exist at every item level.",
+      "WandProfile": "Choose a modifier profile or let Item Forge pick automatically from compatible profiles."
     },
     "Preview": {
       "Empty": "Nothing forged yet. Choose parameters and press Generate.",
@@ -134,7 +138,10 @@
       "SpellDC": "Spell DC",
       "SpellAttack": "Spell attack",
       "ArmorEffect": "Armor benefit",
-      "WeaponEffect": "Weapon benefit"
+      "WeaponEffect": "Weapon benefit",
+      "WandMode": "Wand generation",
+      "WandProfile": "Wand profile",
+      "WandEffect": "Additional effect"
     },
     "Notifications": {
       "GenerationFailed": "No item could be generated for these parameters.",
@@ -220,7 +227,9 @@
       "NoPredefinedSpellheartCandidate": "No predefined spellheart matches the selected level, rarity, and source filters.",
       "NoSpellheartTemplate": "No PF2e spellheart was found to use as a structural template.",
       "NoSpellheartSpellCandidate": "The selected spellheart profile, theme, and sources do not provide enough suitable spells.",
-      "UnknownSpellheartProfile": "The selected spellheart profile is not registered."
+      "UnknownSpellheartProfile": "The selected spellheart profile is not registered.",
+      "NoSpecialWandSpellCandidate": "No spell compatible with this special wand profile was found.",
+      "UnknownWandProfile": "The selected special wand profile is not registered."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatic level-appropriate",
@@ -364,6 +373,27 @@
       "Acid": "acid damage",
       "Sonic": "sonic damage",
       "Bleed": "bleed damage"
+    },
+    "WandMode": {
+      "Standard": "Standard wand",
+      "Special": "Special wand"
+    },
+    "WandProfiles": {
+      "Automatic": "Automatic",
+      "Reaching": "Reaching",
+      "Legerdemain": "Legerdemain",
+      "Mercy": "Mercy"
+    },
+    "WandText": {
+      "ReachingName": "Wand of Reaching: {spell} (Rank {rank})",
+      "ReachingDescription": "This special wand extends the reach of its stored spell.",
+      "ReachingEffect": "When you cast the stored spell, the activation takes 1 additional action if the spell normally takes 1 or 2 actions. Its range increases by 30 feet; a touch-range spell instead gains a range of 30 feet.",
+      "LegerdemainName": "Wand of Legerdemain: {spell} (Rank {rank})",
+      "LegerdemainDescription": "This special wand follows its stored spell with a conspicuous illusory performance.",
+      "LegerdemainEffect": "After casting the stored spell, you can spend 1 action to create an illusory spotlight and harmless stage tricks. Enemies within 30 feet attempt a Will save against your spell DC; enemies recently threatened or treated with hostile actions gain a +4 circumstance bonus. On a failure they are fascinated with you until the end of your next turn. You can sustain the performance for up to 1 minute; hostile acts end the fascination, and the spotlight prevents you from being concealed and ends if you become invisible, attempt Stealth, or dismiss it.",
+      "MercyName": "Wand of Mercy: {spell} (Rank {rank})",
+      "MercyDescription": "This special wand can make a suitable damaging spell nonlethal.",
+      "MercyEffect": "When you cast the stored spell, the activation takes 1 additional action. You can give the spell the nonlethal trait for that casting."
     }
   }
 }

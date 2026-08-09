@@ -133,3 +133,28 @@ test("CompendiumIndex classifies spellhearts as dedicated magic items", async ()
   assert.match(spellheart.description, /Armor and weapon benefits/);
   assert.equal(ordinary.categories.includes("magic.spellheart"), false);
 });
+
+test("CompendiumIndex records spell cast actions and whether a spell deals damage", async () => {
+  const pack = makePack("pf2e.spell-shapes", [
+    raw("damage-spell", "spell", 2, {
+      traits: { value: ["fire"], rarity: "common", traditions: ["arcane"] },
+      time: { value: "2" },
+      damage: { "0": { formula: "2d6", damageType: "fire" } }
+    }),
+    raw("utility-spell", "spell", 2, {
+      traits: { value: [], rarity: "common", traditions: ["arcane"] },
+      time: { value: "reaction" },
+      damage: {}
+    })
+  ]);
+  const categories = registerCoreCategories(new CategoryRegistry());
+  const game = { system: { id: "pf2e" }, packs: new FakePackCollection([pack]) };
+  const index = new CompendiumIndex({ categoryRegistry: categories, gameProvider: () => game });
+  await index.refresh();
+  const damaging = index.spellEntries.find((entry) => entry.id === "damage-spell");
+  const utility = index.spellEntries.find((entry) => entry.id === "utility-spell");
+  assert.equal(damaging.castActions, 2);
+  assert.equal(damaging.hasDamage, true);
+  assert.equal(utility.castActions, null);
+  assert.equal(utility.hasDamage, false);
+});

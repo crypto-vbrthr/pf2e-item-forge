@@ -70,6 +70,8 @@ export class CompendiumIndex {
             "system.damage.damageType",
             "system.ritual",
             "system.heightening",
+            "system.time.value",
+            "system.damage",
             "system.description.value"
           ]
         });
@@ -201,9 +203,23 @@ export class CompendiumIndex {
       cantrip: traits.includes("cantrip"),
       focus: traits.includes("focus") || (traits.includes("cantrip") && traditions.length === 0),
       heightening: structuredClone(getProperty(raw, "system.heightening") ?? null),
+      castActions: this.#parseSpellCastActions(getProperty(raw, "system.time.value")),
+      hasDamage: this.#spellHasDamage(getProperty(raw, "system.damage")),
       description: getProperty(raw, "system.description.value") ?? "",
       slug: getProperty(raw, "system.slug") ?? null
     };
+  }
+
+  #parseSpellCastActions(value) {
+    if (Number.isInteger(value) && value > 0) return value;
+    const text = String(value ?? "").trim();
+    const match = text.match(/^(\d+)$/);
+    return match ? Number(match[1]) : null;
+  }
+
+  #spellHasDamage(value) {
+    if (Array.isArray(value)) return value.length > 0;
+    return Boolean(value && typeof value === "object" && Object.keys(value).length > 0);
   }
 
   #classify(raw) {

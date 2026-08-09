@@ -10,6 +10,7 @@ const LEVEL_POLICIES = new Set(["strict", "nearest", "notAbove", "notBelow"]);
 const SOURCE_MODES = new Set(["all", "system", "selected"]);
 const FUNDAMENTAL_RUNE_MODES = new Set(["automatic", "none"]);
 const PROPERTY_RUNE_MODES = new Set(["automatic", "random", "fixed", "none"]);
+const WAND_MODES = new Set(["standard", "special"]);
 const STAFF_MODES = new Set(["generated", "existing"]);
 const SPELLHEART_MODES = new Set(["generated", "existing"]);
 
@@ -116,6 +117,8 @@ export function normalizeRequest(request = {}, options = {}) {
     magic: {
       theme: typeof request.magic?.theme === "string" && request.magic.theme ? request.magic.theme : "automatic",
       allowHeightened: boolean(request.magic?.allowHeightened, true),
+      wandMode: WAND_MODES.has(request.magic?.wandMode) ? request.magic.wandMode : "standard",
+      wandProfile: typeof request.magic?.wandProfile === "string" && request.magic.wandProfile ? request.magic.wandProfile : "automatic",
       staffMode: STAFF_MODES.has(request.magic?.staffMode) ? request.magic.staffMode : "generated",
       staffProfile: typeof request.magic?.staffProfile === "string" && request.magic.staffProfile ? request.magic.staffProfile : "automatic",
       spellheartMode: SPELLHEART_MODES.has(request.magic?.spellheartMode) ? request.magic.spellheartMode : "existing",

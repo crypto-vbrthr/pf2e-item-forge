@@ -1,7 +1,7 @@
 import { API_VERSION } from "../constants.js";
 
 export class ItemForgeApi {
-  constructor({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes = [], staffProfiles = null, spellheartProfiles = null, openApplication }) {
+  constructor({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes = [], wandProfiles = null, staffProfiles = null, spellheartProfiles = null, openApplication }) {
     this.apiVersion = API_VERSION;
     this.engine = engine;
     this.categories = categories;
@@ -10,6 +10,7 @@ export class ItemForgeApi {
     this.treasure = treasure;
     this.propertyRunes = propertyRunes;
     this.magicThemes = magicThemes;
+    this.wandProfiles = wandProfiles;
     this.staffProfiles = staffProfiles;
     this.spellheartProfiles = spellheartProfiles;
     this.openApplication = openApplication;
@@ -51,6 +52,8 @@ export class ItemForgeApi {
       propertyRuneModes: ["automatic", "random", "fixed", "none"],
       magicThemes: this.magicThemes.map((theme) => theme.id),
       magicItemKinds: ["wand", "staff", "spellheart"],
+      wandModes: ["standard", "special"],
+      wandProfiles: this.wandProfiles?.getAll?.().map((profile) => ({ id: profile.id, label: profile.label, ranks: profile.variants.map((variant) => variant.rank), levels: profile.variants.map((variant) => variant.level) })) ?? [],
       staffModes: ["generated", "existing"],
       spellheartModes: ["generated", "existing"],
       staffProfiles: this.staffProfiles?.getAll?.().map((profile) => ({ id: profile.id, label: profile.label, levels: profile.variants.map((variant) => variant.level) })) ?? [],

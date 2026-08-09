@@ -50,7 +50,9 @@
       "StaffMode": "Zauberstecken-Erzeugung",
       "StaffProfile": "Familienprofil",
       "SpellheartMode": "Zauberherz-Erzeugung",
-      "SpellheartProfile": "Zauberherz-Profil"
+      "SpellheartProfile": "Zauberherz-Profil",
+      "WandMode": "Zauberstab-Erzeugung",
+      "WandProfile": "Besonderes Zauberstabprofil"
     },
     "LevelMode": {
       "Single": "Einzelne Stufe",
@@ -94,7 +96,9 @@
       "StaffProfile": "Das Profil bestimmt die Stufen der Grund-, starken und mächtigen Variante und welche neuen Zaubergrade jede Variante hinzufügt. Frühere Varianten werden vollständig geerbt.",
       "SpellheartMode": "Vordefiniert kopiert ein vollständiges PF2e-Zauberherz aus den gewählten Kompendien. Generiert erstellt ein neues Zauberherz aus einem regelwerksnahen, zusammenhängenden Effektprofil.",
       "SpellheartProfile": "Ein Profil legt Stufen, Preise, Rüstungs- und Waffeneffekte sowie die Struktur der enthaltenen Zauber gemeinsam fest. Effekte verschiedener Profile werden nicht frei vermischt.",
-      "SpellheartTheme": "Das Thema bestimmt den Zauberpool und die thematische Schadens- oder Schutzart. Bei einem festen Profil werden nur dazu passende Themen angeboten."
+      "SpellheartTheme": "Das Thema bestimmt den Zauberpool und die thematische Schadens- oder Schutzart. Bei einem festen Profil werden nur dazu passende Themen angeboten.",
+      "WandMode": "Standard erzeugt einen gewöhnlichen Zauberstab mit genau einem Zauber. Besonders ergänzt den Zauber um ein regelwerksnahes Zusatzprofil mit eigener Stufen- und Preisprogression; daher existiert nicht auf jeder Gegenstandsstufe ein passender besonderer Stab.",
+      "WandProfile": "Wähle ein Zusatzprofil oder lasse die Item Forge automatisch aus den kompatiblen Profilen wählen."
     },
     "Preview": {
       "Empty": "Noch nichts geschmiedet. Parameter wählen und Generieren drücken.",
@@ -134,7 +138,10 @@
       "SpellDC": "Zauber-SG",
       "SpellAttack": "Zauberangriff",
       "ArmorEffect": "Rüstungseffekt",
-      "WeaponEffect": "Waffeneffekt"
+      "WeaponEffect": "Waffeneffekt",
+      "WandMode": "Zauberstab-Erzeugung",
+      "WandProfile": "Zauberstabprofil",
+      "WandEffect": "Zusatzwirkung"
     },
     "Notifications": {
       "GenerationFailed": "Für diese Parameter konnte kein Gegenstand erzeugt werden.",
@@ -220,7 +227,9 @@
       "NoPredefinedSpellheartCandidate": "Kein vordefiniertes Zauberherz entspricht den gewählten Stufen-, Seltenheits- und Quellenfiltern.",
       "NoSpellheartTemplate": "Es wurde kein PF2e-Zauberherz als strukturelle Vorlage gefunden.",
       "NoSpellheartSpellCandidate": "Für das gewählte Zauberherz-Profil, Thema und die gewählten Quellen stehen nicht genügend passende Zauber zur Verfügung.",
-      "UnknownSpellheartProfile": "Das gewählte Zauberherz-Profil ist nicht registriert."
+      "UnknownSpellheartProfile": "Das gewählte Zauberherz-Profil ist nicht registriert.",
+      "NoSpecialWandSpellCandidate": "Für dieses besondere Zauberstabprofil wurde kein passender Zauber gefunden.",
+      "UnknownWandProfile": "Das ausgewählte besondere Zauberstabprofil ist nicht registriert."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatisch stufengerecht",
@@ -364,6 +373,27 @@
       "Acid": "Säureschaden",
       "Sonic": "Schallschaden",
       "Bleed": "Blutungsschaden"
+    },
+    "WandMode": {
+      "Standard": "Standardzauberstab",
+      "Special": "Besonderer Zauberstab"
+    },
+    "WandProfiles": {
+      "Automatic": "Automatisch",
+      "Reaching": "Reichweite",
+      "Legerdemain": "Taschenspielerei",
+      "Mercy": "Gnade"
+    },
+    "WandText": {
+      "ReachingName": "Zauberstab der Reichweite: {spell} (Grad {rank})",
+      "ReachingDescription": "Dieser besondere Zauberstab dehnt die Reichweite seines gespeicherten Zaubers aus.",
+      "ReachingEffect": "Wenn du den gespeicherten Zauber wirkst, benötigt die Aktivierung 1 zusätzliche Aktion, falls der Zauber normalerweise 1 oder 2 Aktionen benötigt. Seine Reichweite erhöht sich um 9 Meter (30 Fuß); ein Zauber mit Reichweite Berührung erhält stattdessen 9 Meter (30 Fuß) Reichweite.",
+      "LegerdemainName": "Zauberstab der Taschenspielerei: {spell} (Grad {rank})",
+      "LegerdemainDescription": "Dieser besondere Zauberstab verbindet seinen gespeicherten Zauber mit einer auffälligen illusionären Darbietung.",
+      "LegerdemainEffect": "Nachdem du den gespeicherten Zauber gewirkt hast, kannst du 1 Aktion aufwenden, um einen illusionären Scheinwerfer und harmlose Bühnentricks zu erzeugen. Gegner im Umkreis von 9 Metern (30 Fuß) würfeln einen Willenswurf gegen deinen Zauber-SG; kürzlich bedrohte oder feindselig behandelte Gegner erhalten +4 Umstandsbonus. Bei einem Fehlschlag sind sie bis zum Ende deines nächsten Zuges von dir fasziniert. Du kannst die Darbietung bis zu 1 Minute aufrechterhalten; feindselige Handlungen beenden die Faszination, und der Scheinwerfer verhindert Verbergen und endet bei Unsichtbarkeit, einem Heimlichkeitswurf oder wenn du ihn beendest.",
+      "MercyName": "Zauberstab der Gnade: {spell} (Grad {rank})",
+      "MercyDescription": "Dieser besondere Zauberstab kann einen geeigneten Schadenszauber nichttödlich wirken lassen.",
+      "MercyEffect": "Wenn du den gespeicherten Zauber wirkst, benötigt die Aktivierung 1 zusätzliche Aktion. Du kannst dem Zauber dabei die Kategorie Nichttödlich verleihen."
     }
   }
 }

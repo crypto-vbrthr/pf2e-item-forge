@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { WandGenerator } from "../../src/engine/generators/wand-generator.js";
+import { WandProfileRegistry, registerCoreWandProfiles } from "../../src/engine/registries/wand-profile-registry.js";
 
 function request(overrides = {}) {
   return {
@@ -51,6 +52,8 @@ function spellEntry(overrides = {}) {
     focus: false,
     heightening: { type: "interval", interval: 1 },
     slug: "blazing-test",
+    castActions: 2,
+    hasDamage: true,
     ...overrides
   };
 }
@@ -96,10 +99,15 @@ function setup(entries) {
   };
   return new WandGenerator({
     compendiumIndex: index,
+    wandProfiles: registerCoreWandProfiles(new WandProfileRegistry()),
     configProvider: () => config,
     uuidResolver: async (uuid) => templates[uuid] ?? null,
     randomId: () => "wand-embedded-spell",
-    formatter: (_key, { name, level }) => `Wand: ${name} (Rank ${level})`
+    formatter: (key, data = {}) => {
+      if (key === "TEST.WandName") return `Wand: ${data.name} (Rank ${data.level})`;
+      if (key.includes("WandText")) return `${key} :: ${data.spell ?? ""} ${data.rank ?? ""}`.trim();
+      return key;
+    }
   });
 }
 
@@ -135,4 +143,43 @@ test("WandGenerator obeys a selected magic theme", async () => {
   ]);
   const result = await generator.generate(request({ level: { min: 3, max: 3, target: 3 } }));
   assert.equal(result.metadata.spell.name, "Fire");
+});
+
+
+test("WandGenerator creates a special reaching wand at the profile level and price", async () => {
+  const generator = setup([spellEntry()]);
+  const result = await generator.generate(request({
+    level: { min: 8, max: 8, target: 8 },
+    magic: { theme: "fire", allowHeightened: true, wandMode: "special", wandProfile: "core.reaching" }
+  }));
+  assert.equal(result.metadata.level, 8);
+  assert.equal(result.metadata.magic.wandMode, "special");
+  assert.equal(result.metadata.magic.profile, "core.reaching");
+  assert.equal(result.metadata.spell.rank, 3);
+  assert.deepEqual(result.itemSource.system.price.value, { gp: 500 });
+  assert.equal(result.itemSource.flags["pf2e-item-forge"].wand.automation, "rules-text");
+  assert.match(result.itemSource.system.description.value, /WandText\.ReachingEffect/);
+});
+
+test("WandGenerator enforces mercy wand spell compatibility", async () => {
+  const generator = setup([
+    spellEntry({ id: "valid", uuid: "Compendium.test.spells.Item.valid", name: "Valid", traits: ["fire"], hasDamage: true, castActions: 2 }),
+    spellEntry({ id: "void", uuid: "Compendium.test.spells.Item.void", name: "Void", traits: ["fire", "void"], hasDamage: true, castActions: 2 }),
+    spellEntry({ id: "nodamage", uuid: "Compendium.test.spells.Item.nodamage", name: "No Damage", traits: ["fire"], hasDamage: false, castActions: 2 }),
+    spellEntry({ id: "slow", uuid: "Compendium.test.spells.Item.slow", name: "Slow", traits: ["fire"], hasDamage: true, castActions: 3 })
+  ]);
+  const result = await generator.generate(request({
+    level: { min: 4, max: 4, target: 4 },
+    magic: { theme: "fire", allowHeightened: false, wandMode: "special", wandProfile: "core.mercy" }
+  }));
+  assert.equal(result.metadata.spell.name, "Valid");
+  assert.deepEqual(result.itemSource.system.price.value, { gp: 75 });
+});
+
+test("WandGenerator rejects an unknown special wand profile", async () => {
+  const generator = setup([spellEntry()]);
+  await assert.rejects(
+    () => generator.generate(request({ magic: { theme: "fire", allowHeightened: true, wandMode: "special", wandProfile: "missing" } })),
+    (error) => error?.code === "UNKNOWN_WAND_PROFILE"
+  );
 });

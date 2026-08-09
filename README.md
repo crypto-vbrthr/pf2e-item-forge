@@ -2,9 +2,9 @@
 
 Reusable Item Forge architecture for Foundry VTT v14 and Pathfinder 2e.
 
-## v0.0.16 scope
+## v0.0.17 scope
 
-This release adds generated custom Spellhearts alongside the existing path that preserves published PF2e Spellhearts exactly, building on the spell-bearing wand/staff and reusable API/editor architecture.
+This release adds rules-grounded generated special wands while retaining ordinary spell-bearing wands, staff families, custom Spellhearts, and the reusable API/editor architecture.
 
 Implemented:
 
@@ -19,7 +19,7 @@ Implemented:
 - Existing physical compendium items, excluding feats/spells/rule documents
 - Spell-bearing scroll generation with meaningful legal heightening
 - Spell-bound/special magic-item mode for wands, staves, and spellhearts
-- Wands use the PF2e generic wand templates and embed one real spell at a legal base or meaningful heightened rank
+- Wands can be standard single-spell wands or generated special wands using validated Reaching, Legerdemain, or Mercy profiles; both embed one real spell at a legal base or meaningful heightened rank
 - Staves can either be copied exactly from selected compendia or generated as rulebook-style variant families with inherited lower variants
 - Spellhearts can either be selected as complete predefined PF2e items or generated from validated custom Spellheart profiles with coherent armor/weapon benefits, spell progressions, prices, and themes
 - Magic themes for fire, cold, electricity, healing, illusion, mental, vitality, void, arcane, divine, occult, primal, and summoning
@@ -41,11 +41,10 @@ Implemented:
 - Embedded `ItemForgeEditor` with request editing, preview, reroll, description display, and no persistence side effects
 - Standalone `ItemForgeApplication` container owning Foundry document creation
 - German and English localization
-- 109 automated unit/integration/statistical/contract tests
+- 124 automated unit/integration/statistical/contract tests
 
 Not yet implemented:
 
-- Generated/custom spellheart composition with validated armor/weapon effect templates (predefined spellhearts are supported now)
 - Native PF2e staff-preparation/casting automation for generated custom staff-family manifests (predefined staves preserve their native PF2e data unchanged)
 - Precious-material composition for functional weapons/armor
 - Presets
@@ -98,6 +97,26 @@ await game.pf2eItemForge.generate({
   }
 });
 ```
+
+Generate a special wand with a rules-grounded modifier profile:
+
+```js
+await game.pf2eItemForge.generate({
+  mode: "magic",
+  category: "magic.wand",
+  level: 8,
+  levelPolicy: "strict",
+  source: { mode: "system" },
+  magic: {
+    wandMode: "special",
+    wandProfile: "core.reaching",
+    theme: "fire",
+    allowHeightened: true
+  }
+});
+```
+
+Special wand profiles are whole, validated modifiers. They control their own item-level/price progression and spell compatibility. Generated custom effects are stored as explicit rules text and structured Item Forge flags rather than guessed PF2e Rule Elements.
 
 Generate one thematic staff family variant:
 

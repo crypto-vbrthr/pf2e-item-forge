@@ -27,6 +27,7 @@ ItemForgeEngine (canonical normalization, validation, generation)
         +-- shared spell-item utilities / magic themes
         +-- ItemLevelResolver
         +-- PropertyRuneRegistry
+        +-- WandProfileRegistry
         +-- StaffProfileRegistry
         +-- SpellheartProfileRegistry
         +-- ValueSolver
@@ -76,7 +77,13 @@ Registered generation modes are exposed through the public capabilities API and 
 
 ### Wands
 
-`WandGenerator` selects one eligible non-cantrip, non-focus, non-ritual spell from the configured spell sources. The spell rank must correspond to a legal base rank or to heightening data actually present on the spell when `magic.allowHeightened` is enabled. The generator resolves the PF2e generic wand template for that rank, clones it, transfers rarity/traits, and embeds the selected spell into `system.spell` with the chosen `heightenedLevel`. The physical wand level and price therefore come from PF2e's own rank-specific wand templates.
+`WandGenerator` selects one eligible non-cantrip, non-focus, non-ritual spell from the configured spell sources. The spell rank must correspond to a legal base rank or to heightening data actually present on the spell when `magic.allowHeightened` is enabled.
+
+`magic.wandMode: "standard"` resolves the PF2e generic wand template for that rank, clones it, transfers rarity/traits, and embeds the selected spell into `system.spell` with the chosen `heightenedLevel`. Its physical item level and price therefore come from PF2e's rank-specific generic wand template.
+
+`magic.wandMode: "special"` selects a validated whole modifier from `WandProfileRegistry`. Core profiles model generic special-wand families that can sensibly accept many spells: Reaching, Legerdemain, and Mercy. Each profile owns its rank-to-item-level/price progression and optional spell-shape constraints. Mercy, for example, only accepts damaging 1- or 2-action spells and excludes death, nonlethal, and void traits. The spell-support index therefore records cast-action count and whether a spell has damage data. Spell-specific published special wands are not generalized into free-form effects.
+
+Generated special-wand effects are written as localized explicit rules text and stored in `flags.pf2e-item-forge.wand` with profile, spell, rank, price, and automation status. The structural item still comes from the PF2e generic wand template, but Item Forge deliberately does not invent unverified custom Rule Elements for the added special-wand behavior. External modules can register additional validated profiles through `game.pf2eItemForge.wandProfiles`.
 
 ### Staves
 

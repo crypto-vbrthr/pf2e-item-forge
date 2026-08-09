@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.0.17
+
+- Adds generated special wands beside the existing standard single-spell wand path.
+- Adds public `WandProfileRegistry`, exposed as `game.pf2eItemForge.wandProfiles`, with validated rank/level/price progressions and spell-compatibility constraints.
+- Adds three conservative core special-wand profiles patterned directly after generic Treasure Vault wand families: Reaching, Legerdemain, and Mercy. Spell-specific published wands are deliberately not generalized into arbitrary effects.
+- Adds `magic.wandMode` (`standard` / `special`) and `magic.wandProfile` (`automatic` or a registered profile) to canonical request normalization, capabilities, and the Embedded Item Forge Editor.
+- Special-wand item level and price are taken from the selected profile variant rather than the generic PF2e wand template.
+- Mercy-profile generation requires a damaging 1- or 2-action spell and excludes death, nonlethal, and void spells; the spell index now records cast actions and whether a spell has damage entries.
+- Generated special-wand effects are emitted as localized rules text plus structured `flags.pf2e-item-forge.wand` metadata. The generator does not invent fragile PF2e Rule Elements for these custom spell modifications.
+- Preview now shows wand generation mode, selected special profile, and its additional effect.
+- Adds German/English localization, profile-registry validation, spell-shape indexing, special-wand compatibility, price/level, unknown-profile, and API-contract regression tests.
+- Automated suite now contains 124 passing tests.
+
 ## 0.0.16
 
 - Adds custom Spellheart generation beside the existing full-copy path for published PF2e Spellhearts.

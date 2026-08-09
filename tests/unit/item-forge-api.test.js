@@ -23,6 +23,7 @@ function apiFixture() {
       motifs: { getAll: () => [] }, conditions: { getAll: () => [] }, craftsmanship: { getAll: () => [] }, styles: { getAll: () => [] }
     },
     propertyRunes: { getAll: () => [] },
+    wandProfiles: { getAll: () => [{ id: "core.reaching", label: "Reaching", variants: [{ rank: 1, level: 4 }, { rank: 2, level: 6 }] }] },
     staffProfiles: { getAll: () => [{ id: "core.3-8-12", label: "Profile", variants: [{ level: 3 }, { level: 8 }, { level: 12 }] }] },
     spellheartProfiles: { getAll: () => [{ id: "core.elemental-conduit", label: "Elemental", allowedThemes: ["fire", "cold"], variants: [{ level: 3 }, { level: 8 }, { level: 13 }] }] },
     openApplication: () => "opened"
@@ -42,6 +43,8 @@ test("ItemForgeApi capabilities expose generator priority metadata and registere
   assert.deepEqual(capabilities.generationModes, ["custom"]);
   assert.deepEqual(capabilities.generators, ["test"]);
   assert.deepEqual(capabilities.generatorMetadata, [{ id: "test", priority: 10, modes: ["custom"] }]);
+  assert.deepEqual(capabilities.wandModes, ["standard", "special"]);
+  assert.deepEqual(capabilities.wandProfiles, [{ id: "core.reaching", label: "Reaching", ranks: [1, 2], levels: [4, 6] }]);
   assert.deepEqual(capabilities.staffModes, ["generated", "existing"]);
   assert.deepEqual(capabilities.staffProfiles, [{ id: "core.3-8-12", label: "Profile", levels: [3, 8, 12] }]);
   assert.deepEqual(capabilities.spellheartModes, ["generated", "existing"]);

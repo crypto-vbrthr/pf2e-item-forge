@@ -10,6 +10,7 @@ import { WandGenerator } from "../src/engine/generators/wand-generator.js";
 import { StaffGenerator } from "../src/engine/generators/staff-generator.js";
 import { SpellheartGenerator } from "../src/engine/generators/spellheart-generator.js";
 import { SpellheartProfileRegistry, registerCoreSpellheartProfiles } from "../src/engine/registries/spellheart-profile-registry.js";
+import { WandProfileRegistry, registerCoreWandProfiles } from "../src/engine/registries/wand-profile-registry.js";
 import { StaffProfileRegistry, registerCoreStaffProfiles } from "../src/engine/registries/staff-profile-registry.js";
 import { getSelectableMagicThemes } from "../src/engine/magic-themes.js";
 import { TreasureRegistry } from "../src/engine/registries/treasure-registry.js";
@@ -61,10 +62,11 @@ function createApi() {
   const generators = new GeneratorRegistry();
   const treasure = registerCoreTreasureContent(new TreasureRegistry({ categories }));
   const propertyRunes = registerCorePropertyRunes(new PropertyRuneRegistry());
+  const wandProfiles = registerCoreWandProfiles(new WandProfileRegistry());
   const staffProfiles = registerCoreStaffProfiles(new StaffProfileRegistry());
   const spellheartProfiles = registerCoreSpellheartProfiles(new SpellheartProfileRegistry());
   generators.register(new TreasureGenerator({ categories, treasure }), { priority: 200, modes: ["treasure"] });
-  generators.register(new WandGenerator({ compendiumIndex }), { priority: 220, modes: ["magic"] });
+  generators.register(new WandGenerator({ compendiumIndex, wandProfiles }), { priority: 220, modes: ["magic"] });
   generators.register(new StaffGenerator({ compendiumIndex, staffProfiles }), { priority: 210, modes: ["magic"] });
   generators.register(new SpellheartGenerator({ compendiumIndex, spellheartProfiles }), { priority: 215, modes: ["magic"] });
   generators.register(new ScrollGenerator({ compendiumIndex }), { priority: 200, modes: ["existing"] });
@@ -87,7 +89,7 @@ function createApi() {
     return application;
   };
 
-  return new ItemForgeApi({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes: getSelectableMagicThemes(), staffProfiles, spellheartProfiles, openApplication });
+  return new ItemForgeApi({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes: getSelectableMagicThemes(), wandProfiles, staffProfiles, spellheartProfiles, openApplication });
 }
 
 function exposeApi() {
