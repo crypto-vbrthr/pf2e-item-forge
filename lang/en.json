@@ -43,7 +43,8 @@
       "Craftsmanship": "Craftsmanship",
       "Condition": "Condition",
       "Motif": "Motif",
-      "Style": "Style"
+      "Style": "Style",
+      "TreasureType": "Treasure type"
     },
     "LevelMode": {
       "Single": "Single level",
@@ -77,7 +78,8 @@
       "PropertyRuneCapacity": "The actual number of property runes is limited by the potency rune value.",
       "ScrollSources": "For scrolls, spell compendiums are also offered as sources. The generic scroll is only a template; the generated item receives a suitable spell.",
       "TreasureMode": "Generates exactly one nonmagical sale or art treasure. Material, craftsmanship, and condition affect its value.",
-      "ValueTolerance": "0.15 means ±15% around the target value. If no match is found, the ValueSolver returns the closest valid result with a warning."
+      "ValueTolerance": "0.15 means ±15% around the target value. If no match is found, the ValueSolver returns the closest valid result with a warning.",
+      "TreasureType": "Optionally select one exact treasure type. “Any” lets Item Forge roll within the selected category."
     },
     "Preview": {
       "Empty": "Nothing forged yet. Choose parameters and press Generate.",

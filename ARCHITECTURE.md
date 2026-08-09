@@ -1,24 +1,25 @@
 # Architecture
 
 ```text
-ItemForgeApplication (workflow container)
+ItemForgeApplication (workflow container / persistence)
         |
         v
-ItemForgeEditor (embedded ApplicationV2 child, request + preview)
+ItemForgeEditor (embedded ApplicationV2 child / request + preview)
         |
         v
-ItemForgeEngine (business logic)
+ItemForgeEngine (canonical normalization, validation, generation)
         |
         +-- CategoryRegistry
         +-- CompendiumIndex
         |     +-- physical item index
         |     +-- spell index (support data for spell consumables)
         |
-        +-- GeneratorRegistry
+        +-- GeneratorRegistry (priority + declared generation modes)
         |     +-- TreasureGenerator
         |     +-- ScrollGenerator
-        |     +-- ExistingItemGenerator
         |     +-- EquipmentGenerator
+        |     +-- ExistingItemGenerator
+        |     +-- extension generators
         |
         +-- ItemLevelResolver
         +-- PropertyRuneRegistry
@@ -36,52 +37,77 @@ ItemForgeEngine (business logic)
 ## Boundaries
 
 - The engine creates exactly one item result per request.
-- The editor edits one request and previews one result.
-- The application container owns persistence/workflow actions.
-- Other modules should use the public engine API, not the standalone GUI.
-- A future Loot Forge should own total budget, quantity, and overall theme, then issue individual Item Forge requests.
-- Built-in and external treasure content use the same registries.
-- Spell documents are support data, not directly generatable physical items.
+- `normalize()`, `validate()`, `generate()`, and the embedded editor use the same canonical request hydration path.
+- The editor edits one request and previews one result. It does not create Foundry documents.
+- The application container owns persistence/workflow actions such as `Item.create()`.
+- Other modules should use the public engine API and may embed `ItemForgeEditor` without the standalone Item Forge window.
+- Future Loot Forge integration should distribute budgets/counts/themes and issue individual Item Forge requests.
+- Built-in and external treasure content use the same validated registries.
+- Spell documents are support data, not directly generatable physical items. `ScrollGenerator` may select an eligible spell and embed it into a physical scroll result.
+
+## Generator resolution
+
+Generators are registered with a declared generation mode and priority. Resolution is deterministic: the highest-priority generator whose `supports(request)` returns true wins. This lets specialist and extension generators override broad core strategies without depending on registration order.
+
+Core priorities:
+
+```text
+TreasureGenerator     200  mode treasure
+ScrollGenerator       200  mode existing
+EquipmentGenerator    150  mode equipment
+ExistingItemGenerator   0  mode existing
+```
+
+Registered generation modes are exposed through the public capabilities API and are validated dynamically rather than being hard-coded in the request normalizer.
 
 ## Treasure generation
 
-`TreasureGenerator` handles `mode: "treasure"`. Generated treasure is deliberately nonmagical and intended primarily for sale/flavor.
+`TreasureGenerator` is implemented and data-driven. A request may choose a broad category such as `treasure.jewelry` or additionally pin one concrete registry type such as `core.type.jewelry.tiara`.
 
 ```text
 Treasure request
    |
-   +-- category -> matching TreasureType definitions
-   +-- optional material / condition / craftsmanship / motif / style constraints
-   +-- target value or value range
+   +-- category + optional exact type
+   +-- value target/range + bounded ValueSolver
+   +-- material / condition / craftsmanship / motif / style
    |
    v
-ValueSolver (bounded attempts)
+style-aware candidate construction
    |
-   +-- seeded candidate composition
-   |     +-- base archetype value
-   |     +-- material factor
-   |     +-- craftsmanship factor (where applicable)
-   |     +-- condition factor
-   |     +-- style factor
-   |     +-- data-defined attributes
-   |     +-- reusable components
+   +-- type
+   +-- material
+   +-- condition
+   +-- craftsmanship
+   +-- motif
+   +-- attributes
+   +-- coherent optional components
    |
-   +-- closest valid candidate if no in-range result exists
    v
-PF2e Treasure item source + generation plan
+valuation -> PF2e treasure Item source
 ```
 
-Treasure archetypes are data-driven. The generator does not require a code branch for each painting, ring, book, wine, or future custom type. A type definition declares its categories, allowed material tags, optional components/attributes, valuation data, and name/description templates.
+Styles can weight material tags, motifs, craftsmanship, type tags, and component chances. Component craftsmanship can inherit the parent quality, stay close to it, roll independently, or be disabled. Gemstone materials may define their own `componentValue` range for inlays/settings.
 
-### Extension rule
+Treasure registry definitions are validated when registered. Invalid ranges, missing component references, invalid fixed materials, malformed weights, and (when the CategoryRegistry is supplied) unknown categories fail immediately instead of surfacing during a later generation.
 
-If a new treasure idea can be expressed as data, it should be added through the registries rather than generator code. Special generator strategies should be reserved for genuinely unusual behavior.
+## Scroll generation
 
-### ValueSolver
+`ScrollGenerator` owns `mode: "existing"` + `category: "consumable.scroll"` before the general existing-item strategy resolves.
 
-- Per-request `solver.maxAttempts`
-- Global default from module settings
-- Absolute safety cap of 1000
-- Returns the first result inside the requested tolerance/range
-- Otherwise returns the closest valid candidate with `VALUE_TARGET_APPROXIMATED`
-- Never loops indefinitely
+```text
+Scroll request
+   |
+   +-- selected spell compendiums
+   |      -> eligible non-cantrip/non-focus/non-ritual spells
+   |
+   +-- meaningful base/heightened ranks
+   |      -> interval or fixed heightening definitions
+   |
+   +-- PF2e generic scroll template for that rank
+   |      -> determines physical scroll level/price
+   |
+   v
+physical Consumable source with embedded system.spell
+```
+
+Generic scroll templates are infrastructure and are suppressed from ordinary predefined-item selection so an empty scroll cannot leak into broad `item` or `consumable` generation.

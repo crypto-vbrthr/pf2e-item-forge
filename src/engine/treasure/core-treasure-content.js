@@ -71,25 +71,25 @@ export function registerCoreTreasureContent(treasure) {
   ]);
 
   registerAll(treasure.styles, [
-    { id: "core.style.noble", label: T("adlig", "noble"), valueFactor: 1.08, weight: 14 },
-    { id: "core.style.dwarven", label: T("zwergisch", "dwarven"), valueFactor: 1.04, weight: 10 },
-    { id: "core.style.elven", label: T("elfisch", "elven"), valueFactor: 1.06, weight: 10 },
-    { id: "core.style.ancient", label: T("altertümlich", "ancient"), valueFactor: 1.1, weight: 12 },
-    { id: "core.style.rustic", label: T("rustikal", "rustic"), valueFactor: 0.92, weight: 18 },
-    { id: "core.style.courtly", label: T("höfisch", "courtly"), valueFactor: 1.12, weight: 12 },
-    { id: "core.style.temple", label: T("sakral", "sacred"), valueFactor: 1.05, weight: 12 },
-    { id: "core.style.merchant", label: T("wohlhabend-bürgerlich", "wealthy mercantile"), valueFactor: 1.0, weight: 12 }
+    { id: "core.style.noble", label: T("adlig", "noble"), valueFactor: 1.08, weight: 14, weights: { materialTags: { precious: 1.45, luxury: 1.25 }, motifs: { "core.motif.heraldry": 2.0, "core.motif.hunting": 1.35 }, craftsmanship: { "core.craftsmanship.fine": 1.35, "core.craftsmanship.masterful": 1.25 } } },
+    { id: "core.style.dwarven", label: T("zwergisch", "dwarven"), valueFactor: 1.04, weight: 10, weights: { materialTags: { metal: 1.5, stone: 1.4, wood: 0.75 }, motifs: { "core.motif.ancestral": 2.1, "core.motif.geometric": 1.8 }, craftsmanship: { "core.craftsmanship.solid": 1.25, "core.craftsmanship.fine": 1.25 } } },
+    { id: "core.style.elven", label: T("elfisch", "elven"), valueFactor: 1.06, weight: 10, weights: { materialTags: { precious: 1.25, wood: 1.2, fabric: 1.2 }, motifs: { "core.motif.nature": 1.8, "core.motif.floral": 1.9, "core.motif.celestial": 1.4 }, craftsmanship: { "core.craftsmanship.fine": 1.45, "core.craftsmanship.masterful": 1.3 } } },
+    { id: "core.style.ancient", label: T("altertümlich", "ancient"), valueFactor: 1.1, weight: 12, weights: { materialTags: { stone: 1.25, metal: 1.15 }, motifs: { "core.motif.ancestral": 1.65, "core.motif.religious": 1.35 }, craftsmanship: { "core.craftsmanship.solid": 1.15 } } },
+    { id: "core.style.rustic", label: T("rustikal", "rustic"), valueFactor: 0.92, weight: 18, weights: { materialTags: { wood: 1.6, fabric: 1.25, precious: 0.45 }, motifs: { "core.motif.nature": 1.55, "core.motif.hunting": 1.35 }, craftsmanship: { "core.craftsmanship.plain": 1.5, "core.craftsmanship.solid": 1.25, "core.craftsmanship.exceptional": 0.35 } } },
+    { id: "core.style.courtly", label: T("höfisch", "courtly"), valueFactor: 1.12, weight: 12, weights: { materialTags: { precious: 1.55, fabric: 1.3, luxury: 1.35 }, motifs: { "core.motif.heraldry": 1.7, "core.motif.floral": 1.45 }, craftsmanship: { "core.craftsmanship.fine": 1.5, "core.craftsmanship.masterful": 1.35 } } },
+    { id: "core.style.temple", label: T("sakral", "sacred"), valueFactor: 1.05, weight: 12, weights: { materialTags: { ceremonial: 1.5, stone: 1.15, precious: 1.1 }, motifs: { "core.motif.religious": 2.4, "core.motif.celestial": 1.35 }, components: { "core.component.gilding": 1.25, "core.component.engraving": 1.2 } } },
+    { id: "core.style.merchant", label: T("wohlhabend-bürgerlich", "wealthy mercantile"), valueFactor: 1.0, weight: 12, weights: { materialTags: { luxury: 1.2, precious: 1.1 }, craftsmanship: { "core.craftsmanship.solid": 1.3, "core.craftsmanship.fine": 1.2 } } }
   ]);
 
   registerAll(treasure.components, [
-    { id: "core.component.frame", label: T("Rahmen", "frame"), materialTags: ["wood", "metal"], baseValue: [4, 35], sentence: T("Der Rahmen besteht aus {material}; seine Verarbeitung ist {craftsmanship}.", "The frame is made of {material}; its workmanship is {craftsmanship}.") },
-    { id: "core.component.pedestal", label: T("Sockel", "pedestal"), materialTags: ["stone", "wood", "metal"], baseValue: [3, 28], sentence: T("Das Stück steht auf einem Sockel aus {material}.", "The piece stands on a pedestal of {material}.") },
-    { id: "core.component.gemstones", label: T("Edelsteineinlage", "gemstone setting"), materialTags: ["gemstone"], baseValue: [4, 18], quantity: [1, 4], sentence: T("{quantity} Einsätze aus {material} setzen kostbare Akzente.", "{quantity} settings of {material} add costly accents.") },
-    { id: "core.component.gilding", label: T("Vergoldung", "gilding"), fixedMaterial: "core.material.gold", baseValue: [5, 30], sentence: T("Teile der Oberfläche sind sorgfältig vergoldet.", "Parts of the surface are carefully gilded.") },
-    { id: "core.component.engraving", label: T("Gravur", "engraving"), baseValue: [2, 16], sentence: T("Feine Gravuren bedecken Teile der Oberfläche.", "Fine engraving covers parts of the surface.") },
-    { id: "core.component.binding", label: T("Einband", "binding"), materialTags: ["leather", "wood"], baseValue: [2, 20], sentence: T("Der Einband besteht aus {material}; seine Verarbeitung ist {craftsmanship}.", "The binding is made of {material}; its workmanship is {craftsmanship}.") },
-    { id: "core.component.illustrations", label: T("Illustrationen", "illustrations"), baseValue: [5, 40], sentence: T("Mehrere sorgfältige Illustrationen und Zierinitialen erhöhen den Sammlerwert.", "Several careful illustrations and decorated initials increase its collector value.") },
-    { id: "core.component.waxSeal", label: T("Wachssiegel", "wax seal"), baseValue: [1, 5], sentence: T("Das Gefäß ist noch mit einem alten Wachssiegel verschlossen.", "The vessel remains closed with an old wax seal.") }
+    { id: "core.component.frame", label: T("Rahmen", "frame"), materialTags: ["wood", "metal"], baseValue: [4, 35], craftsmanshipMode: "near-parent", sentence: T("Der Rahmen besteht aus {material}; seine Verarbeitung ist {craftsmanship}.", "The frame is made of {material}; its workmanship is {craftsmanship}.") },
+    { id: "core.component.pedestal", label: T("Sockel", "pedestal"), materialTags: ["stone", "wood", "metal"], baseValue: [3, 28], craftsmanshipMode: "near-parent", sentence: T("Das Stück steht auf einem Sockel aus {material}.", "The piece stands on a pedestal of {material}.") },
+    { id: "core.component.gemstones", label: T("Edelsteineinlage", "gemstone setting"), materialTags: ["gemstone"], baseValue: [4, 18], quantity: [1, 4], craftsmanshipMode: "near-parent", sentence: T("{quantity} Einsätze aus {material} setzen kostbare Akzente.", "{quantity} settings of {material} add costly accents.") },
+    { id: "core.component.gilding", label: T("Vergoldung", "gilding"), fixedMaterial: "core.material.gold", baseValue: [5, 30], craftsmanshipMode: "inherit", sentence: T("Teile der Oberfläche sind sorgfältig vergoldet.", "Parts of the surface are carefully gilded.") },
+    { id: "core.component.engraving", label: T("Gravur", "engraving"), baseValue: [2, 16], craftsmanshipMode: "inherit", sentence: T("Feine Gravuren bedecken Teile der Oberfläche.", "Fine engraving covers parts of the surface.") },
+    { id: "core.component.binding", label: T("Einband", "binding"), materialTags: ["leather", "wood"], baseValue: [2, 20], craftsmanshipMode: "near-parent", sentence: T("Der Einband besteht aus {material}; seine Verarbeitung ist {craftsmanship}.", "The binding is made of {material}; its workmanship is {craftsmanship}.") },
+    { id: "core.component.illustrations", label: T("Illustrationen", "illustrations"), baseValue: [5, 40], craftsmanshipMode: "near-parent", sentence: T("Mehrere sorgfältige Illustrationen und Zierinitialen erhöhen den Sammlerwert.", "Several careful illustrations and decorated initials increase its collector value.") },
+    { id: "core.component.waxSeal", label: T("Wachssiegel", "wax seal"), baseValue: [1, 5], craftsmanshipMode: "none", sentence: T("Das Gefäß ist noch mit einem alten Wachssiegel verschlossen.", "The vessel remains closed with an old wax seal.") }
   ]);
 
   const type = (id, category, label, options = {}) => treasure.types.register({
@@ -148,7 +148,7 @@ export function registerCoreTreasureContent(treasure) {
 
   type("core.type.art.tapestry", "treasure.art.textile", T("Wandteppich", "tapestry"), {
     tags: ["textile", "decorative"], baseValue: [18, 140], materialTags: ["textile"], components: [],
-    nameTemplates: { de: ["Wandteppich mit {motif}"], en: ["Tapestry with {motif}"] }
+    nameTemplates: { de: ["Wandteppich: {motif}"], en: ["Tapestry with {motif}"] }
   });
 
   for (const [id, label, base] of [

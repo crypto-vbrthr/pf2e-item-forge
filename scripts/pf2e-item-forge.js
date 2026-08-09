@@ -53,12 +53,12 @@ function createApi() {
   const categories = registerCoreCategories(new CategoryRegistry());
   const compendiumIndex = new CompendiumIndex({ categoryRegistry: categories });
   const generators = new GeneratorRegistry();
-  const treasure = registerCoreTreasureContent(new TreasureRegistry());
+  const treasure = registerCoreTreasureContent(new TreasureRegistry({ categories }));
   const propertyRunes = registerCorePropertyRunes(new PropertyRuneRegistry());
-  generators.register(new TreasureGenerator({ categories, treasure }));
-  generators.register(new ScrollGenerator({ compendiumIndex }));
-  generators.register(new ExistingItemGenerator({ compendiumIndex }));
-  generators.register(new EquipmentGenerator({ compendiumIndex, propertyRunes }));
+  generators.register(new TreasureGenerator({ categories, treasure }), { priority: 200, modes: ["treasure"] });
+  generators.register(new ScrollGenerator({ compendiumIndex }), { priority: 200, modes: ["existing"] });
+  generators.register(new EquipmentGenerator({ compendiumIndex, propertyRunes }), { priority: 150, modes: ["equipment"] });
+  generators.register(new ExistingItemGenerator({ compendiumIndex }), { priority: 0, modes: ["existing"] });
 
   const engine = new ItemForgeEngine({
     categories,

@@ -12,19 +12,27 @@ export class ItemForgeEngine {
     await this.compendiumIndex.refresh();
   }
 
+  normalize(request) {
+    return normalizeRequest(request, this.defaultOptions);
+  }
+
   validate(request) {
-    return validateRequest(request, { categories: this.categories });
+    return validateRequest(request, {
+      categories: this.categories,
+      generationModes: this.generators.getModes(),
+      defaultOptions: this.defaultOptions
+    });
   }
 
   async generate(rawRequest) {
-    const request = normalizeRequest(rawRequest, this.defaultOptions);
-    const validation = validateRequest(request, { categories: this.categories });
+    const validation = this.validate(rawRequest);
     if (!validation.valid) {
       const error = new Error("Invalid Item Forge request");
       error.code = "INVALID_REQUEST";
       error.details = validation.errors;
       throw error;
     }
+    const request = validation.request;
 
     const generator = this.generators.resolve(request);
     if (!generator) {

@@ -47,6 +47,8 @@ const REQUIRED_KEYS = [
   "PF2E_ITEM_FORGE.Fields.Condition",
   "PF2E_ITEM_FORGE.Fields.Motif",
   "PF2E_ITEM_FORGE.Fields.Style",
+  "PF2E_ITEM_FORGE.Fields.TreasureType",
+  "PF2E_ITEM_FORGE.Hints.TreasureType",
   "PF2E_ITEM_FORGE.Treasure.Any",
   "PF2E_ITEM_FORGE.Treasure.ValueHeading",
   "PF2E_ITEM_FORGE.Preview.Value",

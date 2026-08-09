@@ -53,3 +53,10 @@ test("normalizeRequest supports treasure mode and value constraints", () => {
   assert.equal(request.value.max, 80);
   assert.equal(request.treasure.material, "core.material.silver");
 });
+
+
+test("normalizeRequest keeps registered future generation modes and normalizes exact treasure type", () => {
+  const request = normalizeRequest({ mode: "custom-mode", treasure: { type: "custom.type" }, seed: "x" });
+  assert.equal(request.mode, "custom-mode");
+  assert.equal(request.treasure.type, "custom.type");
+});

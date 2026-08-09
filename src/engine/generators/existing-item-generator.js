@@ -4,6 +4,8 @@ import { distanceToLevelRequest, levelAllowed } from "../item-level-resolver.js"
 export class ExistingItemGenerator {
   constructor({ compendiumIndex }) {
     this.id = "existing-item";
+    this.mode = "existing";
+    this.priority = 0;
     this.index = compendiumIndex;
   }
 

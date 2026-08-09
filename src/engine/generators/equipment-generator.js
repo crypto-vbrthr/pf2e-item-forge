@@ -58,6 +58,8 @@ function highestRarity(baseRarity, propertyRunes) {
 export class EquipmentGenerator {
   constructor({ compendiumIndex, propertyRunes, levelResolver = new ItemLevelResolver() }) {
     this.id = "equipment-composed";
+    this.mode = "equipment";
+    this.priority = 150;
     this.index = compendiumIndex;
     this.propertyRunes = propertyRunes;
     this.levelResolver = levelResolver;

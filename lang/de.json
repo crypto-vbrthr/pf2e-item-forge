@@ -43,7 +43,8 @@
       "Craftsmanship": "Verarbeitung",
       "Condition": "Zustand",
       "Motif": "Motiv",
-      "Style": "Stil"
+      "Style": "Stil",
+      "TreasureType": "Schatzart"
     },
     "LevelMode": {
       "Single": "Einzelne Stufe",
@@ -77,7 +78,8 @@
       "PropertyRuneCapacity": "Die tatsächliche Zahl möglicher Eigenschaftsrunen wird durch den Wert der Verbesserungsrune begrenzt.",
       "ScrollSources": "Bei Schriftrollen werden zusätzlich Zauber-Kompendien als Quellen angeboten. Die generische Schriftrolle dient nur als Vorlage; der erzeugte Gegenstand erhält einen passenden Zauber.",
       "TreasureMode": "Erzeugt genau einen nichtmagischen Verkaufs- oder Kunstschatz. Material, Verarbeitung und Zustand beeinflussen seinen Wert.",
-      "ValueTolerance": "0,15 entspricht ±15 % um den Zielwert. Wird kein Treffer gefunden, liefert der ValueSolver das nächstgelegene gültige Ergebnis mit Warnung."
+      "ValueTolerance": "0,15 entspricht ±15 % um den Zielwert. Wird kein Treffer gefunden, liefert der ValueSolver das nächstgelegene gültige Ergebnis mit Warnung.",
+      "TreasureType": "Optional kann eine konkrete Schatzart gewählt werden. „Beliebig“ lässt die Item Forge innerhalb der gewählten Kategorie würfeln."
     },
     "Preview": {
       "Empty": "Noch nichts geschmiedet. Parameter wählen und Generieren drücken.",

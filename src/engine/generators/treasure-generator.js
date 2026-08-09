@@ -24,6 +24,13 @@ function weightedPick(rng, values) {
   return values.at(-1);
 }
 
+function withWeights(values, multiplier) {
+  return values.map((value) => ({
+    ...value,
+    weight: Math.max(0, Number(value.weight ?? 1) * Math.max(0, Number(multiplier(value) ?? 1)))
+  }));
+}
+
 function randomBetween(rng, range, { decimals = 1 } = {}) {
   const [rawMin, rawMax] = Array.isArray(range) ? range : [range ?? 0, range ?? 0];
   const min = Number(rawMin) || 0;
@@ -79,6 +86,8 @@ export class TreasureGenerator {
     localeProvider = () => globalThis.game?.i18n?.lang ?? "en"
   } = {}) {
     this.id = "treasure-generated";
+    this.mode = "treasure";
+    this.priority = 200;
     this.categories = categories;
     this.treasure = treasure;
     this.valueSolver = valueSolver;
@@ -142,9 +151,9 @@ export class TreasureGenerator {
     };
   }
 
-
   #validateSelections(request) {
     const selections = [
+      ["type", this.treasure.types],
       ["material", this.treasure.materials],
       ["condition", this.treasure.conditions],
       ["craftsmanship", this.treasure.craftsmanship],
@@ -163,10 +172,12 @@ export class TreasureGenerator {
   }
 
   #matchingTypes(request) {
+    const selectedType = selectedOrAny(this.treasure.types, request.treasure.type);
     const material = selectedOrAny(this.treasure.materials, request.treasure.material);
     const motif = selectedOrAny(this.treasure.motifs, request.treasure.motif);
 
     return this.treasure.types.getAll().filter((type) => {
+      if (selectedType && type.id !== selectedType.id) return false;
       if (!this.categories.matches(type.categories ?? [], request.category)) return false;
       if (material) {
         if (!(type.materialTags ?? []).length) return false;
@@ -179,21 +190,22 @@ export class TreasureGenerator {
   }
 
   #generateCandidate(request, types, rng, locale) {
-    const type = weightedPick(rng, types);
+    const style = this.#pickRegistryEntry(this.treasure.styles, request.treasure.style, rng);
+    if (!style) return null;
+
+    const type = weightedPick(rng, withWeights(types, (entry) => this.#styleTagMultiplier(style, entry.tags, "typeTags")));
     if (!type) return null;
 
-    const material = this.#pickMaterial(request, type, rng);
+    const material = this.#pickMaterial(request, type, style, rng);
     if ((type.materialTags ?? []).length && !material) return null;
 
     const condition = this.#pickCondition(request, type, material, rng);
     if (!condition) return null;
     const craftsmanship = type.usesCraftsmanship === false
       ? { id: null, label: { de: "", en: "" }, sentence: { de: "", en: "" }, valueFactor: 1 }
-      : this.#pickRegistryEntry(this.treasure.craftsmanship, request.treasure.craftsmanship, rng);
+      : this.#pickCraftsmanship(request, style, rng);
     if (!craftsmanship) return null;
-    const style = this.#pickRegistryEntry(this.treasure.styles, request.treasure.style, rng);
-    if (!style) return null;
-    const motif = type.supportsMotif ? this.#pickRegistryEntry(this.treasure.motifs, request.treasure.motif, rng) : null;
+    const motif = type.supportsMotif ? this.#pickMotif(request, style, rng) : null;
     if (type.supportsMotif && request.treasure.motif !== "any" && !motif) return null;
 
     const attributes = {};
@@ -209,10 +221,12 @@ export class TreasureGenerator {
 
     const components = [];
     for (const reference of type.components ?? []) {
-      if (rng.random() > Number(reference.chance ?? 1)) continue;
+      const styleChanceFactor = Number(style.weights?.components?.[reference.id] ?? 1);
+      const chance = Math.max(0, Math.min(1, Number(reference.chance ?? 1) * styleChanceFactor));
+      if (rng.random() > chance) continue;
       const component = this.treasure.components.get(reference.id);
       if (!component) continue;
-      const built = this.#buildComponent(component, rng, locale);
+      const built = this.#buildComponent(component, rng, locale, craftsmanship, style);
       if (built) components.push(built);
     }
 
@@ -245,11 +259,25 @@ export class TreasureGenerator {
     };
   }
 
-  #pickMaterial(request, type, rng) {
+  #styleTagMultiplier(style, tags = [], field = "materialTags") {
+    const weights = style?.weights?.[field] ?? {};
+    let multiplier = 1;
+    let matched = false;
+    for (const tag of tags ?? []) {
+      if (weights[tag] != null) {
+        multiplier *= Number(weights[tag]);
+        matched = true;
+      }
+    }
+    return matched ? multiplier : 1;
+  }
+
+  #pickMaterial(request, type, style, rng) {
     if (!(type.materialTags ?? []).length) return null;
     const selected = selectedOrAny(this.treasure.materials, request.treasure.material);
     if (selected) return hasAnyTag(selected, type.materialTags) ? selected : null;
-    return weightedPick(rng, this.treasure.materials.getAll().filter((material) => hasAnyTag(material, type.materialTags)));
+    const candidates = this.treasure.materials.getAll().filter((material) => hasAnyTag(material, type.materialTags));
+    return weightedPick(rng, withWeights(candidates, (material) => this.#styleTagMultiplier(style, material.tags, "materialTags")));
   }
 
   #pickCondition(request, type, material, rng) {
@@ -259,22 +287,57 @@ export class TreasureGenerator {
     return weightedPick(rng, this.treasure.conditions.getAll().filter((condition) => conditionCompatible(condition, tags)));
   }
 
+  #pickCraftsmanship(request, style, rng) {
+    const selected = selectedOrAny(this.treasure.craftsmanship, request.treasure.craftsmanship);
+    if (selected) return selected;
+    return weightedPick(rng, withWeights(this.treasure.craftsmanship.getAll(), (entry) => style?.weights?.craftsmanship?.[entry.id] ?? 1));
+  }
+
+  #pickMotif(request, style, rng) {
+    const selected = selectedOrAny(this.treasure.motifs, request.treasure.motif);
+    if (selected) return selected;
+    return weightedPick(rng, withWeights(this.treasure.motifs.getAll(), (entry) => style?.weights?.motifs?.[entry.id] ?? 1));
+  }
+
   #pickRegistryEntry(registry, selectedId, rng) {
     const selected = selectedOrAny(registry, selectedId);
     return selected ?? weightedPick(rng, registry.getAll());
   }
 
-  #buildComponent(component, rng, locale) {
+  #componentCraftsmanship(component, parentCraftsmanship, style, rng) {
+    const mode = component.craftsmanshipMode ?? "near-parent";
+    if (mode === "none") return null;
+    if (mode === "inherit" && parentCraftsmanship?.id) return parentCraftsmanship;
+
+    const all = this.treasure.craftsmanship.getAll();
+    if (mode === "near-parent" && parentCraftsmanship?.id) {
+      const index = all.findIndex((entry) => entry.id === parentCraftsmanship.id);
+      if (index >= 0) {
+        const near = all.filter((_entry, candidateIndex) => Math.abs(candidateIndex - index) <= 1);
+        return weightedPick(rng, withWeights(near, (entry) => {
+          const styleWeight = style?.weights?.craftsmanship?.[entry.id] ?? 1;
+          return entry.id === parentCraftsmanship.id ? Number(styleWeight) * 1.8 : Number(styleWeight);
+        }));
+      }
+    }
+
+    return weightedPick(rng, withWeights(all, (entry) => style?.weights?.craftsmanship?.[entry.id] ?? 1));
+  }
+
+  #buildComponent(component, rng, locale, parentCraftsmanship, style) {
     let material = null;
     if (component.fixedMaterial) material = this.treasure.materials.get(component.fixedMaterial);
     else if (component.materialTags?.length) {
-      material = weightedPick(rng, this.treasure.materials.getAll().filter((entry) => hasAnyTag(entry, component.materialTags)));
+      const candidates = this.treasure.materials.getAll().filter((entry) => hasAnyTag(entry, component.materialTags));
+      material = weightedPick(rng, withWeights(candidates, (entry) => this.#styleTagMultiplier(style, entry.tags, "materialTags")));
     }
 
-    const craftsmanship = weightedPick(rng, this.treasure.craftsmanship.getAll());
+    const craftsmanship = this.#componentCraftsmanship(component, parentCraftsmanship, style, rng);
     const quantity = component.quantity ? rng.integer(component.quantity[0], component.quantity[1]) : 1;
-    let value = randomBetween(rng, component.baseValue ?? [0, 0]);
-    value *= Number(material?.valueFactor ?? 1);
+    const materialComponentRange = material?.componentValue;
+    let value = materialComponentRange
+      ? randomBetween(rng, materialComponentRange)
+      : randomBetween(rng, component.baseValue ?? [0, 0]) * Number(material?.valueFactor ?? 1);
     value *= Number(craftsmanship?.valueFactor ?? 1);
     value *= quantity;
     value = Math.round(value * 10) / 10;
@@ -378,7 +441,14 @@ export class TreasureGenerator {
       style: { id: candidate.style.id, label: localized(candidate.style.label, candidate.locale), valueFactor: candidate.style.valueFactor },
       motif: candidate.motif ? { id: candidate.motif.id, label: localized(candidate.motif.label, candidate.locale) } : null,
       attributes: Object.fromEntries(Object.entries(candidate.attributes).map(([key, option]) => [key, { id: option.id, label: localized(option.label, candidate.locale) }])),
-      components: candidate.components.map((component) => ({ id: component.id, label: component.label, material: component.material ? localized(component.material.label, candidate.locale) : null, quantity: component.quantity, value: component.value })),
+      components: candidate.components.map((component) => ({
+        id: component.id,
+        label: component.label,
+        material: component.material ? localized(component.material.label, candidate.locale) : null,
+        craftsmanship: component.craftsmanship ? localized(component.craftsmanship.label, candidate.locale) : null,
+        quantity: component.quantity,
+        value: component.value
+      })),
       valuation: {
         baseValue: candidate.baseValue,
         componentValue: candidate.componentValue,

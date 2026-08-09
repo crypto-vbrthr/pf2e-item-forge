@@ -45,6 +45,8 @@ export class ScrollGenerator {
     formatter = (key, data) => globalThis.game?.i18n?.format?.(key, data) ?? null
   } = {}) {
     this.id = "scroll";
+    this.mode = "existing";
+    this.priority = 200;
     this.index = compendiumIndex;
     this.configProvider = configProvider;
     this.uuidResolver = uuidResolver;

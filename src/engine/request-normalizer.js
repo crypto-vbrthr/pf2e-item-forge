@@ -8,7 +8,6 @@ import { createSeed } from "./seeded-rng.js";
 
 const LEVEL_POLICIES = new Set(["strict", "nearest", "notAbove", "notBelow"]);
 const SOURCE_MODES = new Set(["all", "system", "selected"]);
-const GENERATION_MODES = new Set(["existing", "equipment", "treasure"]);
 const FUNDAMENTAL_RUNE_MODES = new Set(["automatic", "none"]);
 const PROPERTY_RUNE_MODES = new Set(["automatic", "random", "fixed", "none"]);
 
@@ -17,10 +16,13 @@ function integer(value, fallback) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-
 function decimal(value, fallback) {
   const parsed = Number.parseFloat(value);
   return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function uniqueStrings(values) {
+  return [...new Set(Array.isArray(values) ? values.filter((value) => typeof value === "string" && value) : [])];
 }
 
 function normalizeValue(value = {}) {
@@ -57,6 +59,11 @@ function normalizeLevel(level) {
   return { min, max, target };
 }
 
+/**
+ * Produce the canonical request understood by the engine. This is the single
+ * hydration path used by validation, generation, the embedded editor, and API
+ * consumers so that omitted fields always receive identical defaults.
+ */
 export function normalizeRequest(request = {}, options = {}) {
   const level = normalizeLevel(request.level);
   const value = normalizeValue(request.value);
@@ -64,23 +71,25 @@ export function normalizeRequest(request = {}, options = {}) {
   const sourceMode = SOURCE_MODES.has(source.mode) ? source.mode : options.defaultSourceMode ?? "all";
   const policy = LEVEL_POLICIES.has(request.levelPolicy) ? request.levelPolicy : "strict";
   const configuredAttempts = integer(request.solver?.maxAttempts, options.defaultSolverAttempts ?? DEFAULT_SOLVER_ATTEMPTS);
+  const rawMode = typeof request.mode === "string" && request.mode.trim() ? request.mode.trim() : "existing";
 
   return {
-    mode: GENERATION_MODES.has(request.mode) ? request.mode : "existing",
-    category: request.category ?? "item",
+    mode: rawMode,
+    category: typeof request.category === "string" && request.category ? request.category : "item",
     level,
     value,
     levelPolicy: policy,
-    rarity: Array.isArray(request.rarity) ? [...new Set(request.rarity.filter(Boolean))] : [],
+    rarity: uniqueStrings(request.rarity),
     source: {
       mode: sourceMode,
-      includePacks: [...new Set(source.includePacks ?? [])],
-      excludePacks: [...new Set(source.excludePacks ?? [])]
+      includePacks: uniqueStrings(source.includePacks),
+      excludePacks: uniqueStrings(source.excludePacks)
     },
     solver: {
       maxAttempts: Math.max(1, Math.min(ABSOLUTE_SOLVER_ATTEMPTS, configuredAttempts))
     },
     treasure: {
+      type: typeof request.treasure?.type === "string" && request.treasure.type ? request.treasure.type : "any",
       material: typeof request.treasure?.material === "string" && request.treasure.material ? request.treasure.material : "any",
       condition: typeof request.treasure?.condition === "string" && request.treasure.condition ? request.treasure.condition : "any",
       craftsmanship: typeof request.treasure?.craftsmanship === "string" && request.treasure.craftsmanship ? request.treasure.craftsmanship : "any",
@@ -95,26 +104,52 @@ export function normalizeRequest(request = {}, options = {}) {
         mode: PROPERTY_RUNE_MODES.has(request.equipment?.propertyRunes?.mode)
           ? request.equipment.propertyRunes.mode
           : "automatic",
-        selected: [...new Set(
-          Array.isArray(request.equipment?.propertyRunes?.selected)
-            ? request.equipment.propertyRunes.selected.filter((slug) => typeof slug === "string" && slug)
-            : []
-        )]
+        selected: uniqueStrings(request.equipment?.propertyRunes?.selected)
       }
     },
     seed: String(request.seed ?? createSeed()),
-    filters: request.filters ?? {},
-    metadata: request.metadata ?? {}
+    filters: request.filters && typeof request.filters === "object" ? request.filters : {},
+    metadata: request.metadata && typeof request.metadata === "object" ? request.metadata : {}
   };
 }
 
-export function validateRequest(request, { categories } = {}) {
+/**
+ * Hydrate a request for the embedded editor. The engine shape remains canonical
+ * while levelMode is UI-only state.
+ */
+export function hydrateEditorRequest(request = {}, options = {}) {
+  const normalized = normalizeRequest(request, options);
+  const requestedMode = request.levelMode;
+  const levelMode = requestedMode === "range" || requestedMode === "single"
+    ? requestedMode
+    : normalized.level.min === normalized.level.max ? "single" : "range";
+
+  if (levelMode === "single") {
+    normalized.level.max = normalized.level.min;
+    normalized.level.target = normalized.level.min;
+  }
+
+  return { ...normalized, levelMode };
+}
+
+export function validateRequest(request, {
+  categories,
+  generationModes = null,
+  defaultOptions = {}
+} = {}) {
   const errors = [];
   let normalized;
   try {
-    normalized = normalizeRequest(request);
+    normalized = normalizeRequest(request, defaultOptions);
   } catch (error) {
     return { valid: false, errors: [{ code: "INVALID_REQUEST", message: error.message }] };
+  }
+
+  if (generationModes) {
+    const supportedModes = generationModes instanceof Set ? generationModes : new Set(generationModes);
+    if (supportedModes.size && !supportedModes.has(normalized.mode)) {
+      errors.push({ code: "UNKNOWN_GENERATION_MODE", field: "mode", value: normalized.mode });
+    }
   }
 
   if (categories && !categories.has(normalized.category)) {

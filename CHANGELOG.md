@@ -1,25 +1,29 @@
 # Changelog
 
+## 0.0.9
+
+- Hardens the public request contract: `normalize()`, `validate()`, `generate()`, and the embedded editor now share one canonical hydration/default path.
+- Fixes `ItemForgeEditor.setRequest()` so partial requests from embedding modules receive all required defaults instead of depending on the standalone Item Forge container.
+- Adds priority-based `GeneratorRegistry` resolution and dynamically registered generation modes, allowing specialist/extension generators to override broad core generators without registration-order tricks.
+- Adds priority metadata as the additive `generatorMetadata` field in `getCapabilities()` while preserving the existing `generators` ID list.
+- Adds optional exact treasure-type selection beneath broad treasure categories (for example a specific ring, tiara, book type, or art object).
+- Adds registration-time validation for treasure types, materials, components, conditions, craftsmanship, motifs, and styles; invalid ranges and missing references now fail early.
+- Adds optional category validation for treasure types when the Item Forge CategoryRegistry is available.
+- Makes treasure styles influence generation weights for materials, motifs, craftsmanship, type tags, and component frequency rather than acting only as a price label.
+- Makes component workmanship coherent with the parent object through `inherit`, `near-parent`, `independent`, and `none` craftsmanship modes.
+- Uses gemstone material `componentValue` ranges for gemstone settings/inlays instead of leaving that data unused.
+- Fixes the known German tapestry-name grammar regression.
+- Adds API, engine-contract, GeneratorRegistry, embedded-editor, application-container, registry-validation, exact-treasure-type, style-weighting, component-coherence, and gemstone-valuation regression tests.
+- Automated suite now contains 70 passing tests.
+
 ## 0.0.8
 
-- Adds the first full generated `TreasureGenerator` through `mode: "treasure"`.
-- Generates exactly one nonmagical sale/flavor treasure per engine request, preserving the Item Forge/Loot Forge responsibility boundary.
-- Adds target-value and value-range inputs plus configurable `ValueSolver` attempt limits.
-- Material, craftsmanship, condition, style, attributes, and reusable components now contribute to the generated price.
-- Adds explicit closest-valid fallback warnings when the requested value cannot be hit inside the attempt budget.
-- Adds 45 built-in treasure archetypes across gemstones, art, sculpture, jewelry, tableware, ceremonial objects, luxury goods, books/manuscripts, wine, beer, mead, and spirits.
-- Adds 29 materials, 8 reusable components, 9 motifs, 9 conditions, 6 craftsmanship grades, and 8 styles.
-- Adds frames, pedestals, gemstone settings, gilding, engraving, bindings, illustrations, wax seals, bottles/amphorae/casks, and book/drink-specific data attributes.
-- Material and condition compatibility prevents obviously invalid combinations; the editor filters materials according to the selected treasure category.
-- Adds new hierarchical treasure categories, including painting/sculpture/textile-art and beverage subcategories.
-- Generated results are valid PF2e `treasure` item sources with price denominations, descriptions, and required physical-item defaults.
-- Preview now shows generated treasure value, archetype, material, craftsmanship, condition, style, motif, components, and description.
-- Generated world items retain the full generation plan in Item Forge flags.
-- Adds `craftsmanship` to the public treasure registries and reports registry counts via capabilities.
-- Unknown registry IDs fail explicitly rather than silently falling back to random content.
-- Adds German/English localization for the TreasureGenerator UI.
-- Adds integration, extension, valuation, determinism, attempt-limit, and 300-seed statistical variety tests.
-- Automated suite now contains 51 passing tests.
+- Adds the first full `TreasureGenerator` implementation for non-functional sale treasure.
+- Generates one treasure item per engine request with target value/range, material, craftsmanship, condition, motif, style, and bounded ValueSolver attempts.
+- Adds 45 built-in treasure types including jewelry, paintings, sculpture, tableware, ceremonial/luxury goods, books, gemstones, and alcoholic beverages in bottles/jugs/amphorae/small casks.
+- Adds registry-driven materials, components, motifs, conditions, craftsmanship levels, and styles.
+- Material, craftsmanship, condition, attributes, and optional components affect sale value.
+- Adds generated descriptions, PF2e `treasure` Item sources, detailed preview metadata, and statistical variety tests.
 
 ## 0.0.7
 

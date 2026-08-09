@@ -12,6 +12,10 @@ export class ItemForgeApi {
     this.openApplication = openApplication;
   }
 
+  normalize(request) {
+    return this.engine.normalize(request);
+  }
+
   generate(request) {
     return this.engine.generate(request);
   }
@@ -36,9 +40,10 @@ export class ItemForgeApi {
     return {
       apiVersion: this.apiVersion,
       generators: this.generators.getAll().map((generator) => generator.id),
+      generatorMetadata: this.generators.getMetadata(),
       categories: this.categories.getAll().map((category) => category.id),
       sourceModes: ["all", "system", "selected"],
-      generationModes: ["existing", "equipment", "treasure"],
+      generationModes: this.generators.getModes(),
       fundamentalRuneModes: ["automatic", "none"],
       propertyRuneModes: ["automatic", "random", "fixed", "none"],
       propertyRunes: this.propertyRunes.getAll().map((rune) => ({ id: rune.id, slug: rune.slug, itemType: rune.itemType, level: rune.level, rarity: rune.rarity })),
