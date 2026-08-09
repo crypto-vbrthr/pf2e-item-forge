@@ -1,0 +1,42 @@
+{
+  "id": "pf2e-item-forge",
+  "title": "PF2E Item Forge",
+  "description": "A reusable PF2E item generation engine with an embedded editor for Foundry VTT.",
+  "version": "0.0.3",
+  "authors": [
+    {
+      "name": "PF2E Item Forge"
+    }
+  ],
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "relationships": {
+    "systems": [
+      {
+        "id": "pf2e",
+        "type": "system",
+        "compatibility": {}
+      }
+    ]
+  },
+  "esmodules": [
+    "scripts/pf2e-item-forge.js"
+  ],
+  "styles": [
+    "styles/pf2e-item-forge.css"
+  ],
+  "languages": [
+    {
+      "lang": "de",
+      "name": "Deutsch",
+      "path": "lang/de.json"
+    },
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ]
+}

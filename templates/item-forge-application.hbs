@@ -1,0 +1,27 @@
+<div class="item-forge-shell">
+  <header class="item-forge-shell__header">
+    <div>
+      <h2><i class="fa-solid fa-hammer"></i> {{localize "PF2E_ITEM_FORGE.App.Heading"}}</h2>
+      <p>{{localize "PF2E_ITEM_FORGE.App.Subtitle"}}</p>
+    </div>
+    <button type="button" data-action="refreshSources" class="icon-button" data-tooltip="{{localize 'PF2E_ITEM_FORGE.Actions.RefreshSources'}}">
+      <i class="fa-solid fa-rotate"></i>
+    </button>
+  </header>
+
+  <main class="item-forge-shell__editor" data-item-forge-editor-slot></main>
+
+  <footer class="item-forge-shell__footer">
+    <div class="button-group">
+      <button type="button" data-action="generate" {{#if busy}}disabled{{/if}}>
+        <i class="fa-solid fa-hammer"></i> {{localize "PF2E_ITEM_FORGE.Actions.Generate"}}
+      </button>
+      <button type="button" data-action="reroll" {{#if busy}}disabled{{/if}}>
+        <i class="fa-solid fa-dice"></i> {{localize "PF2E_ITEM_FORGE.Actions.Reroll"}}
+      </button>
+    </div>
+    <button type="button" data-action="createItem" {{#unless hasPreview}}disabled{{/unless}}>
+      <i class="fa-solid fa-floppy-disk"></i> {{localize "PF2E_ITEM_FORGE.Actions.CreateItem"}}
+    </button>
+  </footer>
+</div>

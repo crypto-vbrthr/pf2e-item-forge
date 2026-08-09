@@ -1,0 +1,49 @@
+import { API_VERSION } from "../constants.js";
+
+export class ItemForgeApi {
+  constructor({ engine, categories, generators, compendiumIndex, treasure, openApplication }) {
+    this.apiVersion = API_VERSION;
+    this.engine = engine;
+    this.categories = categories;
+    this.generators = generators;
+    this.compendiumIndex = compendiumIndex;
+    this.treasure = treasure;
+    this.openApplication = openApplication;
+  }
+
+  generate(request) {
+    return this.engine.generate(request);
+  }
+
+  preview(request) {
+    return this.engine.preview(request);
+  }
+
+  validate(request) {
+    return this.engine.validate(request);
+  }
+
+  refreshIndex() {
+    return this.compendiumIndex.refresh();
+  }
+
+  getAvailableItemPacks() {
+    return this.compendiumIndex.getAvailablePacks();
+  }
+
+  getCapabilities() {
+    return {
+      apiVersion: this.apiVersion,
+      generators: this.generators.getAll().map((generator) => generator.id),
+      categories: this.categories.getAll().map((category) => category.id),
+      sourceModes: ["all", "system", "selected"],
+      levelPolicies: ["strict", "nearest", "notAbove", "notBelow"],
+      embeddedEditor: true,
+      treasureRegistries: true
+    };
+  }
+
+  open(options = {}) {
+    return this.openApplication(options);
+  }
+}

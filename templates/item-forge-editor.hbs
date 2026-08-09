@@ -1,0 +1,122 @@
+<div class="item-forge-editor-grid">
+  <section class="item-forge-panel item-forge-parameters">
+    <h3>{{localize "PF2E_ITEM_FORGE.Editor.Parameters"}}</h3>
+
+    <div class="form-group">
+      <label>{{localize "PF2E_ITEM_FORGE.Fields.Category"}}</label>
+      <select name="category">
+        {{#each categories}}
+          <option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "PF2E_ITEM_FORGE.Fields.LevelMode"}}</label>
+      <select name="levelMode">
+        <option value="single" {{#unless isRange}}selected{{/unless}}>{{localize "PF2E_ITEM_FORGE.LevelMode.Single"}}</option>
+        <option value="range" {{#if isRange}}selected{{/if}}>{{localize "PF2E_ITEM_FORGE.LevelMode.Range"}}</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>{{#if isRange}}{{localize "PF2E_ITEM_FORGE.Fields.LevelMin"}}{{else}}{{localize "PF2E_ITEM_FORGE.Fields.Level"}}{{/if}}</label>
+        <input type="number" name="level.min" min="0" max="30" value="{{request.level.min}}">
+      </div>
+      {{#if isRange}}
+      <div class="form-group">
+        <label>{{localize "PF2E_ITEM_FORGE.Fields.LevelMax"}}</label>
+        <input type="number" name="level.max" min="0" max="30" value="{{request.level.max}}">
+      </div>
+      {{/if}}
+    </div>
+
+    <div class="form-group">
+      <label>{{localize "PF2E_ITEM_FORGE.Fields.LevelPolicy"}}</label>
+      <select name="levelPolicy">
+        {{#each levelPolicies}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+      </select>
+    </div>
+
+    <fieldset>
+      <legend>{{localize "PF2E_ITEM_FORGE.Fields.Rarity"}}</legend>
+      <label class="checkbox"><input type="checkbox" name="rarity" value="common" {{#if rarity.common}}checked{{/if}}> {{localize "PF2E_ITEM_FORGE.Rarity.Common"}}</label>
+      <label class="checkbox"><input type="checkbox" name="rarity" value="uncommon" {{#if rarity.uncommon}}checked{{/if}}> {{localize "PF2E_ITEM_FORGE.Rarity.Uncommon"}}</label>
+      <label class="checkbox"><input type="checkbox" name="rarity" value="rare" {{#if rarity.rare}}checked{{/if}}> {{localize "PF2E_ITEM_FORGE.Rarity.Rare"}}</label>
+      <label class="checkbox"><input type="checkbox" name="rarity" value="unique" {{#if rarity.unique}}checked{{/if}}> {{localize "PF2E_ITEM_FORGE.Rarity.Unique"}}</label>
+      <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.EmptyRarityMeansAll"}}</p>
+    </fieldset>
+
+    <fieldset>
+      <legend>{{localize "PF2E_ITEM_FORGE.Fields.Sources"}}</legend>
+      <div class="form-group">
+        <select name="source.mode">
+          {{#each sourceModes}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+        </select>
+      </div>
+      {{#if selectedSources}}
+      <div class="pack-list">
+        {{#each packs}}
+          <label class="checkbox pack-list__entry">
+            <input type="checkbox" name="sourcePack" value="{{id}}" {{#if checked}}checked{{/if}}>
+            <span>{{label}}</span>
+            <small>{{id}}</small>
+          </label>
+        {{else}}
+          <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.NoItemPacks"}}</p>
+        {{/each}}
+      </div>
+      {{/if}}
+    </fieldset>
+
+    <details>
+      <summary>{{localize "PF2E_ITEM_FORGE.Editor.Advanced"}}</summary>
+      <div class="form-group">
+        <label>{{localize "PF2E_ITEM_FORGE.Fields.SolverAttempts"}}</label>
+        <input type="number" name="solver.maxAttempts" min="1" max="1000" value="{{request.solver.maxAttempts}}">
+        <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.SolverAttempts"}}</p>
+      </div>
+      <div class="seed-line">
+        <span>{{localize "PF2E_ITEM_FORGE.Fields.Seed"}}</span>
+        <code>{{request.seed}}</code>
+      </div>
+    </details>
+  </section>
+
+  <section class="item-forge-panel item-forge-preview">
+    <h3>{{localize "PF2E_ITEM_FORGE.Editor.Preview"}}</h3>
+    {{#if busy}}
+      <div class="empty-state"><i class="fa-solid fa-hammer fa-bounce"></i><p>{{localize "PF2E_ITEM_FORGE.Preview.Generating"}}</p></div>
+    {{else if error}}
+      <div class="error-state">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <strong>{{error.code}}</strong>
+        <p>{{error.message}}</p>
+      </div>
+    {{else if preview}}
+      <article class="preview-card">
+        <img src="{{preview.img}}" alt="">
+        <div class="preview-card__body">
+          <h2>{{preview.name}}</h2>
+          <div class="chips">
+            <span>{{preview.type}}</span>
+            <span>{{localize "PF2E_ITEM_FORGE.Preview.Level"}} {{preview.level}}</span>
+            <span>{{preview.rarity}}</span>
+          </div>
+          <dl>
+            <dt>{{localize "PF2E_ITEM_FORGE.Preview.Source"}}</dt><dd>{{preview.sourcePack}}</dd>
+            <dt>{{localize "PF2E_ITEM_FORGE.Preview.Candidates"}}</dt><dd>{{preview.candidateCount}}</dd>
+          </dl>
+          {{#if preview.warnings.length}}
+            <div class="warning-box">
+              {{#each preview.warnings}}<div><i class="fa-solid fa-triangle-exclamation"></i> {{code}}</div>{{/each}}
+            </div>
+          {{/if}}
+        </div>
+      </article>
+    {{else}}
+      <div class="empty-state"><i class="fa-regular fa-gem"></i><p>{{localize "PF2E_ITEM_FORGE.Preview.Empty"}}</p></div>
+    {{/if}}
+  </section>
+</div>

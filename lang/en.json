@@ -1,0 +1,107 @@
+{
+  "PF2E_ITEM_FORGE": {
+    "App": {
+      "Title": "PF2E Item Forge",
+      "Heading": "Item Forge",
+      "Subtitle": "One item, many knobs to turn."
+    },
+    "Button": {
+      "Open": "Item Forge"
+    },
+    "Actions": {
+      "Generate": "Generate",
+      "Reroll": "Reroll",
+      "CreateItem": "Create item",
+      "RefreshSources": "Refresh compendium index"
+    },
+    "Editor": {
+      "Parameters": "Parameters",
+      "Preview": "Preview",
+      "Advanced": "Advanced options"
+    },
+    "Fields": {
+      "Category": "Category",
+      "LevelMode": "Level input",
+      "Level": "Level",
+      "LevelMin": "Level from",
+      "LevelMax": "Level to",
+      "LevelPolicy": "Level policy",
+      "Rarity": "Rarity",
+      "Sources": "Compendiums",
+      "SolverAttempts": "Maximum ValueSolver attempts",
+      "Seed": "Seed"
+    },
+    "LevelMode": {
+      "Single": "Single level",
+      "Range": "Level range"
+    },
+    "LevelPolicy": {
+      "Strict": "Strictly inside range",
+      "Nearest": "Allow nearest level",
+      "NotAbove": "Do not exceed maximum",
+      "NotBelow": "Do not go below minimum"
+    },
+    "SourceMode": {
+      "All": "All eligible item compendiums",
+      "System": "PF2e system compendiums only",
+      "Selected": "Selected compendiums only"
+    },
+    "Rarity": {
+      "Common": "Common",
+      "Uncommon": "Uncommon",
+      "Rare": "Rare",
+      "Unique": "Unique"
+    },
+    "Hints": {
+      "EmptyRarityMeansAll": "No selection means all rarities are allowed.",
+      "NoItemPacks": "No item compendiums found.",
+      "SolverAttempts": "Already part of the stable request schema; the treasure generator will use this value in a later phase."
+    },
+    "Preview": {
+      "Empty": "Nothing forged yet. Choose parameters and press Generate.",
+      "Generating": "Forging item …",
+      "Level": "Level",
+      "Source": "Source",
+      "Candidates": "Matching candidates"
+    },
+    "Notifications": {
+      "GenerationFailed": "No item could be generated for these parameters.",
+      "NoPreview": "Generate a preview first.",
+      "ItemCreated": "{name} was created in the Item Directory.",
+      "SourcesRefreshed": "Compendium index refreshed."
+    },
+    "Settings": {
+      "DefaultSolverAttempts": {
+        "Name": "Item Forge: default ValueSolver attempts",
+        "Hint": "Default maximum attempts for value-based generators. Individual API requests may override it up to the safety maximum."
+      },
+      "DefaultSourceMode": {
+        "Name": "Item Forge: default source mode",
+        "Hint": "Which item compendiums new requests use by default."
+      }
+    },
+    "Categories": {
+      "Item": "All items",
+      "Weapon": "Weapon",
+      "WeaponMelee": "Melee weapon",
+      "WeaponRanged": "Ranged weapon",
+      "WeaponRangedFirearm": "Firearm",
+      "Armor": "Armor",
+      "ArmorLight": "Light armor",
+      "ArmorMedium": "Medium armor",
+      "ArmorHeavy": "Heavy armor",
+      "Shield": "Shield",
+      "Consumable": "Consumable",
+      "ConsumablePotion": "Potion",
+      "ConsumableScroll": "Scroll",
+      "ConsumableAmmunition": "Ammunition",
+      "Equipment": "Equipment",
+      "Treasure": "Treasure",
+      "TreasureGemstone": "Gemstone",
+      "TreasureArt": "Art object",
+      "TreasureJewelry": "Jewelry",
+      "TreasureBook": "Book",
+      "TreasureBeverage": "Valuable beverage"
+    }
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "PF2E_ITEM_FORGE": {
+    "App": {
+      "Title": "PF2E Item Forge",
+      "Heading": "Item Forge",
+      "Subtitle": "Ein Gegenstand, viele Stellschrauben."
+    },
+    "Button": {
+      "Open": "Item Forge"
+    },
+    "Actions": {
+      "Generate": "Generieren",
+      "Reroll": "Neu würfeln",
+      "CreateItem": "Item erstellen",
+      "RefreshSources": "Kompendienindex aktualisieren"
+    },
+    "Editor": {
+      "Parameters": "Parameter",
+      "Preview": "Vorschau",
+      "Advanced": "Erweiterte Optionen"
+    },
+    "Fields": {
+      "Category": "Kategorie",
+      "LevelMode": "Stufenangabe",
+      "Level": "Stufe",
+      "LevelMin": "Stufe von",
+      "LevelMax": "Stufe bis",
+      "LevelPolicy": "Stufenverhalten",
+      "Rarity": "Seltenheit",
+      "Sources": "Kompendien",
+      "SolverAttempts": "Maximale ValueSolver-Versuche",
+      "Seed": "Seed"
+    },
+    "LevelMode": {
+      "Single": "Einzelne Stufe",
+      "Range": "Stufenbereich"
+    },
+    "LevelPolicy": {
+      "Strict": "Strikt im Bereich",
+      "Nearest": "Nächstgelegene Stufe erlauben",
+      "NotAbove": "Nicht über Maximum",
+      "NotBelow": "Nicht unter Minimum"
+    },
+    "SourceMode": {
+      "All": "Alle geeigneten Item-Kompendien",
+      "System": "Nur PF2e-Systemkompendien",
+      "Selected": "Nur ausgewählte Kompendien"
+    },
+    "Rarity": {
+      "Common": "Gewöhnlich",
+      "Uncommon": "Ungewöhnlich",
+      "Rare": "Selten",
+      "Unique": "Einzigartig"
+    },
+    "Hints": {
+      "EmptyRarityMeansAll": "Keine Auswahl bedeutet: alle Seltenheiten zulassen.",
+      "NoItemPacks": "Keine Item-Kompendien gefunden.",
+      "SolverAttempts": "Ist bereits Teil des stabilen Request-Schemas; der Schatzgenerator verwendet diesen Wert in einer späteren Ausbaustufe."
+    },
+    "Preview": {
+      "Empty": "Noch nichts geschmiedet. Parameter wählen und Generieren drücken.",
+      "Generating": "Gegenstand wird geschmiedet …",
+      "Level": "Stufe",
+      "Source": "Quelle",
+      "Candidates": "Passende Kandidaten"
+    },
+    "Notifications": {
+      "GenerationFailed": "Für diese Parameter konnte kein Gegenstand erzeugt werden.",
+      "NoPreview": "Erzeuge zuerst eine Vorschau.",
+      "ItemCreated": "{name} wurde im Gegenstandsverzeichnis erstellt.",
+      "SourcesRefreshed": "Kompendienindex aktualisiert."
+    },
+    "Settings": {
+      "DefaultSolverAttempts": {
+        "Name": "Item Forge: Standardversuche des ValueSolvers",
+        "Hint": "Maximale Standardzahl der Versuche für wertbasierte Generatoren. Einzelne API-Anfragen dürfen diesen Wert bis zum Sicherheitsmaximum überschreiben."
+      },
+      "DefaultSourceMode": {
+        "Name": "Item Forge: Standard-Quellenmodus",
+        "Hint": "Welche Item-Kompendien neue Anfragen standardmäßig verwenden."
+      }
+    },
+    "Categories": {
+      "Item": "Alle Gegenstände",
+      "Weapon": "Waffe",
+      "WeaponMelee": "Nahkampfwaffe",
+      "WeaponRanged": "Fernkampfwaffe",
+      "WeaponRangedFirearm": "Schusswaffe",
+      "Armor": "Rüstung",
+      "ArmorLight": "Leichte Rüstung",
+      "ArmorMedium": "Mittelschwere Rüstung",
+      "ArmorHeavy": "Schwere Rüstung",
+      "Shield": "Schild",
+      "Consumable": "Verbrauchsgegenstand",
+      "ConsumablePotion": "Trank",
+      "ConsumableScroll": "Schriftrolle",
+      "ConsumableAmmunition": "Munition",
+      "Equipment": "Ausrüstung",
+      "Treasure": "Schatz",
+      "TreasureGemstone": "Edelstein",
+      "TreasureArt": "Kunstgegenstand",
+      "TreasureJewelry": "Schmuck",
+      "TreasureBook": "Buch",
+      "TreasureBeverage": "Wertvolles Getränk"
+    }
+  }
+}
