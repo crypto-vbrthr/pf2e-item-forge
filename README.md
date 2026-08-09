@@ -2,9 +2,9 @@
 
 Reusable Item Forge architecture for Foundry VTT v14 and Pathfinder 2e.
 
-## v0.0.13 scope
+## v0.0.14 scope
 
-This release corrects staff generation to follow PF2e-style staff families while keeping spell-bearing wands and the reusable API/editor architecture.
+This release adds universal price display to the preview while retaining the corrected PF2e-style staff-family generation and reusable API/editor architecture.
 
 Implemented:
 
@@ -37,10 +37,10 @@ Implemented:
 - Material-aware wear such as fading, patina, water/smoke damage, cracking, worm damage, and restoration
 - Type-specific Bulk, reproducible generation flags, and detailed valuation breakdown metadata
 - Registration-time validation for extension treasure content
-- Embedded `ItemForgeEditor` with request editing, preview, reroll, description display, and no persistence side effects
+- Embedded `ItemForgeEditor` with request editing, preview, reroll, description and localized price display, and no persistence side effects
 - Standalone `ItemForgeApplication` container owning Foundry document creation
 - German and English localization
-- 99 automated unit/integration/statistical/contract tests
+- 101 automated unit/integration/statistical/contract tests
 
 Not yet implemented:
 

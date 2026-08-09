@@ -14,6 +14,38 @@ function localizeMaybe(key) {
   return localized === key ? key : localized;
 }
 
+/** Format a PF2e physical-item price for the preview without creating a document. */
+export function formatItemPrice(itemSource, fallbackGp = null) {
+  const raw = itemSource?.system?.price?.value;
+
+  if (typeof raw === "string" && raw.trim()) return raw.trim();
+  if (typeof raw === "number" && Number.isFinite(raw)) {
+    return `${raw} ${localizeMaybe("PF2E_ITEM_FORGE.Currency.GP")}`;
+  }
+
+  if (raw && typeof raw === "object") {
+    const labels = {
+      pp: localizeMaybe("PF2E_ITEM_FORGE.Currency.PP"),
+      gp: localizeMaybe("PF2E_ITEM_FORGE.Currency.GP"),
+      sp: localizeMaybe("PF2E_ITEM_FORGE.Currency.SP"),
+      cp: localizeMaybe("PF2E_ITEM_FORGE.Currency.CP")
+    };
+    const parts = ["pp", "gp", "sp", "cp"]
+      .map((coin) => [coin, Number(raw[coin] ?? 0)])
+      .filter(([, amount]) => Number.isFinite(amount) && amount !== 0)
+      .map(([coin, amount]) => `${amount} ${labels[coin]}`);
+    if (parts.length) return parts.join(" ");
+
+    // A present, but empty/zero, coin structure is a legitimate free item.
+    if (["pp", "gp", "sp", "cp"].some((coin) => Object.hasOwn(raw, coin)) || Object.keys(raw).length === 0) {
+      return `0 ${labels.gp}`;
+    }
+  }
+
+  const fallback = Number(fallbackGp);
+  return Number.isFinite(fallback) ? `${fallback} ${localizeMaybe("PF2E_ITEM_FORGE.Currency.GP")}` : null;
+}
+
 async function enrichHtml(html) {
   if (!html) return "";
   const implementation = globalThis.foundry?.applications?.ux?.TextEditor?.implementation
@@ -305,6 +337,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
               }
             : null,
           value: this.previewResult.metadata?.value ?? null,
+          price: formatItemPrice(this.previewResult.itemSource, this.previewResult.metadata?.value),
           solverAttempts: this.previewResult.metadata?.solverAttempts ?? null,
           solverExact: this.previewResult.metadata?.solverExact ?? null
         }

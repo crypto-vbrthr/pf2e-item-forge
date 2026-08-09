@@ -121,7 +121,8 @@
       "SpellList": "Zauberliste",
       "StaffMode": "Zauberstecken-Erzeugung",
       "StaffProfile": "Familienprofil",
-      "StaffVariant": "Variante"
+      "StaffVariant": "Variante",
+      "Price": "Preis"
     },
     "Notifications": {
       "GenerationFailed": "Für diese Parameter konnte kein Gegenstand erzeugt werden.",
@@ -286,6 +287,12 @@
       "Base": "Grundvariante",
       "Greater": "Starker Zauberstecken",
       "Major": "Mächtiger Zauberstecken"
+    },
+    "Currency": {
+      "PP": "PM",
+      "GP": "GM",
+      "SP": "SM",
+      "CP": "KM"
     }
   }
 }

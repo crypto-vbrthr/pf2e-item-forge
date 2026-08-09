@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.14
+
+- Preview: displays the price for every generated or selected item, not only treasure items.
+- Prices support PF2e platinum, gold, silver, and copper coin values and are localized in German/English.
+
 ## 0.0.13
 
 - Replaces the universal generated-staff level ladder with rulebook-style staff families.

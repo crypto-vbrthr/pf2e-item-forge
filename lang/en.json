@@ -121,7 +121,8 @@
       "SpellList": "Spell list",
       "StaffMode": "Staff generation",
       "StaffProfile": "Family profile",
-      "StaffVariant": "Variant"
+      "StaffVariant": "Variant",
+      "Price": "Price"
     },
     "Notifications": {
       "GenerationFailed": "No item could be generated for these parameters.",
@@ -286,6 +287,12 @@
       "Base": "Base variant",
       "Greater": "Greater staff",
       "Major": "Major staff"
+    },
+    "Currency": {
+      "PP": "pp",
+      "GP": "gp",
+      "SP": "sp",
+      "CP": "cp"
     }
   }
 }

@@ -288,12 +288,11 @@
           <h2>{{preview.name}}</h2>
           <div class="chips">
             <span>{{preview.type}}</span>
-            {{#if preview.treasure}}
-              <span>{{localize "PF2E_ITEM_FORGE.Preview.Value"}} {{preview.value}} GM</span>
-            {{else}}
+            {{#if preview.price}}<span>{{localize "PF2E_ITEM_FORGE.Preview.Price"}} {{preview.price}}</span>{{/if}}
+            {{#unless preview.treasure}}
               <span>{{localize "PF2E_ITEM_FORGE.Preview.Level"}} {{preview.level}}</span>
               <span>{{preview.rarity}}</span>
-            {{/if}}
+            {{/unless}}
           </div>
           <dl>
             <dt>{{localize "PF2E_ITEM_FORGE.Preview.Source"}}</dt><dd>{{preview.sourcePack}}</dd>

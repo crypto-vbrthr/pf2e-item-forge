@@ -124,3 +124,32 @@ test("dependent treasure-type rerender preserves the parameter-panel scroll posi
   await input.onChange();
   assert.equal(panel.scrollTop, 187);
 });
+
+test("preview price formatter supports every PF2e coin denomination", async () => {
+  const previousLocalize = game.i18n.localize;
+  game.i18n.localize = (key) => ({
+    "PF2E_ITEM_FORGE.Currency.PP": "PM",
+    "PF2E_ITEM_FORGE.Currency.GP": "GM",
+    "PF2E_ITEM_FORGE.Currency.SP": "SM",
+    "PF2E_ITEM_FORGE.Currency.CP": "KM"
+  }[key] ?? key);
+  try {
+    const { formatItemPrice } = await import("../../src/app/item-forge-editor.js");
+    assert.equal(formatItemPrice({ system: { price: { value: { pp: 1, gp: 2, sp: 3, cp: 4 } } } }), "1 PM 2 GM 3 SM 4 KM");
+    assert.equal(formatItemPrice({ system: { price: { value: { gp: 12 } } } }), "12 GM");
+    assert.equal(formatItemPrice({ system: { price: { value: {} } } }), "0 GM");
+  } finally {
+    game.i18n.localize = previousLocalize;
+  }
+});
+
+test("preview price formatter can fall back to generated treasure value", async () => {
+  const previousLocalize = game.i18n.localize;
+  game.i18n.localize = (key) => key === "PF2E_ITEM_FORGE.Currency.GP" ? "GM" : key;
+  try {
+    const { formatItemPrice } = await import("../../src/app/item-forge-editor.js");
+    assert.equal(formatItemPrice({ system: {} }, 37.5), "37.5 GM");
+  } finally {
+    game.i18n.localize = previousLocalize;
+  }
+});
