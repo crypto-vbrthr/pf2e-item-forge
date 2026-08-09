@@ -46,7 +46,9 @@
       "Style": "Stil",
       "TreasureType": "Schatzart",
       "MagicTheme": "Magisches Thema",
-      "AllowHeightenedSpells": "Passende Zauber erhöht verwenden"
+      "AllowHeightenedSpells": "Passende Zauber erhöht verwenden",
+      "StaffMode": "Zauberstecken-Erzeugung",
+      "StaffProfile": "Familienprofil"
     },
     "LevelMode": {
       "Single": "Einzelne Stufe",
@@ -82,10 +84,12 @@
       "TreasureMode": "Erzeugt genau einen nichtmagischen Verkaufs- oder Kunstschatz. Material, Verarbeitung und Zustand beeinflussen seinen Wert.",
       "ValueTolerance": "0,15 entspricht ±15 % um den Zielwert. Wird kein Treffer gefunden, liefert der ValueSolver das nächstgelegene gültige Ergebnis mit Warnung.",
       "TreasureType": "Optional kann eine konkrete Schatzart gewählt werden. „Beliebig“ lässt die Item Forge innerhalb der gewählten Kategorie würfeln.",
-      "MagicMode": "Erzeugt zaubergebundene magische Gegenstände. Zauberstäbe enthalten einen einzelnen passenden Zauber; Zauberstecken erhalten eine thematische Zauberliste über mehrere Grade.",
+      "MagicMode": "Erzeugt zaubergebundene magische Gegenstände. Zauberstäbe enthalten einen einzelnen passenden Zauber; Zauberstecken können entweder regelwerksgetreu aus Kompendien gewählt oder als thematische Variantenfamilie generiert werden.",
       "MagicSources": "Die ausgewählten Kompendien bestimmen den Zauberpool. Systemvorlagen für den Gegenstand selbst werden nur als technische Basis verwendet.",
       "MagicTheme": "Automatisch wählt ein Thema mit genügend passenden Zaubern. Ein festes Thema ist eine harte Vorgabe.",
-      "AllowHeightenedSpells": "Nur Zauber mit einer echten Erhöhungsdefinition dürfen auf höheren Graden erneut in Zauberstäben oder Zauberstecken auftauchen."
+      "AllowHeightenedSpells": "Nur Zauber mit einer echten Erhöhungsdefinition dürfen auf höheren Graden erneut in Zauberstäben oder Zauberstecken auftauchen.",
+      "StaffMode": "Vordefiniert kopiert einen vorhandenen PF2e-Zauberstecken unverändert aus den ausgewählten Kompendien. Generiert erstellt eine neue thematische Zaubersteckenfamilie nach regelwerksnahen Stufenprofilen.",
+      "StaffProfile": "Das Profil bestimmt die Stufen der Grund-, starken und mächtigen Variante und welche neuen Zaubergrade jede Variante hinzufügt. Frühere Varianten werden vollständig geerbt."
     },
     "Preview": {
       "Empty": "Noch nichts geschmiedet. Parameter wählen und Generieren drücken.",
@@ -114,7 +118,10 @@
       "MagicKind": "Magischer Gegenstandstyp",
       "MagicTheme": "Thema",
       "HighestSpellRank": "Höchster Zaubergrad",
-      "SpellList": "Zauberliste"
+      "SpellList": "Zauberliste",
+      "StaffMode": "Zauberstecken-Erzeugung",
+      "StaffProfile": "Familienprofil",
+      "StaffVariant": "Variante"
     },
     "Notifications": {
       "GenerationFailed": "Für diese Parameter konnte kein Gegenstand erzeugt werden.",
@@ -193,7 +200,9 @@
       "UnsupportedMagicCategory": "Diese Erzeugungsart unterstützt derzeit Zauberstäbe und Zauberstecken.",
       "NoWandSpellCandidate": "In den gewählten Quellen wurde kein für einen Zauberstab geeigneter Zauber gefunden.",
       "NoStaffSpellCandidate": "Für die gewählte Stufe und das gewählte Thema konnte keine passende Zauberliste für einen Zauberstecken zusammengestellt werden.",
-      "NoStaffBaseItem": "Die PF2e-Basiswaffe für einen Zauberstecken konnte nicht gefunden werden."
+      "NoStaffBaseItem": "Die PF2e-Basiswaffe für einen Zauberstecken konnte nicht gefunden werden.",
+      "NoPredefinedStaffCandidate": "In den gewählten Kompendien wurde kein vordefinierter Zauberstecken für die Stufenvorgabe gefunden.",
+      "UnknownStaffProfile": "Das gewählte Zauberstecken-Familienprofil ist nicht registriert."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatisch stufengerecht",
@@ -236,12 +245,16 @@
     },
     "Magic": {
       "SettingsHeading": "Zaubermagie",
-      "StaffName": "Zauberstecken: {theme}",
+      "StaffName": "Zauberstecken – {theme}",
       "Cantrip": "Zaubertrick",
       "SpellRankLabel": "Grad {rank}",
       "HeightenedShort": "erhöht auf Grad {rank}",
       "GeneratedStaffDescription": "Dieser Zauberstecken bündelt Magie mit dem Thema „{theme}“. Seine Zauberliste wurde stufengerecht aus den gewählten Zauberquellen zusammengestellt.",
-      "StaffActivation": "Aktivierung – Zauber wirken: Wende Ladungen in Höhe des Zaubergrades auf, um einen Zauber aus der Liste zu wirken. Zaubertricks verbrauchen keine Ladungen."
+      "StaffActivation": "Aktivierung – Zauber wirken: Wende Ladungen in Höhe des Zaubergrades auf, um einen Zauber aus der Liste zu wirken. Zaubertricks verbrauchen keine Ladungen.",
+      "GreaterStaffName": "Starker Zauberstecken – {theme}",
+      "MajorStaffName": "Mächtiger Zauberstecken – {theme}",
+      "GeneratedStaffFamilyDescription": "Dieser Zauberstecken gehört zu einer thematischen Variantenfamilie zum Thema „{theme}“. Die gewählte Variante enthält zusätzlich alle Zauber, die bereits in schwächeren Varianten der Familie enthalten sind.",
+      "StaffFamilyProfileDescription": "Familienprogression: {levels}. Jede höhere Variante ergänzt neue Zaubergrade, statt automatisch jeden Grad bis zum Maximum neu zu befüllen."
     },
     "MagicThemes": {
       "Automatic": "Automatisch",
@@ -258,6 +271,21 @@
       "Occult": "Okkult",
       "Primal": "Naturmagie",
       "Summoning": "Beschwörung"
+    },
+    "StaffMode": {
+      "Generated": "Thematische Zaubersteckenfamilie generieren",
+      "Existing": "Vordefinierten Zauberstecken auswählen"
+    },
+    "StaffProfiles": {
+      "Automatic": "Automatisch passend zur Stufe",
+      "Core3812": "Klassisch 3 → 8 → 12",
+      "Core4812": "Klassisch 4 → 8 → 12",
+      "Core61014": "Klassisch 6 → 10 → 14"
+    },
+    "StaffVariants": {
+      "Base": "Grundvariante",
+      "Greater": "Starker Zauberstecken",
+      "Major": "Mächtiger Zauberstecken"
     }
   }
 }

@@ -108,6 +108,10 @@ test("getMeaningfulSpellRanks uses interval and fixed heightening without invent
   assert.deepEqual(getMeaningfulSpellRanks(spellEntry({ baseRank: 2, heightening: { type: "fixed", levels: { 4: {}, 7: {} } } })), [2, 4, 7]);
 });
 
+test("getMeaningfulSpellRanks never down-ranks a spell above the requested maximum", () => {
+  assert.deepEqual(getMeaningfulSpellRanks({ baseRank: 3, heightening: null }, { maxRank: 1 }), []);
+});
+
 test("ScrollGenerator embeds a level-appropriate heightened spell", async () => {
   const spell = spellEntry();
   const excludedCantrip = spellEntry({ id: "cantrip", uuid: "Compendium.test.spells.Item.cantrip", name: "Cantrip", cantrip: true });

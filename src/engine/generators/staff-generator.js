@@ -2,24 +2,12 @@ import { SeededRng } from "../seeded-rng.js";
 import { distanceToLevelRequest, levelAllowed } from "../item-level-resolver.js";
 import { getHighestRarity, getMeaningfulSpellRanks, isNormalSlottedSpell, isStaffCantrip } from "../spell-item-utils.js";
 import { MAGIC_THEME_DEFINITIONS, getMagicTheme, spellMatchesMagicTheme } from "../magic-themes.js";
+import { registerCoreStaffProfiles, StaffProfileRegistry } from "../registries/staff-profile-registry.js";
 
 function clone(value) {
   if (globalThis.foundry?.utils?.deepClone) return globalThis.foundry.utils.deepClone(value);
   return structuredClone(value);
 }
-
-const STAFF_PROFILES = [
-  { level: 3, maxRank: 1, price: 60 },
-  { level: 4, maxRank: 1, price: 90 },
-  { level: 6, maxRank: 2, price: 230 },
-  { level: 8, maxRank: 3, price: 450 },
-  { level: 10, maxRank: 4, price: 900 },
-  { level: 12, maxRank: 5, price: 1800 },
-  { level: 14, maxRank: 6, price: 4000 },
-  { level: 16, maxRank: 7, price: 9200 },
-  { level: 18, maxRank: 8, price: 24000 },
-  { level: 20, maxRank: 9, price: 70000 }
-];
 
 function weightedPick(rng, entries, weightFn) {
   if (!entries.length) return null;
@@ -34,22 +22,41 @@ function weightedPick(rng, entries, weightFn) {
   return weighted.at(-1).entry;
 }
 
+function localize(formatter, key, fallback, data = {}) {
+  const value = formatter?.(key, data);
+  return value && value !== key ? value : fallback;
+}
+
 function staffThemeName(themeId, formatter) {
   const theme = getMagicTheme(themeId);
-  const label = theme?.label ? formatter?.(theme.label, {}) : null;
-  if (label && label !== theme.label) return label;
-  return themeId;
+  return theme?.label ? localize(formatter, theme.label, themeId) : themeId;
+}
+
+function variantRanks(profile, variantIndex) {
+  return profile.variants
+    .slice(0, variantIndex + 1)
+    .flatMap((variant) => variant.ranks.map((rank) => rank.rank));
+}
+
+function maxRankForVariant(profile, variantIndex) {
+  return Math.max(0, ...variantRanks(profile, variantIndex));
+}
+
+function profileLevels(profile) {
+  return profile.variants.map((variant) => variant.level);
 }
 
 export class StaffGenerator {
   constructor({
     compendiumIndex,
+    staffProfiles = registerCoreStaffProfiles(new StaffProfileRegistry()),
     formatter = (key, data) => globalThis.game?.i18n?.format?.(key, data) ?? key
   } = {}) {
     this.id = "staff";
     this.mode = "magic";
     this.priority = 210;
     this.index = compendiumIndex;
+    this.staffProfiles = staffProfiles;
     this.formatter = formatter;
   }
 
@@ -59,10 +66,89 @@ export class StaffGenerator {
 
   async generate(request) {
     if (!this.index.ready) await this.index.refresh();
-    const profileSelection = this.#selectProfile(request);
-    const profile = profileSelection.profile;
-    const warnings = [...profileSelection.warnings];
+    return request.magic?.staffMode === "existing"
+      ? this.#generateExisting(request)
+      : this.#generateFamily(request);
+  }
+
+  async #generateExisting(request) {
+    const allCandidates = this.index.query(request).filter((entry) => entry.categories?.includes?.("magic.staff"));
+    let candidates = allCandidates.filter((entry) => levelAllowed(entry.level, request));
+    const warnings = [];
+
+    if (!candidates.length && request.levelPolicy === "nearest" && allCandidates.length) {
+      const distance = Math.min(...allCandidates.map((entry) => distanceToLevelRequest(entry.level, request.level)));
+      candidates = allCandidates.filter((entry) => distanceToLevelRequest(entry.level, request.level) === distance);
+      warnings.push({
+        code: "LEVEL_TARGET_APPROXIMATED",
+        requested: { ...request.level },
+        actualLevels: [...new Set(candidates.map((entry) => entry.level))]
+      });
+    }
+
+    if (!candidates.length) {
+      const error = new Error("No predefined staff matches the request");
+      error.code = allCandidates.length ? "NO_ITEM_IN_LEVEL_RANGE" : "NO_PREDEFINED_STAFF_CANDIDATE";
+      error.details = { level: request.level, source: request.source };
+      throw error;
+    }
+
     const rng = new SeededRng(request.seed);
+    const target = request.level.target;
+    const closest = target == null
+      ? candidates
+      : candidates.filter((entry) => {
+          const best = Math.min(...candidates.map((candidate) => Math.abs(candidate.level - target)));
+          return Math.abs(entry.level - target) === best;
+        });
+    const selected = rng.pick(closest);
+    const document = await this.index.getDocument(selected);
+    if (!document) {
+      const error = new Error(`Could not load predefined staff ${selected.uuid}`);
+      error.code = "ITEM_DOCUMENT_NOT_FOUND";
+      throw error;
+    }
+
+    const itemSource = typeof document.toObject === "function" ? document.toObject() : clone(document._source ?? document);
+    itemSource._id = null;
+    itemSource.flags ??= {};
+    itemSource.flags["pf2e-item-forge"] = {
+      ...(itemSource.flags["pf2e-item-forge"] ?? {}),
+      generated: false,
+      generator: "staff",
+      seed: request.seed,
+      sourceUuid: selected.uuid,
+      staff: { mode: "existing" }
+    };
+
+    return {
+      request,
+      itemSource,
+      warnings,
+      plan: {
+        kind: "staff-existing",
+        sourceItem: { name: selected.name, uuid: selected.uuid, level: selected.level }
+      },
+      metadata: {
+        seed: request.seed,
+        generator: this.id,
+        sourcePack: selected.pack,
+        sourceUuid: selected.uuid,
+        level: selected.level,
+        rarity: selected.rarity,
+        category: request.category,
+        candidateCount: candidates.length,
+        magic: { kind: "staff", staffMode: "existing", theme: null },
+        baseItem: { name: selected.name, uuid: selected.uuid, level: selected.level }
+      }
+    };
+  }
+
+  async #generateFamily(request) {
+    const rng = new SeededRng(request.seed);
+    const selection = this.#selectFamilyVariant(request, rng);
+    const { profile, variantIndex, variant } = selection;
+    const warnings = [...selection.warnings];
     const baseEntry = this.#getBaseStaffEntry();
     if (!baseEntry) {
       const error = new Error("No ordinary staff weapon template is available");
@@ -79,37 +165,43 @@ export class StaffGenerator {
     const spellPool = this.index.querySpells(request).filter((spell) =>
       (isNormalSlottedSpell(spell) || isStaffCantrip(spell)) && !spell.ritual && !spell.focus
     );
-    const themeId = this.#resolveTheme(request.magic?.theme ?? "automatic", spellPool, profile, rng);
+    const themeId = this.#resolveTheme(request.magic?.theme ?? "automatic", spellPool, profile, variantIndex, rng);
     if (!themeId) {
-      const error = new Error("No staff theme has enough matching spells");
+      const error = new Error("No staff theme has enough matching spells for the selected family profile");
       error.code = "NO_STAFF_SPELL_CANDIDATE";
-      error.details = { theme: request.magic?.theme ?? "automatic", maxRank: profile.maxRank };
+      error.details = {
+        theme: request.magic?.theme ?? "automatic",
+        profile: profile.id,
+        variant: variant.id,
+        requiredRanks: variantRanks(profile, variantIndex)
+      };
       throw error;
     }
 
     const themedPool = spellPool.filter((spell) => spellMatchesMagicTheme(spell, themeId));
-    const spells = this.#buildSpellManifest(themedPool, profile, request.magic?.allowHeightened !== false, rng);
-    if (!spells.some((entry) => !entry.cantrip)) {
-      const error = new Error("No staff spell candidate matches the selected theme and level");
-      error.code = "NO_STAFF_SPELL_CANDIDATE";
-      error.details = { theme: themeId, maxRank: profile.maxRank };
-      throw error;
-    }
+    const family = this.#buildFamilyManifest({
+      spellPool: themedPool,
+      profile,
+      variantIndex,
+      allowHeightened: request.magic?.allowHeightened !== false,
+      seed: request.seed
+    });
+    const spells = family.flatMap((tier) => tier.spells);
 
     const itemSource = typeof baseDocument.toObject === "function"
       ? baseDocument.toObject()
       : clone(baseDocument._source ?? baseDocument);
-    this.#composeStaff(itemSource, { baseEntry, profile, spells, themeId, request });
+    this.#composeStaff(itemSource, { baseEntry, profile, variantIndex, variant, family, spells, themeId, request });
 
     const rarity = getHighestRarity(spells.map((entry) => entry.spell.rarity));
-    const spellMetadata = spells.map((entry) => ({
-      name: entry.spell.name,
-      sourceUuid: entry.spell.uuid,
-      sourcePack: entry.spell.pack,
-      baseRank: entry.spell.baseRank,
-      rank: entry.rank,
-      cantrip: entry.cantrip,
-      heightened: !entry.cantrip && entry.rank > entry.spell.baseRank
+    const spellMetadata = spells.map((entry) => this.#spellMetadata(entry, variantIndex));
+    const familyMetadata = family.map((tier) => ({
+      variant: tier.variant.id,
+      variantLabel: tier.variant.label,
+      level: tier.variant.level,
+      price: tier.variant.price,
+      inherited: tier.tierIndex < variantIndex,
+      spells: tier.spells.map((entry) => this.#spellMetadata(entry, variantIndex))
     }));
 
     return {
@@ -117,10 +209,12 @@ export class StaffGenerator {
       itemSource,
       warnings,
       plan: {
-        kind: "staff",
+        kind: "staff-family",
         theme: themeId,
-        profile: { ...profile },
+        profile: { id: profile.id, label: profile.label, levels: profileLevels(profile) },
+        variant: { id: variant.id, label: variant.label, index: variantIndex, level: variant.level, price: variant.price },
         baseItem: { name: baseEntry.name, uuid: baseEntry.uuid, level: baseEntry.level },
+        family: familyMetadata,
         spells: spellMetadata
       },
       metadata: {
@@ -128,40 +222,72 @@ export class StaffGenerator {
         generator: this.id,
         sourcePack: [...new Set(spells.map((entry) => entry.spell.pack))].join(", "),
         sourceUuid: baseEntry.uuid,
-        level: profile.level,
+        level: variant.level,
         rarity,
         category: request.category,
         candidateCount: themedPool.length,
-        magic: { kind: "staff", theme: themeId, maxRank: profile.maxRank },
+        magic: {
+          kind: "staff",
+          staffMode: "generated",
+          theme: themeId,
+          profile: profile.id,
+          profileLevels: profileLevels(profile),
+          variant: variant.id,
+          variantLabel: variant.label,
+          maxRank: maxRankForVariant(profile, variantIndex)
+        },
         spells: spellMetadata,
+        staffFamily: familyMetadata,
         baseItem: { name: baseEntry.name, uuid: baseEntry.uuid, level: baseEntry.level }
       }
     };
   }
 
-  #selectProfile(request) {
-    let candidates = STAFF_PROFILES.filter((profile) => levelAllowed(profile.level, request));
+  #selectFamilyVariant(request, rng) {
+    const requestedProfile = request.magic?.staffProfile ?? "automatic";
+    const profiles = requestedProfile === "automatic"
+      ? this.staffProfiles.getAll()
+      : [this.staffProfiles.get(requestedProfile)].filter(Boolean);
+
+    if (!profiles.length) {
+      const error = new Error(`Unknown staff family profile ${requestedProfile}`);
+      error.code = "UNKNOWN_STAFF_PROFILE";
+      throw error;
+    }
+
+    const all = profiles.flatMap((profile) => profile.variants.map((variant, variantIndex) => ({ profile, variant, variantIndex })));
+    let candidates = all.filter(({ variant }) => levelAllowed(variant.level, request));
     const warnings = [];
-    if (!candidates.length && request.levelPolicy === "nearest") {
-      const distance = Math.min(...STAFF_PROFILES.map((profile) => distanceToLevelRequest(profile.level, request.level)));
-      candidates = STAFF_PROFILES.filter((profile) => distanceToLevelRequest(profile.level, request.level) === distance);
+
+    if (!candidates.length && request.levelPolicy === "nearest" && all.length) {
+      const distance = Math.min(...all.map(({ variant }) => distanceToLevelRequest(variant.level, request.level)));
+      candidates = all.filter(({ variant }) => distanceToLevelRequest(variant.level, request.level) === distance);
       warnings.push({
         code: "LEVEL_TARGET_APPROXIMATED",
         requested: { ...request.level },
-        actualLevels: candidates.map((profile) => profile.level)
+        actualLevels: [...new Set(candidates.map(({ variant }) => variant.level))]
       });
     }
+
     if (!candidates.length) {
-      const error = new Error("No generated staff profile matches the requested item level");
+      const error = new Error("No generated staff family variant matches the requested item level");
       error.code = "NO_ITEM_IN_LEVEL_RANGE";
-      error.details = { level: request.level, availableLevels: STAFF_PROFILES.map((profile) => profile.level) };
+      error.details = {
+        level: request.level,
+        profile: requestedProfile,
+        availableLevels: [...new Set(all.map(({ variant }) => variant.level))].sort((a, b) => a - b)
+      };
       throw error;
     }
+
     const target = request.level.target;
-    const profile = target == null
-      ? candidates[0]
-      : [...candidates].sort((a, b) => Math.abs(a.level - target) - Math.abs(b.level - target) || a.level - b.level)[0];
-    return { profile, warnings };
+    if (target != null) {
+      const distance = Math.min(...candidates.map(({ variant }) => Math.abs(variant.level - target)));
+      candidates = candidates.filter(({ variant }) => Math.abs(variant.level - target) === distance);
+    }
+
+    const selected = rng.pick(candidates);
+    return { ...selected, warnings };
   }
 
   #getBaseStaffEntry() {
@@ -175,99 +301,139 @@ export class StaffGenerator {
     return systemEntries.find(matches) ?? allEntries.find(matches) ?? null;
   }
 
-  #resolveTheme(requestedTheme, spellPool, profile, rng) {
+  #resolveTheme(requestedTheme, spellPool, profile, variantIndex, rng) {
     if (requestedTheme !== "automatic") {
       const theme = getMagicTheme(requestedTheme);
       if (!theme) return null;
-      return this.#themeHasCoverage(theme.id, spellPool, profile) ? theme.id : null;
+      return this.#themeHasCoverage(theme.id, spellPool, profile, variantIndex) ? theme.id : null;
     }
 
     const themes = MAGIC_THEME_DEFINITIONS
       .filter((theme) => !theme.automatic)
-      .filter((theme) => this.#themeHasCoverage(theme.id, spellPool, profile));
+      .filter((theme) => this.#themeHasCoverage(theme.id, spellPool, profile, variantIndex));
     if (!themes.length) return null;
 
     return weightedPick(rng, themes, (theme) => {
       const pool = spellPool.filter((spell) => spellMatchesMagicTheme(spell, theme));
       const directTraitBonus = theme.traits?.length || theme.traitsAny?.length ? 1.3 : 1;
-      return Math.min(8, pool.length) * directTraitBonus;
+      return Math.min(10, pool.length) * directTraitBonus;
     })?.id ?? null;
   }
 
-  #themeHasCoverage(themeId, spellPool, profile) {
+  #themeHasCoverage(themeId, spellPool, profile, variantIndex) {
     const themed = spellPool.filter((spell) => spellMatchesMagicTheme(spell, themeId));
     const slotted = themed.filter(isNormalSlottedSpell);
-    if (!slotted.length) return false;
-    const topRankCandidates = slotted.filter((spell) =>
-      getMeaningfulSpellRanks(spell, { maxRank: profile.maxRank }).includes(profile.maxRank)
-    );
-    return topRankCandidates.length > 0;
+    const maxRank = maxRankForVariant(profile, variantIndex);
+    return variantRanks(profile, variantIndex).every((rank) => slotted.some((spell) =>
+      getMeaningfulSpellRanks(spell, { maxRank }).includes(rank)
+    ));
   }
 
-  #buildSpellManifest(spellPool, profile, allowHeightened, rng) {
+  #buildFamilyManifest({ spellPool, profile, variantIndex, allowHeightened, seed }) {
     const cantrips = spellPool.filter(isStaffCantrip);
     const slotted = spellPool.filter(isNormalSlottedSpell);
-    const manifest = [];
-    const used = new Set();
+    const family = [];
+    const usedAtLowerRank = new Set();
+    const maxRank = maxRankForVariant(profile, variantIndex);
 
-    if (cantrips.length) {
-      const cantrip = rng.pick(cantrips);
-      manifest.push({ spell: cantrip, rank: 0, cantrip: true });
-      used.add(cantrip.uuid);
-    }
+    for (let tierIndex = 0; tierIndex <= variantIndex; tierIndex += 1) {
+      const variant = profile.variants[tierIndex];
+      const tierRng = new SeededRng(`${seed}:${profile.id}:${tierIndex}`);
+      const tierSpells = [];
 
-    for (let rank = 1; rank <= profile.maxRank; rank += 1) {
-      const desired = rank >= Math.max(1, profile.maxRank - 1) ? 2 : 1;
-      const candidates = slotted
-        .filter((spell) => {
-          const ranks = allowHeightened ? getMeaningfulSpellRanks(spell, { maxRank: profile.maxRank }) : [spell.baseRank];
-          return ranks.includes(rank);
-        })
-        .map((spell) => ({ spell, rank, cantrip: false, heightened: rank > spell.baseRank }));
-
-      const rankUsed = new Set();
-      for (let slot = 0; slot < desired && candidates.length; slot += 1) {
-        const available = candidates.filter((candidate) => !rankUsed.has(candidate.spell.uuid));
-        if (!available.length) break;
-        const selected = weightedPick(rng, available, (candidate) => {
-          let weight = used.has(candidate.spell.uuid) ? 0.45 : 1;
-          if (candidate.heightened && used.has(candidate.spell.uuid)) weight *= 1.6;
-          if (rank === profile.maxRank) weight *= 1.3;
-          return weight;
-        });
-        if (!selected) break;
-        manifest.push(selected);
-        used.add(selected.spell.uuid);
-        rankUsed.add(selected.spell.uuid);
+      if (tierIndex === 0 && variant.cantrip && cantrips.length) {
+        const cantrip = tierRng.pick(cantrips);
+        tierSpells.push({ spell: cantrip, rank: 0, cantrip: true, tierIndex, variantId: variant.id });
+        usedAtLowerRank.add(cantrip.uuid);
       }
+
+      for (const rankSpec of variant.ranks) {
+        const candidates = slotted
+          .filter((spell) => {
+            const ranks = allowHeightened ? getMeaningfulSpellRanks(spell, { maxRank }) : [spell.baseRank];
+            return ranks.includes(rankSpec.rank);
+          })
+          .map((spell) => ({ spell, rank: rankSpec.rank, cantrip: false, heightened: rankSpec.rank > spell.baseRank }));
+
+        if (!candidates.length) {
+          const error = new Error(`No spell candidate for staff rank ${rankSpec.rank}`);
+          error.code = "NO_STAFF_SPELL_CANDIDATE";
+          error.details = { profile: profile.id, variant: variant.id, rank: rankSpec.rank };
+          throw error;
+        }
+
+        const availableCount = Math.min(rankSpec.max, candidates.length);
+        let desired = Math.min(rankSpec.min, availableCount);
+        for (let count = desired; count < availableCount; count += 1) {
+          if (tierRng.random() < 0.55) desired += 1;
+          else break;
+        }
+
+        const rankUsed = new Set();
+        for (let slot = 0; slot < desired; slot += 1) {
+          const available = candidates.filter((candidate) => !rankUsed.has(candidate.spell.uuid));
+          if (!available.length) break;
+          const selected = weightedPick(tierRng, available, (candidate) => {
+            let weight = 1;
+            if (usedAtLowerRank.has(candidate.spell.uuid) && candidate.heightened) weight *= 2.25;
+            else if (usedAtLowerRank.has(candidate.spell.uuid)) weight *= 0.35;
+            if (candidate.spell.baseRank === candidate.rank) weight *= 1.15;
+            return weight;
+          });
+          if (!selected) break;
+          tierSpells.push({ ...selected, tierIndex, variantId: variant.id });
+          rankUsed.add(selected.spell.uuid);
+        }
+
+        for (const selected of tierSpells.filter((entry) => entry.rank === rankSpec.rank)) {
+          usedAtLowerRank.add(selected.spell.uuid);
+        }
+      }
+
+      family.push({ tierIndex, variant, spells: tierSpells });
     }
 
-    return manifest.sort((a, b) => a.rank - b.rank || a.spell.name.localeCompare(b.spell.name));
+    return family;
   }
 
-  #composeStaff(itemSource, { baseEntry, profile, spells, themeId, request }) {
+  #spellMetadata(entry, selectedVariantIndex) {
+    return {
+      name: entry.spell.name,
+      sourceUuid: entry.spell.uuid,
+      sourcePack: entry.spell.pack,
+      baseRank: entry.spell.baseRank,
+      rank: entry.rank,
+      cantrip: entry.cantrip,
+      heightened: !entry.cantrip && entry.rank > entry.spell.baseRank,
+      introducedIn: entry.variantId,
+      inherited: entry.tierIndex < selectedVariantIndex
+    };
+  }
+
+  #composeStaff(itemSource, { baseEntry, profile, variantIndex, variant, family, spells, themeId, request }) {
     itemSource._id = null;
     itemSource.system ??= {};
-    itemSource.system.level ??= { value: profile.level };
-    itemSource.system.level.value = profile.level;
+    itemSource.system.level ??= { value: variant.level };
+    itemSource.system.level.value = variant.level;
     itemSource.system.price ??= { value: {} };
-    itemSource.system.price.value = { gp: profile.price };
+    itemSource.system.price.value = { gp: variant.price };
     itemSource.system.traits ??= { value: [] };
     itemSource.system.traits.value ??= [];
     itemSource.system.traits.value = [...new Set([...itemSource.system.traits.value, "magical", "staff"])].sort();
     const rarity = getHighestRarity(spells.map((entry) => entry.spell.rarity));
     if (Object.hasOwn(itemSource.system.traits, "rarity")) itemSource.system.traits.rarity = rarity;
     if (itemSource.system.rarity?.value !== undefined) itemSource.system.rarity.value = rarity;
-    if (itemSource.system.runes) {
-      itemSource.system.runes = { potency: 0, striking: 0, property: [] };
-    }
-    if (itemSource.system.specific?.value !== undefined) itemSource.system.specific.value = false;
+    if (itemSource.system.runes) itemSource.system.runes = { potency: 0, striking: 0, property: [] };
+    if (itemSource.system.specific?.value !== undefined) itemSource.system.specific.value = true;
 
     const themeName = staffThemeName(themeId, this.formatter);
-    const localizedName = this.formatter?.("PF2E_ITEM_FORGE.Magic.StaffName", { theme: themeName });
-    itemSource.name = localizedName && localizedName !== "PF2E_ITEM_FORGE.Magic.StaffName"
-      ? localizedName
-      : `Staff of ${themeName}`;
+    const variantNameKey = variantIndex === 0
+      ? "PF2E_ITEM_FORGE.Magic.StaffName"
+      : variantIndex === 1
+        ? "PF2E_ITEM_FORGE.Magic.GreaterStaffName"
+        : "PF2E_ITEM_FORGE.Magic.MajorStaffName";
+    const fallback = `${variantIndex === 1 ? "Greater " : variantIndex >= 2 ? "Major " : ""}Staff — ${themeName}`;
+    itemSource.name = localize(this.formatter, variantNameKey, fallback, { theme: themeName });
 
     const byRank = new Map();
     for (const entry of spells) {
@@ -277,11 +443,11 @@ export class StaffGenerator {
     }
     const rows = [...byRank.entries()].sort((a, b) => a[0] - b[0]).map(([rank, entries]) => {
       const label = rank === 0
-        ? this.formatter?.("PF2E_ITEM_FORGE.Magic.Cantrip", {}) ?? "Cantrip"
-        : this.formatter?.("PF2E_ITEM_FORGE.Magic.SpellRankLabel", { rank }) ?? `Rank ${rank}`;
+        ? localize(this.formatter, "PF2E_ITEM_FORGE.Magic.Cantrip", "Cantrip")
+        : localize(this.formatter, "PF2E_ITEM_FORGE.Magic.SpellRankLabel", `Rank ${rank}`, { rank });
       const links = entries.map((entry) => {
         const suffix = entry.rank > entry.spell.baseRank
-          ? ` (${this.formatter?.("PF2E_ITEM_FORGE.Magic.HeightenedShort", { rank: entry.rank }) ?? `heightened ${entry.rank}`})`
+          ? ` (${localize(this.formatter, "PF2E_ITEM_FORGE.Magic.HeightenedShort", `heightened ${entry.rank}`, { rank: entry.rank })})`
           : "";
         return `@UUID[${entry.spell.uuid}]{${entry.spell.name}}${suffix}`;
       }).join(", ");
@@ -289,12 +455,15 @@ export class StaffGenerator {
     }).join("");
 
     const generic = itemSource.system.description?.value ?? "";
-    const intro = this.formatter?.("PF2E_ITEM_FORGE.Magic.GeneratedStaffDescription", { theme: themeName })
-      ?? `A generated thematic staff of ${themeName}.`;
-    const activation = this.formatter?.("PF2E_ITEM_FORGE.Magic.StaffActivation", {})
-      ?? "Cast a Spell; expend charges equal to the spell rank.";
+    const intro = localize(this.formatter, "PF2E_ITEM_FORGE.Magic.GeneratedStaffFamilyDescription",
+      `This generated staff belongs to a rulebook-style staff family themed around ${themeName}. The selected variant includes the spells introduced by all earlier variants in the family.`,
+      { theme: themeName, levels: profileLevels(profile).join(" → ") });
+    const activation = localize(this.formatter, "PF2E_ITEM_FORGE.Magic.StaffActivation",
+      "Activate — Cast a Spell: Expend charges equal to the spell rank to cast a spell from the list. Cantrips expend no charges.");
+    const profileText = localize(this.formatter, "PF2E_ITEM_FORGE.Magic.StaffFamilyProfileDescription",
+      `Family progression: ${profileLevels(profile).join(" → ")}.`, { levels: profileLevels(profile).join(" → ") });
     itemSource.system.description ??= { value: "" };
-    itemSource.system.description.value = `<p>${intro}</p><p><strong>${activation}</strong></p><ul>${rows}</ul>${generic ? `<hr>${generic}` : ""}`;
+    itemSource.system.description.value = `<p>${intro}</p><p>${profileText}</p><p><strong>${activation}</strong></p><ul>${rows}</ul>${generic ? `<hr>${generic}` : ""}`;
 
     itemSource.flags ??= {};
     itemSource.flags["pf2e-item-forge"] = {
@@ -303,21 +472,44 @@ export class StaffGenerator {
       seed: request.seed,
       baseItemUuid: baseEntry.uuid,
       staff: {
+        mode: "generated-family",
         theme: themeId,
-        level: profile.level,
-        maxRank: profile.maxRank,
-        priceGp: profile.price,
+        profile: profile.id,
+        profileLevels: profileLevels(profile),
+        variant: variant.id,
+        variantIndex,
+        level: variant.level,
+        maxRank: maxRankForVariant(profile, variantIndex),
+        priceGp: variant.price,
+        family: family.map((tier) => ({
+          variant: tier.variant.id,
+          level: tier.variant.level,
+          priceGp: tier.variant.price,
+          spells: tier.spells.map((entry) => ({
+            uuid: entry.spell.uuid,
+            name: entry.spell.name,
+            baseRank: entry.spell.baseRank,
+            rank: entry.rank,
+            cantrip: entry.cantrip,
+            heightened: !entry.cantrip && entry.rank > entry.spell.baseRank
+          }))
+        })),
         spells: spells.map((entry) => ({
           uuid: entry.spell.uuid,
           name: entry.spell.name,
           baseRank: entry.spell.baseRank,
           rank: entry.rank,
           cantrip: entry.cantrip,
-          heightened: !entry.cantrip && entry.rank > entry.spell.baseRank
+          heightened: !entry.cantrip && entry.rank > entry.spell.baseRank,
+          introducedIn: entry.variantId
         }))
       }
     };
   }
 }
 
-export { STAFF_PROFILES };
+export const CORE_STAFF_PROFILE_LEVELS = {
+  "core.3-8-12": [3, 8, 12],
+  "core.4-8-12": [4, 8, 12],
+  "core.6-10-14": [6, 10, 14]
+};

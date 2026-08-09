@@ -8,6 +8,7 @@ import { EquipmentGenerator } from "../src/engine/generators/equipment-generator
 import { TreasureGenerator } from "../src/engine/generators/treasure-generator.js";
 import { WandGenerator } from "../src/engine/generators/wand-generator.js";
 import { StaffGenerator } from "../src/engine/generators/staff-generator.js";
+import { StaffProfileRegistry, registerCoreStaffProfiles } from "../src/engine/registries/staff-profile-registry.js";
 import { getSelectableMagicThemes } from "../src/engine/magic-themes.js";
 import { TreasureRegistry } from "../src/engine/registries/treasure-registry.js";
 import { registerCoreTreasureContent } from "../src/engine/treasure/core-treasure-content.js";
@@ -58,9 +59,10 @@ function createApi() {
   const generators = new GeneratorRegistry();
   const treasure = registerCoreTreasureContent(new TreasureRegistry({ categories }));
   const propertyRunes = registerCorePropertyRunes(new PropertyRuneRegistry());
+  const staffProfiles = registerCoreStaffProfiles(new StaffProfileRegistry());
   generators.register(new TreasureGenerator({ categories, treasure }), { priority: 200, modes: ["treasure"] });
   generators.register(new WandGenerator({ compendiumIndex }), { priority: 220, modes: ["magic"] });
-  generators.register(new StaffGenerator({ compendiumIndex }), { priority: 210, modes: ["magic"] });
+  generators.register(new StaffGenerator({ compendiumIndex, staffProfiles }), { priority: 210, modes: ["magic"] });
   generators.register(new ScrollGenerator({ compendiumIndex }), { priority: 200, modes: ["existing"] });
   generators.register(new EquipmentGenerator({ compendiumIndex, propertyRunes }), { priority: 150, modes: ["equipment"] });
   generators.register(new ExistingItemGenerator({ compendiumIndex }), { priority: 0, modes: ["existing"] });
@@ -81,7 +83,7 @@ function createApi() {
     return application;
   };
 
-  return new ItemForgeApi({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes: getSelectableMagicThemes(), openApplication });
+  return new ItemForgeApi({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes: getSelectableMagicThemes(), staffProfiles, openApplication });
 }
 
 function exposeApi() {

@@ -23,6 +23,7 @@ function apiFixture() {
       motifs: { getAll: () => [] }, conditions: { getAll: () => [] }, craftsmanship: { getAll: () => [] }, styles: { getAll: () => [] }
     },
     propertyRunes: { getAll: () => [] },
+    staffProfiles: { getAll: () => [{ id: "core.3-8-12", label: "Profile", variants: [{ level: 3 }, { level: 8 }, { level: 12 }] }] },
     openApplication: () => "opened"
   });
 }
@@ -40,4 +41,6 @@ test("ItemForgeApi capabilities expose generator priority metadata and registere
   assert.deepEqual(capabilities.generationModes, ["custom"]);
   assert.deepEqual(capabilities.generators, ["test"]);
   assert.deepEqual(capabilities.generatorMetadata, [{ id: "test", priority: 10, modes: ["custom"] }]);
+  assert.deepEqual(capabilities.staffModes, ["generated", "existing"]);
+  assert.deepEqual(capabilities.staffProfiles, [{ id: "core.3-8-12", label: "Profile", levels: [3, 8, 12] }]);
 });

@@ -65,18 +65,50 @@
     {{#if isMagicMode}}
       <fieldset class="magic-settings">
         <legend>{{localize "PF2E_ITEM_FORGE.Magic.SettingsHeading"}}</legend>
-        <div class="form-group">
-          <label>{{localize "PF2E_ITEM_FORGE.Fields.MagicTheme"}}</label>
-          <select name="magic.theme">
-            {{#each magicThemes}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
-          </select>
-          <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.MagicTheme"}}</p>
-        </div>
-        <label class="checkbox">
-          <input type="checkbox" name="magic.allowHeightened" {{#if request.magic.allowHeightened}}checked{{/if}}>
-          {{localize "PF2E_ITEM_FORGE.Fields.AllowHeightenedSpells"}}
-        </label>
-        <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.AllowHeightenedSpells"}}</p>
+        {{#if isStaffCategory}}
+          <div class="form-group">
+            <label>{{localize "PF2E_ITEM_FORGE.Fields.StaffMode"}}</label>
+            <select name="magic.staffMode">
+              {{#each staffModes}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+            </select>
+            <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.StaffMode"}}</p>
+          </div>
+        {{/if}}
+        {{#unless isStaffCategory}}
+          <div class="form-group">
+            <label>{{localize "PF2E_ITEM_FORGE.Fields.MagicTheme"}}</label>
+            <select name="magic.theme">
+              {{#each magicThemes}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+            </select>
+            <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.MagicTheme"}}</p>
+          </div>
+          <label class="checkbox">
+            <input type="checkbox" name="magic.allowHeightened" {{#if request.magic.allowHeightened}}checked{{/if}}>
+            {{localize "PF2E_ITEM_FORGE.Fields.AllowHeightenedSpells"}}
+          </label>
+          <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.AllowHeightenedSpells"}}</p>
+        {{/unless}}
+        {{#if generatedStaff}}
+          <div class="form-group">
+            <label>{{localize "PF2E_ITEM_FORGE.Fields.StaffProfile"}}</label>
+            <select name="magic.staffProfile">
+              {{#each staffProfiles}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+            </select>
+            <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.StaffProfile"}}</p>
+          </div>
+          <div class="form-group">
+            <label>{{localize "PF2E_ITEM_FORGE.Fields.MagicTheme"}}</label>
+            <select name="magic.theme">
+              {{#each magicThemes}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+            </select>
+            <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.MagicTheme"}}</p>
+          </div>
+          <label class="checkbox">
+            <input type="checkbox" name="magic.allowHeightened" {{#if request.magic.allowHeightened}}checked{{/if}}>
+            {{localize "PF2E_ITEM_FORGE.Fields.AllowHeightenedSpells"}}
+          </label>
+          <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.AllowHeightenedSpells"}}</p>
+        {{/if}}
       </fieldset>
     {{/if}}
 
@@ -273,7 +305,10 @@
             {{/if}}
             {{#if preview.magic}}
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.MagicKind"}}</dt><dd>{{#if preview.spell}}{{localize "PF2E_ITEM_FORGE.Categories.MagicWand"}}{{else}}{{localize "PF2E_ITEM_FORGE.Categories.MagicStaff"}}{{/if}}</dd>
-              <dt>{{localize "PF2E_ITEM_FORGE.Preview.MagicTheme"}}</dt><dd>{{preview.magic.themeLabel}}</dd>
+              {{#if preview.magic.staffModeLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.StaffMode"}}</dt><dd>{{preview.magic.staffModeLabel}}</dd>{{/if}}
+              {{#if preview.magic.themeLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.MagicTheme"}}</dt><dd>{{preview.magic.themeLabel}}</dd>{{/if}}
+              {{#if preview.magic.profileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.StaffProfile"}}</dt><dd>{{preview.magic.profileLabel}}</dd>{{/if}}
+              {{#if preview.magic.variantLabelLocalized}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.StaffVariant"}}</dt><dd>{{preview.magic.variantLabelLocalized}}</dd>{{/if}}
               {{#if preview.magic.maxRank}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.HighestSpellRank"}}</dt><dd>{{preview.magic.maxRank}}</dd>{{/if}}
             {{/if}}
             {{#if preview.spells.length}}

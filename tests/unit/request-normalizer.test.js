@@ -65,13 +65,17 @@ test("normalizeRequest hydrates magic item settings", () => {
   const defaults = normalizeRequest({ mode: "magic", category: "magic.staff", seed: "x" });
   assert.equal(defaults.magic.theme, "automatic");
   assert.equal(defaults.magic.allowHeightened, true);
+  assert.equal(defaults.magic.staffMode, "generated");
+  assert.equal(defaults.magic.staffProfile, "automatic");
 
   const explicit = normalizeRequest({
     mode: "magic",
     category: "magic.wand",
-    magic: { theme: "fire", allowHeightened: false },
+    magic: { theme: "fire", allowHeightened: false, staffMode: "existing", staffProfile: "core.6-10-14" },
     seed: "x"
   });
   assert.equal(explicit.magic.theme, "fire");
   assert.equal(explicit.magic.allowHeightened, false);
+  assert.equal(explicit.magic.staffMode, "existing");
+  assert.equal(explicit.magic.staffProfile, "core.6-10-14");
 });

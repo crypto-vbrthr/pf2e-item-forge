@@ -10,6 +10,7 @@ const LEVEL_POLICIES = new Set(["strict", "nearest", "notAbove", "notBelow"]);
 const SOURCE_MODES = new Set(["all", "system", "selected"]);
 const FUNDAMENTAL_RUNE_MODES = new Set(["automatic", "none"]);
 const PROPERTY_RUNE_MODES = new Set(["automatic", "random", "fixed", "none"]);
+const STAFF_MODES = new Set(["generated", "existing"]);
 
 function integer(value, fallback) {
   const parsed = Number.parseInt(value, 10);
@@ -113,7 +114,9 @@ export function normalizeRequest(request = {}, options = {}) {
     },
     magic: {
       theme: typeof request.magic?.theme === "string" && request.magic.theme ? request.magic.theme : "automatic",
-      allowHeightened: boolean(request.magic?.allowHeightened, true)
+      allowHeightened: boolean(request.magic?.allowHeightened, true),
+      staffMode: STAFF_MODES.has(request.magic?.staffMode) ? request.magic.staffMode : "generated",
+      staffProfile: typeof request.magic?.staffProfile === "string" && request.magic.staffProfile ? request.magic.staffProfile : "automatic"
     },
     seed: String(request.seed ?? createSeed()),
     filters: request.filters && typeof request.filters === "object" ? request.filters : {},

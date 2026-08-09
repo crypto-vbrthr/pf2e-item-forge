@@ -9,7 +9,9 @@ function clone(value) {
  * artificially raised to higher ranks by the Item Forge.
  */
 export function getMeaningfulSpellRanks(spell, { maxRank = 10 } = {}) {
-  const baseRank = Math.max(1, Math.min(maxRank, Number(spell?.baseRank ?? 1)));
+  const rawBaseRank = Number(spell?.baseRank ?? 1);
+  if (!Number.isInteger(rawBaseRank) || rawBaseRank < 1 || rawBaseRank > maxRank) return [];
+  const baseRank = rawBaseRank;
   const ranks = new Set([baseRank]);
   const heightening = spell?.heightening;
 

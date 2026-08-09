@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.0.13
+
+- Replaces the universal generated-staff level ladder with rulebook-style staff families.
+- Adds core family profiles `3 → 8 → 12`, `4 → 8 → 12`, and `6 → 10 → 14`; each stronger variant inherits all earlier spells and adds only its own configured spell ranks.
+- Adds `magic.staffMode`: generated thematic family or predefined staff selection.
+- Predefined staff selection clones an actual staff from the selected compendia without replacing its spell list, special abilities, runes, price, or native PF2e data.
+- Adds `magic.staffProfile` and a public `StaffProfileRegistry`, so additional family progressions can be registered without changing `StaffGenerator`.
+- Generated staff families use deterministic per-tier RNG streams, keeping lower-tier spell choices stable when the same seed is used to generate stronger variants.
+- Heightened repetitions remain legal only when the spell has real interval/fixed heightening data for that rank.
+- Fixes `getMeaningfulSpellRanks()` so a spell above the requested maximum rank is never silently down-ranked into a lower staff/scroll/wand slot.
+- Generated staves are marked as specific magic weapons and store a structured variant-family manifest in Item Forge flags.
+- Embedded editor adds staff-generation mode and family-profile controls; preview shows generation path, profile, and selected variant.
+- Adds staff-family registry, inheritance, predefined-staff preservation, heightening, deterministic-family, and no-down-ranking regression coverage.
+- Automated suite now contains 99 passing tests.
+
 ## 0.0.12
 
 - Adds a new `magic` generation mode for generated spell-bound permanent magic items.

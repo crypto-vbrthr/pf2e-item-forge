@@ -46,7 +46,9 @@
       "Style": "Style",
       "TreasureType": "Treasure type",
       "MagicTheme": "Magical theme",
-      "AllowHeightenedSpells": "Use eligible heightened spells"
+      "AllowHeightenedSpells": "Use eligible heightened spells",
+      "StaffMode": "Staff generation",
+      "StaffProfile": "Family profile"
     },
     "LevelMode": {
       "Single": "Single level",
@@ -82,10 +84,12 @@
       "TreasureMode": "Generates exactly one nonmagical sale or art treasure. Material, craftsmanship, and condition affect its value.",
       "ValueTolerance": "0.15 means ±15% around the target value. If no match is found, the ValueSolver returns the closest valid result with a warning.",
       "TreasureType": "Optionally select one exact treasure type. “Any” lets Item Forge roll within the selected category.",
-      "MagicMode": "Generates spell-bound magic items. Wands contain one suitable spell; staves receive a thematic spell list across multiple ranks.",
+      "MagicMode": "Generates spell-bound magic items. Wands contain one suitable spell; staves can either be selected from rules content or generated as thematic variant families.",
       "MagicSources": "Selected compendiums define the spell pool. System item templates are used only as structural bases.",
       "MagicTheme": "Automatic chooses a theme with enough eligible spells. A selected theme is a hard constraint.",
-      "AllowHeightenedSpells": "Only spells with actual heightening data may reappear at higher ranks in generated wands or staves."
+      "AllowHeightenedSpells": "Only spells with actual heightening data may reappear at higher ranks in generated wands or staves.",
+      "StaffMode": "Predefined copies an existing PF2e staff unchanged from the selected compendia. Generated creates a new thematic staff family using rules-style level profiles.",
+      "StaffProfile": "The profile defines the levels of the base, greater, and major variants and which new spell ranks each variant adds. Earlier variants are inherited in full."
     },
     "Preview": {
       "Empty": "Nothing forged yet. Choose parameters and press Generate.",
@@ -114,7 +118,10 @@
       "MagicKind": "Magic item type",
       "MagicTheme": "Theme",
       "HighestSpellRank": "Highest spell rank",
-      "SpellList": "Spell list"
+      "SpellList": "Spell list",
+      "StaffMode": "Staff generation",
+      "StaffProfile": "Family profile",
+      "StaffVariant": "Variant"
     },
     "Notifications": {
       "GenerationFailed": "No item could be generated for these parameters.",
@@ -193,7 +200,9 @@
       "UnsupportedMagicCategory": "This generation mode currently supports wands and staves.",
       "NoWandSpellCandidate": "No spell suitable for a wand was found in the selected sources.",
       "NoStaffSpellCandidate": "No suitable staff spell list could be assembled for the selected level and theme.",
-      "NoStaffBaseItem": "The PF2e base weapon required for a staff could not be found."
+      "NoStaffBaseItem": "The PF2e base weapon required for a staff could not be found.",
+      "NoPredefinedStaffCandidate": "No predefined staff matching the requested level was found in the selected compendia.",
+      "UnknownStaffProfile": "The selected staff family profile is not registered."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatic level-appropriate",
@@ -236,12 +245,16 @@
     },
     "Magic": {
       "SettingsHeading": "Spell magic",
-      "StaffName": "Staff: {theme}",
+      "StaffName": "Staff — {theme}",
       "Cantrip": "Cantrip",
       "SpellRankLabel": "Rank {rank}",
       "HeightenedShort": "heightened to rank {rank}",
       "GeneratedStaffDescription": "This staff gathers magic around the theme “{theme}”. Its spell list was assembled from the selected spell sources to match the requested item level.",
-      "StaffActivation": "Activate – Cast a Spell: Expend charges equal to the spell rank to cast a spell from the list. Cantrips expend no charges."
+      "StaffActivation": "Activate – Cast a Spell: Expend charges equal to the spell rank to cast a spell from the list. Cantrips expend no charges.",
+      "GreaterStaffName": "Greater Staff — {theme}",
+      "MajorStaffName": "Major Staff — {theme}",
+      "GeneratedStaffFamilyDescription": "This staff belongs to a thematic variant family centered on “{theme}”. The selected variant also contains every spell introduced by the earlier variants in the family.",
+      "StaffFamilyProfileDescription": "Family progression: {levels}. Each stronger variant adds new spell ranks rather than automatically filling every rank up to its maximum."
     },
     "MagicThemes": {
       "Automatic": "Automatic",
@@ -258,6 +271,21 @@
       "Occult": "Occult",
       "Primal": "Primal",
       "Summoning": "Summoning"
+    },
+    "StaffMode": {
+      "Generated": "Generate thematic staff family",
+      "Existing": "Select predefined staff"
+    },
+    "StaffProfiles": {
+      "Automatic": "Automatic for requested level",
+      "Core3812": "Classic 3 → 8 → 12",
+      "Core4812": "Classic 4 → 8 → 12",
+      "Core61014": "Classic 6 → 10 → 14"
+    },
+    "StaffVariants": {
+      "Base": "Base variant",
+      "Greater": "Greater staff",
+      "Major": "Major staff"
     }
   }
 }

@@ -26,6 +26,7 @@ ItemForgeEngine (canonical normalization, validation, generation)
         +-- shared spell-item utilities / magic themes
         +-- ItemLevelResolver
         +-- PropertyRuneRegistry
+        +-- StaffProfileRegistry
         +-- ValueSolver
         +-- TreasureRegistry
               +-- types
@@ -46,7 +47,7 @@ ItemForgeEngine (canonical normalization, validation, generation)
 - Other modules should use the public engine API and may embed `ItemForgeEditor` without the standalone Item Forge window.
 - Future Loot Forge integration should distribute budgets/counts/themes and issue individual Item Forge requests.
 - Built-in and external treasure content use the same validated registries.
-- Spell documents are support data, not directly generatable physical items. `ScrollGenerator` and `WandGenerator` may select eligible spells and embed them into physical item results; `StaffGenerator` uses the spell index to build a structured thematic staff manifest.
+- Spell documents are support data, not directly generatable physical items. `ScrollGenerator` and `WandGenerator` may select eligible spells and embed them into physical item results; `StaffGenerator` either copies a predefined PF2e staff unchanged or uses the spell index to build a structured staff-family manifest.
 
 ## Generator resolution
 
@@ -76,9 +77,13 @@ Registered generation modes are exposed through the public capabilities API and 
 
 ### Staves
 
-`StaffGenerator` builds one thematic custom staff around an ordinary PF2e staff weapon source. A level profile determines the highest spell rank and generated sale price. The generator attempts to include one cantrip and spell entries from rank 1 through the profile maximum, with extra density near the top ranks. Previously chosen spells may reappear at a higher rank only when the indexed spell heightening data supports that rank.
+`StaffGenerator` has two explicit paths. `magic.staffMode: "existing"` selects a real staff from the configured compendia and clones its native PF2e item data unchanged, preserving its published spell list, special abilities, runes, price, and system automation.
 
-Generated staff spell lists are stored twice: as enriched `@UUID` spell links in the item description for immediate Foundry usability, and as a complete structured manifest in `flags.pf2e-item-forge.staff` for deterministic regeneration and future integrations. The current implementation deliberately does not invent an undocumented PF2e-native custom-staff storage schema; native staff-preparation/casting automation can be wired to the structured manifest once its live-system contract is verified.
+`magic.staffMode: "generated"` creates a new thematic staff using a `StaffProfileRegistry`. Core profiles model common PF2e family progressions rather than a universal level ladder: `3 → 8 → 12`, `4 → 8 → 12`, and `6 → 10 → 14`. Each profile is a sequence of variants. The base variant introduces its own spell ranks; greater/major variants add only the ranks assigned to that tier and inherit every spell from all earlier variants. A generated level-12 staff in a `3 → 8 → 12` family therefore contains the base rank-1 list, the greater rank-2/3 additions, and the major rank-4/5 additions. It does not independently refill every rank from scratch.
+
+Generated families use deterministic per-tier RNG streams so generating a stronger variant with the same seed preserves the exact lower-tier spell choices. A spell may reappear at a higher rank only when its indexed heightening data actually supports that rank. The shared spell utility never down-ranks a higher-rank spell merely because a lower maximum rank is requested.
+
+Generated staff spell lists are stored as enriched `@UUID` links in the description and as a complete structured family manifest in `flags.pf2e-item-forge.staff`, including profile, selected variant, inherited tiers, and per-tier additions. Generated staves are marked as specific magic weapons. The implementation still deliberately avoids inventing an undocumented PF2e-native custom-staff spell-preparation storage schema; predefined staves use their native data, while generated family automation can later be wired to the verified live-system contract.
 
 ## Treasure generation
 

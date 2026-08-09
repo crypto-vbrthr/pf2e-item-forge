@@ -2,9 +2,9 @@
 
 Reusable Item Forge architecture for Foundry VTT v14 and Pathfinder 2e.
 
-## v0.0.12 scope
+## v0.0.13 scope
 
-This release adds the first generated spell-bound permanent magic-item family on top of the hardened reusable API/editor architecture: spell-bearing wands and thematic generated staves.
+This release corrects staff generation to follow PF2e-style staff families while keeping spell-bearing wands and the reusable API/editor architecture.
 
 Implemented:
 
@@ -20,7 +20,7 @@ Implemented:
 - Spell-bearing scroll generation with meaningful legal heightening
 - Generated spell-bound magic-item mode for wands and staves
 - Wands use the PF2e generic wand templates and embed one real spell at a legal base or meaningful heightened rank
-- Generated staves build thematic multi-rank spell lists, including cantrips and meaningful heightened repetitions when supported by the spell data
+- Staves can either be copied exactly from selected compendia or generated as rulebook-style variant families with inherited lower variants
 - Magic themes for fire, cold, electricity, healing, illusion, mental, vitality, void, arcane, divine, occult, primal, and summoning
 - Composed weapons, armor, and shields with fundamental runes
 - Registry-driven property runes with automatic/random/fixed/none modes and compatibility rules
@@ -40,11 +40,11 @@ Implemented:
 - Embedded `ItemForgeEditor` with request editing, preview, reroll, description display, and no persistence side effects
 - Standalone `ItemForgeApplication` container owning Foundry document creation
 - German and English localization
-- 92 automated unit/integration/statistical/contract tests
+- 99 automated unit/integration/statistical/contract tests
 
 Not yet implemented:
 
-- Native PF2e staff-preparation/casting automation for generated custom staff spell manifests (generated staves currently use a real PF2e staff weapon source, linked spell list, and structured Item Forge flags)
+- Native PF2e staff-preparation/casting automation for generated custom staff-family manifests (predefined staves preserve their native PF2e data unchanged)
 - Precious-material composition for functional weapons/armor
 - Presets
 - Actor/folder output targets
@@ -97,7 +97,7 @@ await game.pf2eItemForge.generate({
 });
 ```
 
-Generate one thematic staff:
+Generate one thematic staff family variant:
 
 ```js
 await game.pf2eItemForge.generate({
@@ -107,9 +107,23 @@ await game.pf2eItemForge.generate({
   levelPolicy: "strict",
   source: { mode: "system" },
   magic: {
+    staffMode: "generated",
+    staffProfile: "core.6-10-14",
     theme: "illusion",
     allowHeightened: true
   }
+});
+```
+
+Select a predefined rules staff without rewriting its spell list or special abilities:
+
+```js
+await game.pf2eItemForge.generate({
+  mode: "magic",
+  category: "magic.staff",
+  level: 8,
+  source: { mode: "system" },
+  magic: { staffMode: "existing" }
 });
 ```
 

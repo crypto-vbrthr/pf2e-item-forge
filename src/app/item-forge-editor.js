@@ -101,6 +101,8 @@ export class ItemForgeEditor extends HandlebarsApplication {
         NO_WAND_SPELL_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoWandSpellCandidate",
         NO_STAFF_SPELL_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoStaffSpellCandidate",
         NO_STAFF_BASE_ITEM: "PF2E_ITEM_FORGE.Errors.NoStaffBaseItem",
+        NO_PREDEFINED_STAFF_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoPredefinedStaffCandidate",
+        UNKNOWN_STAFF_PROFILE: "PF2E_ITEM_FORGE.Errors.UnknownStaffProfile",
         UNSUPPORTED_TREASURE_CATEGORY: "PF2E_ITEM_FORGE.Errors.UnsupportedTreasureCategory",
         NO_TREASURE_TYPE: "PF2E_ITEM_FORGE.Errors.NoTreasureType",
         NO_TREASURE_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoTreasureCandidate",
@@ -198,6 +200,21 @@ export class ItemForgeEditor extends HandlebarsApplication {
       selected: this.request.source.mode === id,
       label: localizeMaybe(`PF2E_ITEM_FORGE.SourceMode.${{ all: "All", system: "System", selected: "Selected" }[id]}`)
     }));
+    const isStaffCategory = isMagicMode && this.request.category === "magic.staff";
+    const generatedStaff = isStaffCategory && this.request.magic?.staffMode !== "existing";
+    const staffModes = ["generated", "existing"].map((id) => ({
+      id,
+      selected: (this.request.magic?.staffMode ?? "generated") === id,
+      label: localizeMaybe(`PF2E_ITEM_FORGE.StaffMode.${id === "generated" ? "Generated" : "Existing"}`)
+    }));
+    const staffProfiles = [
+      { id: "automatic", label: localizeMaybe("PF2E_ITEM_FORGE.StaffProfiles.Automatic"), selected: (this.request.magic?.staffProfile ?? "automatic") === "automatic" },
+      ...((this.api.staffProfiles?.getAll?.() ?? []).map((profile) => ({
+        id: profile.id,
+        label: localizeMaybe(profile.label),
+        selected: this.request.magic?.staffProfile === profile.id
+      })))
+    ];
     const magicThemes = (this.api.magicThemes ?? []).map((theme) => ({
       id: theme.id,
       label: localizeMaybe(theme.label),
@@ -257,7 +274,18 @@ export class ItemForgeEditor extends HandlebarsApplication {
           magic: this.previewResult.metadata?.magic
             ? {
                 ...this.previewResult.metadata.magic,
-                themeLabel: localizeMaybe((this.api.magicThemes ?? []).find((theme) => theme.id === this.previewResult.metadata.magic.theme)?.label ?? this.previewResult.metadata.magic.theme)
+                themeLabel: this.previewResult.metadata.magic.theme
+                  ? localizeMaybe((this.api.magicThemes ?? []).find((theme) => theme.id === this.previewResult.metadata.magic.theme)?.label ?? this.previewResult.metadata.magic.theme)
+                  : null,
+                profileLabel: this.previewResult.metadata.magic.profile
+                  ? localizeMaybe(this.api.staffProfiles?.get?.(this.previewResult.metadata.magic.profile)?.label ?? this.previewResult.metadata.magic.profile)
+                  : null,
+                variantLabelLocalized: this.previewResult.metadata.magic.variantLabel
+                  ? localizeMaybe(this.previewResult.metadata.magic.variantLabel)
+                  : null,
+                staffModeLabel: this.previewResult.metadata.magic.staffMode
+                  ? localizeMaybe(`PF2E_ITEM_FORGE.StaffMode.${this.previewResult.metadata.magic.staffMode === "existing" ? "Existing" : "Generated"}`)
+                  : null
               }
             : null,
           baseItem: this.previewResult.plan?.baseItem ?? this.previewResult.metadata?.baseItem ?? null,
@@ -293,6 +321,10 @@ export class ItemForgeEditor extends HandlebarsApplication {
       isEquipmentMode: this.request.mode === "equipment",
       isTreasureMode: this.request.mode === "treasure",
       isMagicMode,
+      isStaffCategory,
+      generatedStaff,
+      staffModes,
+      staffProfiles,
       magicThemes,
       treasureValueRange: this.request.value?.mode === "range",
       treasureTypes,
@@ -335,7 +367,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
         this.previewResult = null;
         this.error = null;
         this.onChange?.(this.getRequest(), this);
-        if (["mode", "category", "levelMode", "source.mode", "equipment.propertyRunes.mode", "value.mode", "treasure.type"].includes(input.name)) {
+        if (["mode", "category", "levelMode", "source.mode", "equipment.propertyRunes.mode", "value.mode", "treasure.type", "magic.staffMode", "magic.staffProfile"].includes(input.name)) {
           await this.#renderPreservingView();
         }
       });
@@ -479,6 +511,8 @@ export class ItemForgeEditor extends HandlebarsApplication {
     this.request.treasure.motif = value("treasure.motif", this.request.treasure.motif ?? "any");
     this.request.treasure.style = value("treasure.style", this.request.treasure.style ?? "any");
     this.request.magic ??= {};
+    this.request.magic.staffMode = value("magic.staffMode", this.request.magic.staffMode ?? "generated");
+    this.request.magic.staffProfile = value("magic.staffProfile", this.request.magic.staffProfile ?? "automatic");
     this.request.magic.theme = value("magic.theme", this.request.magic.theme ?? "automatic");
     const heightenedInput = root.querySelector('[name="magic.allowHeightened"]');
     if (heightenedInput) this.request.magic.allowHeightened = Boolean(heightenedInput.checked);
