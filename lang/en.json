@@ -52,7 +52,9 @@
       "SpellheartMode": "Spellheart generation",
       "SpellheartProfile": "Spellheart profile",
       "WandMode": "Wand generation",
-      "WandProfile": "Special wand profile"
+      "WandProfile": "Special wand profile",
+      "SpecificItemMode": "Specific generation",
+      "SpecificItemProfile": "Specific item profile"
     },
     "LevelMode": {
       "Single": "Single level",
@@ -88,8 +90,8 @@
       "TreasureMode": "Generates exactly one nonmagical sale or art treasure. Material, craftsmanship, and condition affect its value.",
       "ValueTolerance": "0.15 means ±15% around the target value. If no match is found, the ValueSolver returns the closest valid result with a warning.",
       "TreasureType": "Optionally select one exact treasure type. “Any” lets Item Forge roll within the selected category.",
-      "MagicMode": "Generates spell-bound magic items. Wands contain one suitable spell; staves can either be selected from rules content or generated as thematic variant families.",
-      "MagicSources": "Selected compendiums define the spell pool. System item templates are used only as structural bases.",
+      "MagicMode": "Generates permanent special magic items such as wands, staves, spellhearts, and specific magic weapons and armor.",
+      "MagicSources": "Selected compendia provide physical base items and, for spell-bound generators, the spell pool as well.",
       "MagicTheme": "Automatic chooses a theme with enough eligible spells. A selected theme is a hard constraint.",
       "AllowHeightenedSpells": "Only spells with actual heightening data may reappear at higher ranks in generated wands or staves.",
       "StaffMode": "Predefined copies an existing PF2e staff unchanged from the selected compendia. Generated creates a new thematic staff family using rules-style level profiles.",
@@ -98,7 +100,11 @@
       "SpellheartProfile": "A profile defines levels, prices, armor and weapon benefits, and spell structure as one balance unit. Effects from unrelated profiles are not freely mixed.",
       "SpellheartTheme": "The theme defines the spell pool and thematic damage or protection type. A fixed profile only offers compatible themes.",
       "WandMode": "Standard creates an ordinary single-spell wand. Special adds a rules-grounded modifier profile with its own level and price progression, so a matching special wand does not exist at every item level.",
-      "WandProfile": "Choose a modifier profile or let Item Forge pick automatically from compatible profiles."
+      "WandProfile": "Choose a modifier profile or let Item Forge pick automatically from compatible profiles.",
+      "SpecificItemMode": "Predefined copies a complete published item unchanged. Generated builds a new specific item on a normal weapon or suit of armor.",
+      "SpecificItemProfile": "A profile keeps item level, price, fundamental runes, and the special ability together as one balance unit.",
+      "SpecificItemTheme": "A fixed theme restricts selection to profiles and variants that explicitly support that theme.",
+      "SpecificItemRunes": "For generated specific items, property runes come only from the profile. Fundamental runes remain normally upgradeable; additional property runes cannot be freely added."
     },
     "Preview": {
       "Empty": "Nothing forged yet. Choose parameters and press Generate.",
@@ -141,7 +147,12 @@
       "WeaponEffect": "Weapon benefit",
       "WandMode": "Wand generation",
       "WandProfile": "Wand profile",
-      "WandEffect": "Additional effect"
+      "WandEffect": "Additional effect",
+      "SpecificItemMode": "Specific generation",
+      "SpecificItemProfile": "Item profile",
+      "SpecificItemVariant": "Variant",
+      "SpecialAbility": "Special ability",
+      "Automation": "Automation"
     },
     "Notifications": {
       "GenerationFailed": "No item could be generated for these parameters.",
@@ -194,13 +205,15 @@
       "Magic": "Magic item",
       "MagicWand": "Wand",
       "MagicStaff": "Staff",
-      "MagicSpellheart": "Spellheart"
+      "MagicSpellheart": "Spellheart",
+      "MagicWeapon": "Specific magic weapon",
+      "MagicArmor": "Specific magic armor"
     },
     "GenerationMode": {
       "Existing": "Select a predefined item",
       "Equipment": "Compose a weapon, armor, or shield",
       "Treasure": "Generate treasure object",
-      "Magic": "Generate spell-bound magic item"
+      "Magic": "Generate special magic item"
     },
     "FundamentalRunes": {
       "Automatic": "Automatic level-appropriate progression",
@@ -218,7 +231,7 @@
       "NoTreasureType": "No registered treasure type matches the selected treasure category.",
       "NoTreasureCandidate": "No valid treasure could be generated with the selected material, condition, and value constraints.",
       "UnknownTreasureContent": "A requested treasure definition is not registered or is no longer available.",
-      "UnsupportedMagicCategory": "This generation mode currently supports wands and staves.",
+      "UnsupportedMagicCategory": "This generation mode supports wands, staves, spellhearts, and specific magic weapons and armor.",
       "NoWandSpellCandidate": "No spell suitable for a wand was found in the selected sources.",
       "NoStaffSpellCandidate": "No suitable staff spell list could be assembled for the selected level and theme.",
       "NoStaffBaseItem": "The PF2e base weapon required for a staff could not be found.",
@@ -229,7 +242,11 @@
       "NoSpellheartSpellCandidate": "The selected spellheart profile, theme, and sources do not provide enough suitable spells.",
       "UnknownSpellheartProfile": "The selected spellheart profile is not registered.",
       "NoSpecialWandSpellCandidate": "No spell compatible with this special wand profile was found.",
-      "UnknownWandProfile": "The selected special wand profile is not registered."
+      "UnknownWandProfile": "The selected special wand profile is not registered.",
+      "NoPredefinedSpecificItemCandidate": "No predefined specific item in the selected compendia matches the requested level.",
+      "NoSpecificBaseItem": "No suitable non-specific base item was found in the selected sources.",
+      "NoSpecificProfileCandidate": "No valid specific magic item could be generated for the requested level, profile, theme, and base item.",
+      "UnknownSpecificItemProfile": "The selected specific magic item profile is not registered."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatic level-appropriate",
@@ -271,7 +288,7 @@
       "ValueRange": "Value range"
     },
     "Magic": {
-      "SettingsHeading": "Spell magic",
+      "SettingsHeading": "Magic Items",
       "StaffName": "Staff — {theme}",
       "Cantrip": "Cantrip",
       "SpellRankLabel": "Rank {rank}",
@@ -394,6 +411,42 @@
       "MercyName": "Wand of Mercy: {spell} (Rank {rank})",
       "MercyDescription": "This special wand can make a suitable damaging spell nonlethal.",
       "MercyEffect": "When you cast the stored spell, the activation takes 1 additional action. You can give the spell the nonlethal trait for that casting."
+    },
+    "SpecificItemMode": {
+      "Existing": "Select predefined specific item",
+      "Generated": "Generate new specific item"
+    },
+    "SpecificItemProfiles": {
+      "Automatic": "Automatic for requested level",
+      "RetributiveWeapon": "Retributive Weapon",
+      "ElementalWeapon": "Elemental Resonance Weapon",
+      "ElementalArmor": "Elemental Ward Armor",
+      "GuardianArmor": "Guardian Reaction Armor"
+    },
+    "SpecificItemVariants": {
+      "Base": "Base",
+      "Greater": "Greater",
+      "Major": "Major"
+    },
+    "SpecificItemText": {
+      "RetributiveWeaponName": "Retributive {base}",
+      "RetributiveWeaponDescription": "This specific magic weapon reacts to its bearer’s attackers and briefly imprints their threat into its magic.",
+      "RetributiveWeaponEffect": "When a creature damages you with an attack, you gain a +{bonus} circumstance bonus to your next damage roll against that creature if you make that damage roll before the end of your next turn. If another creature damages you with an attack first, the retributive magic changes to that new attacker.",
+      "ElementalWeaponName": "Elemental Resonance {base} ({theme})",
+      "ElementalWeaponDescription": "Bound elemental magic constantly resonates through this specific weapon. Its built-in property rune matches its element.",
+      "ElementalWeaponEffect": "Activate – Discharge Resonance [free-action] (concentrate); Frequency once per day; Trigger You hit with this weapon; Effect The creature hit takes an additional {surgeDamage} {damageLabel}.",
+      "ElementalArmorName": "Elemental Ward {base} ({theme})",
+      "ElementalArmorDescription": "This specific armor channels away one form of elemental energy and can condense its protection against a single impact.",
+      "ElementalArmorEffect": "You gain resistance {resistance} to {damageLabel}. Activate [reaction] (concentrate); Frequency once per day; Trigger You would take {damageLabel}; Effect Double this armor’s resistance against the triggering damage.",
+      "GuardianArmorName": "Guardian Reflex {base}",
+      "GuardianArmorDescription": "A defensive resonance worked into this armor hardens at the instant a blow is about to land.",
+      "GuardianArmorEffect": "Activate [reaction] (concentrate); Frequency {frequency}; Trigger An attack would hit you; Effect You gain a +{acBonus} circumstance bonus to AC against the triggering attack. If this turns the attack into a failure, it misses you.",
+      "OncePerDay": "once per day",
+      "OncePerHour": "once per hour",
+      "OncePerTenMinutes": "once per 10 minutes",
+      "SpecialAbility": "Special Ability:",
+      "PropertyRuneRestriction": "As a specific magic item, this item can’t gain property runes that aren’t already part of its profile. Its fundamental runes can be upgraded or transferred normally.",
+      "RulesTextAutomation": "Rules text / structured metadata"
     }
   }
 }

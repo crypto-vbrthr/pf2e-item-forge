@@ -14,6 +14,43 @@ function getProperty(object, path) {
   return path.split(".").reduce((current, key) => current?.[key], object);
 }
 
+export function isSpecificSystemValue(value) {
+  if (value === true) return true;
+  if (value == null || value === false) return false;
+  if (typeof value !== "object" || Array.isArray(value)) return false;
+
+  // Legacy Item Forge/PF2e shapes stored this as { value: boolean }.
+  if (Object.hasOwn(value, "value")) return value.value === true;
+
+  // PF2e v14 models specific weapons/armor as a non-null object containing
+  // the item's baseline material and rune data. Presence of that object is
+  // itself the specific-item marker (WeaponPF2e#isSpecific is !!system.specific).
+  return true;
+}
+
+export function setSpecificSystemValue(system) {
+  if (!system || typeof system !== "object") return;
+  const existing = system.specific;
+
+  // Keep legacy shapes usable for old worlds/modules.
+  if (existing && typeof existing === "object" && !Array.isArray(existing) && Object.hasOwn(existing, "value")) {
+    existing.value = true;
+    return;
+  }
+
+  const clone = (value) => {
+    if (globalThis.foundry?.utils?.deepClone) return globalThis.foundry.utils.deepClone(value);
+    return structuredClone(value);
+  };
+
+  // PF2e v14 SpecificWeaponData/SpecificArmorData are baseline snapshots.
+  // Store the runes/material that belong intrinsically to this specific item.
+  system.specific = {
+    material: clone(system.material ?? {}),
+    runes: clone(system.runes ?? {})
+  };
+}
+
 function packageInfo(pack) {
   return {
     packageType: pack.metadata?.packageType ?? null,
@@ -241,10 +278,14 @@ export class CompendiumIndex {
       if (weaponTraits.includes("staff") && weaponTraits.includes("magical")) {
         categories.push("magic", "magic.staff");
       }
+      if (isSpecificSystemValue(system.specific) && !categories.includes("magic.staff")) {
+        categories.push("magic", "magic.weapon");
+      }
     } else if (type === "armor") {
       categories.push("armor");
       const armorCategory = system.category;
       if (["light", "medium", "heavy"].includes(armorCategory)) categories.push(`armor.${armorCategory}`);
+      if (isSpecificSystemValue(system.specific)) categories.push("magic", "magic.armor");
     } else if (type === "shield") {
       categories.push("shield");
     } else if (type === "consumable") {

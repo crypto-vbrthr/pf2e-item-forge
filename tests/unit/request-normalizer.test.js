@@ -119,3 +119,32 @@ test("normalizeRequest hydrates custom spellheart settings", () => {
   assert.equal(explicit.magic.theme, "fire");
   assert.equal(explicit.magic.allowHeightened, false);
 });
+
+test("normalizeRequest hydrates specific magic weapon and armor settings", () => {
+  const defaults = normalizeRequest({ mode: "magic", category: "magic.weapon", seed: "x" });
+  assert.equal(defaults.magic.specificMode, "existing");
+  assert.equal(defaults.magic.specificProfile, "automatic");
+
+  const explicit = normalizeRequest({
+    mode: "magic",
+    category: "magic.armor",
+    magic: { specificMode: "generated", specificProfile: "core.elemental-ward-armor", theme: "cold" },
+    seed: "x"
+  });
+  assert.equal(explicit.magic.specificMode, "generated");
+  assert.equal(explicit.magic.specificProfile, "core.elemental-ward-armor");
+  assert.equal(explicit.magic.theme, "cold");
+});
+
+test("validation accepts specific magic weapon and armor categories", async () => {
+  const { validateRequest } = await import("../../src/engine/request-normalizer.js");
+  const { CategoryRegistry, registerCoreCategories } = await import("../../src/engine/category-registry.js");
+  const categories = registerCoreCategories(new CategoryRegistry());
+  for (const category of ["magic.weapon", "magic.armor"]) {
+    const result = validateRequest(
+      { mode: "magic", category, level: 8, source: { mode: "system" }, seed: "x" },
+      { categories, generationModes: ["magic"] }
+    );
+    assert.equal(result.valid, true, category);
+  }
+});

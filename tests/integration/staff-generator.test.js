@@ -80,7 +80,7 @@ function baseStaffDocument() {
         traits: { value: ["two-hand-d8"], rarity: "common" },
         rarity: { value: "common" },
         runes: { potency: 0, striking: 0, property: [] },
-        specific: { value: false },
+        specific: null,
         description: { value: "<p>Base staff.</p>" }
       }
     })
@@ -98,7 +98,8 @@ function predefinedStaffDocument() {
         level: { value: 8 },
         price: { value: { gp: 450 } },
         traits: { value: ["magical", "staff"], rarity: "common" },
-        specific: { value: true },
+        specific: { material: { type: null, grade: null }, runes: { potency: 0, striking: 0, property: [] } },
+        runes: { potency: 0, striking: 0, property: [] },
         description: { value: "<p>Official spell list and special rules.</p>" }
       }
     })
@@ -165,7 +166,8 @@ test("StaffGenerator greater 3-8-12 staff inherits base ranks and adds only rank
   assert.equal(result.metadata.magic.profile, "core.3-8-12");
   assert.equal(result.metadata.magic.variant, "greater");
   assert.deepEqual(result.metadata.magic.profileLevels, [3, 8, 12]);
-  assert.equal(result.itemSource.system.specific.value, true);
+  assert.ok(result.itemSource.system.specific);
+  assert.deepEqual(result.itemSource.system.specific.runes, result.itemSource.system.runes);
   assert.deepEqual(result.itemSource.system.price.value, { gp: 450 });
   assert.ok(result.metadata.spells.some((entry) => entry.cantrip));
   assert.ok(result.metadata.spells.some((entry) => entry.rank === 1 && entry.inherited));
@@ -236,7 +238,8 @@ test("StaffGenerator can select an exact predefined staff without replacing its 
   assert.equal(result.metadata.magic.staffMode, "existing");
   assert.equal(result.itemSource.name, "Greater Staff of Fire");
   assert.match(result.itemSource.system.description.value, /Official spell list and special rules/);
-  assert.equal(result.itemSource.system.specific.value, true);
+  assert.ok(result.itemSource.system.specific);
+  assert.deepEqual(result.itemSource.system.specific.runes, result.itemSource.system.runes);
   assert.equal(result.itemSource.flags["pf2e-item-forge"].staff.mode, "existing");
 });
 

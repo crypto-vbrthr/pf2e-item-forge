@@ -16,8 +16,9 @@ ItemForgeEngine (canonical normalization, validation, generation)
         |
         +-- GeneratorRegistry (priority + declared generation modes)
         |     +-- WandGenerator
-        |     +-- StaffGenerator
+        |     +-- SpecificMagicEquipmentGenerator
         |     +-- SpellheartGenerator
+        |     +-- StaffGenerator
         |     +-- TreasureGenerator
         |     +-- ScrollGenerator
         |     +-- EquipmentGenerator
@@ -27,9 +28,9 @@ ItemForgeEngine (canonical normalization, validation, generation)
         +-- shared spell-item utilities / magic themes
         +-- ItemLevelResolver
         +-- PropertyRuneRegistry
-        +-- WandProfileRegistry
         +-- StaffProfileRegistry
         +-- SpellheartProfileRegistry
+        +-- SpecificItemProfileRegistry
         +-- ValueSolver
         +-- TreasureRegistry
               +-- types
@@ -50,7 +51,7 @@ ItemForgeEngine (canonical normalization, validation, generation)
 - Other modules should use the public engine API and may embed `ItemForgeEditor` without the standalone Item Forge window.
 - Future Loot Forge integration should distribute budgets/counts/themes and issue individual Item Forge requests.
 - Built-in and external treasure content use the same validated registries.
-- Spell documents are support data, not directly generatable physical items. `ScrollGenerator` and `WandGenerator` may select eligible spells and embed them into physical item results; `StaffGenerator` either copies a predefined PF2e staff unchanged or uses the spell index to build a structured staff-family manifest. `SpellheartGenerator` has separate predefined and generated paths. Predefined spellhearts preserve their complete native item data; generated spellhearts use validated whole-effect profiles so armor/weapon benefits, level progression, price, theme, and spell slots remain a coherent unit.
+- Spell documents are support data, not directly generatable physical items. `ScrollGenerator` and `WandGenerator` may select eligible spells and embed them into physical item results; `StaffGenerator` either copies a predefined PF2e staff unchanged or uses the spell index to build a structured staff-family manifest. `SpellheartGenerator` has separate predefined and generated paths. `SpecificMagicEquipmentGenerator` does not require spell sources and either preserves a complete published specific weapon/armor or composes one validated profile onto a mundane base item. Predefined magic items preserve native PF2e automation; generated custom abilities remain explicit rules text plus structured flags unless a verified system contract exists.
 
 ## Generator resolution
 
@@ -59,9 +60,10 @@ Generators are registered with a declared generation mode and priority. Resoluti
 Core priorities:
 
 ```text
-WandGenerator         220  mode magic
-SpellheartGenerator   215  mode magic
-StaffGenerator        210  mode magic
+WandGenerator                    220  mode magic
+SpecificMagicEquipmentGenerator  218  mode magic
+SpellheartGenerator              215  mode magic
+StaffGenerator                   210  mode magic
 TreasureGenerator     200  mode treasure
 ScrollGenerator       200  mode existing
 EquipmentGenerator    150  mode equipment
@@ -73,17 +75,11 @@ Registered generation modes are exposed through the public capabilities API and 
 
 ## Spell-bound permanent magic items
 
-`mode: "magic"` currently owns `magic.wand`, `magic.staff`, and `magic.spellheart`. Wands, generated staves, and generated spellhearts reuse the spell-support index and meaningful-heightening helpers. Predefined spellhearts preserve complete native PF2e documents, while generated spellhearts compose from validated profile families rather than arbitrary effect fragments.
+`mode: "magic"` owns `magic.wand`, `magic.staff`, `magic.spellheart`, `magic.weapon`, and `magic.armor`. Wands, generated staves, and generated spellhearts reuse the spell-support index and meaningful-heightening helpers. Specific weapons/armor instead use the physical-item index and a dedicated specific-item profile registry. Predefined items preserve complete native PF2e documents, while generated custom items compose from validated whole-effect profiles rather than arbitrary effect fragments.
 
 ### Wands
 
-`WandGenerator` selects one eligible non-cantrip, non-focus, non-ritual spell from the configured spell sources. The spell rank must correspond to a legal base rank or to heightening data actually present on the spell when `magic.allowHeightened` is enabled.
-
-`magic.wandMode: "standard"` resolves the PF2e generic wand template for that rank, clones it, transfers rarity/traits, and embeds the selected spell into `system.spell` with the chosen `heightenedLevel`. Its physical item level and price therefore come from PF2e's rank-specific generic wand template.
-
-`magic.wandMode: "special"` selects a validated whole modifier from `WandProfileRegistry`. Core profiles model generic special-wand families that can sensibly accept many spells: Reaching, Legerdemain, and Mercy. Each profile owns its rank-to-item-level/price progression and optional spell-shape constraints. Mercy, for example, only accepts damaging 1- or 2-action spells and excludes death, nonlethal, and void traits. The spell-support index therefore records cast-action count and whether a spell has damage data. Spell-specific published special wands are not generalized into free-form effects.
-
-Generated special-wand effects are written as localized explicit rules text and stored in `flags.pf2e-item-forge.wand` with profile, spell, rank, price, and automation status. The structural item still comes from the PF2e generic wand template, but Item Forge deliberately does not invent unverified custom Rule Elements for the added special-wand behavior. External modules can register additional validated profiles through `game.pf2eItemForge.wandProfiles`.
+`WandGenerator` selects one eligible non-cantrip, non-focus, non-ritual spell from the configured spell sources. The spell rank must correspond to a legal base rank or to heightening data actually present on the spell when `magic.allowHeightened` is enabled. The generator resolves the PF2e generic wand template for that rank, clones it, transfers rarity/traits, and embeds the selected spell into `system.spell` with the chosen `heightenedLevel`. The physical wand level and price therefore come from PF2e's own rank-specific wand templates.
 
 ### Staves
 
@@ -105,6 +101,15 @@ Generated staff spell lists are stored as enriched `@UUID` links in the descript
 Generated spellhearts always select a themed cantrip plus the daily spells required by the chosen profile variant. Heightening is permitted only when the indexed spell actually exposes a meaningful fixed/interval heightened rank. A higher-rank spell is never down-ranked to fill a lower slot. Source-pack, rarity, seed, exact/range level, and level-policy constraints all remain part of the same canonical request.
 
 A real indexed spellheart is used only as a structural PF2e `equipment` template. Its published description, slug, and Rule Elements are removed before the generated profile is applied, so unrelated automation can never leak into the custom result. The generated attachment benefits are rendered as explicit rules text and stored with the complete profile/spell manifest in `flags.pf2e-item-forge.spellheart`. This is deliberate: Item Forge does not invent unverified PF2e Rule Element predicates for arbitrary attachment-specific homebrew effects. Predefined spellhearts remain the path for native published automation.
+
+
+### Specific magic weapons and armor
+
+`SpecificMagicEquipmentGenerator` resolves `magic.weapon` and `magic.armor`. `magic.specificMode: "existing"` selects only indexed PF2e items whose `system.specific.value` is true and clones the complete document, preserving published Rule Elements, activations, runes, price, and description.
+
+`magic.specificMode: "generated"` starts from a compatible non-specific, rune-free physical base and selects a `SpecificItemProfileRegistry` profile. Each profile owns the item type, allowed themes, compatibility constraints, a strict level/price variant progression, fundamental-rune profile, optional profile-owned property runes, and one special ability. The generated source is marked `system.specific.value = true`. Its fundamental runes remain ordinary PF2e runes, but its property-rune list is written exclusively from the profile and the normal free property-rune editor is not exposed for this path. This enforces the specific-item rule that new property runes cannot simply be added later unless the item already possesses them.
+
+Generated unique abilities are rendered into the description and stored in `flags.pf2e-item-forge.specificItem` with profile, variant, theme, base item, runes, level, price, seed, and automation status. They intentionally use `automation: "rules-text"` rather than guessed Rule Elements. Extension modules can register additional complete families through `game.pf2eItemForge.specificItemProfiles`.
 
 
 ## Treasure generation
@@ -162,3 +167,8 @@ physical Consumable source with embedded system.spell
 ```
 
 Generic scroll templates are infrastructure and are suppressed from ordinary predefined-item selection so an empty scroll cannot leak into broad `item` or `consumable` generation.
+
+
+## Specific-item compatibility
+
+The compendium index treats PF2e v14's non-null `system.specific` object as the canonical specific weapon/armor marker, while retaining legacy marker support. Generated specific physical items snapshot their intrinsic material and rune state into `system.specific`.

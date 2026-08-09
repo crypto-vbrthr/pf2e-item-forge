@@ -1,18 +1,36 @@
 # Changelog
 
+## 0.0.19
+
+- Fixed detection of predefined PF2e v14 specific magic weapons and armor. PF2e v14 stores `system.specific` as a non-null baseline data object rather than `{ value: true }`.
+- Preserved backwards compatibility with the older boolean / `{ value: boolean }` marker shapes.
+- Generated specific weapons, armor, and generated staves now write PF2e-v14-style baseline `material` and `runes` data into `system.specific`.
+- Added regression coverage for the live PF2e v14 specific-item data shape.
+
+## 0.0.18
+
+- Adds dedicated `magic.weapon` and `magic.armor` categories for specific magic weapons and armor.
+- Adds `SpecificMagicEquipmentGenerator` with separate predefined and generated paths.
+- Predefined specific items are copied whole from configured compendia, preserving native PF2e Rule Elements, activations, runes, descriptions, price, rarity, and other system data.
+- Generated specific items start from a mundane compatible base weapon or armor and apply one validated `SpecificItemProfile` containing item level, price, fundamental runes, optional profile-owned property runes, theme, and one coherent special ability.
+- Generated items are marked with `system.specific.value = true`; fundamental runes remain normal PF2e runes, while property runes can only come from the selected specific-item profile.
+- Adds public `game.pf2eItemForge.specificItemProfiles` registry and capability metadata for external profile packs.
+- Adds four initial generated profile families: retributive weapon, elemental resonance weapon, elemental ward armor, and guardian-reaction armor.
+- Elemental resonance weapons demonstrate profile-owned property runes by binding the matching flaming/frost/shock/corrosive rune without exposing the generic property-rune editor.
+- Custom special abilities are deliberately stored as rules text plus structured Item Forge metadata instead of guessed PF2e Rule Elements; published items remain the native-automation path.
+- Compendium indexing now distinguishes specific magic weapons/armor from normal bases, and composed-equipment generation explicitly ignores `system.specific.value: true`.
+- Embedded editor adds predefined/generated selection, profile/theme controls, specific-item preview details, and physical-only source selection where no spell pool is needed.
+- Adds registry validation, classification, request/API contract, deterministic generation, predefined-preservation, rune-locking, and editor regression tests.
+- Automated suite now contains 136 passing tests.
+
 ## 0.0.17
 
-- Adds generated special wands beside the existing standard single-spell wand path.
-- Adds public `WandProfileRegistry`, exposed as `game.pf2eItemForge.wandProfiles`, with validated rank/level/price progressions and spell-compatibility constraints.
-- Adds three conservative core special-wand profiles patterned directly after generic Treasure Vault wand families: Reaching, Legerdemain, and Mercy. Spell-specific published wands are deliberately not generalized into arbitrary effects.
-- Adds `magic.wandMode` (`standard` / `special`) and `magic.wandProfile` (`automatic` or a registered profile) to canonical request normalization, capabilities, and the Embedded Item Forge Editor.
-- Special-wand item level and price are taken from the selected profile variant rather than the generic PF2e wand template.
-- Mercy-profile generation requires a damaging 1- or 2-action spell and excludes death, nonlethal, and void spells; the spell index now records cast actions and whether a spell has damage entries.
-- Generated special-wand effects are emitted as localized rules text plus structured `flags.pf2e-item-forge.wand` metadata. The generator does not invent fragile PF2e Rule Elements for these custom spell modifications.
-- Preview now shows wand generation mode, selected special profile, and its additional effect.
-- Adds German/English localization, profile-registry validation, spell-shape indexing, special-wand compatibility, price/level, unknown-profile, and API-contract regression tests.
-- Automated suite now contains 124 passing tests.
-
+- Adds profile-driven special wand generation beside standard PF2e spell wands.
+- Adds public `WandProfileRegistry` with reaching, legerdemain, and mercy profiles based on generic special-wand patterns.
+- Special wand profiles validate their own level/price progression and spell compatibility, including damage, casting-action, and forbidden-trait constraints.
+- Adds `magic.wandMode` and `magic.wandProfile` to the canonical request contract and embedded editor.
+- Stores custom wand additions as explicit rules text plus structured Item Forge metadata while retaining a real embedded spell.
+- Automated suite contains 124 passing tests.
 ## 0.0.16
 
 - Adds custom Spellheart generation beside the existing full-copy path for published PF2e Spellhearts.

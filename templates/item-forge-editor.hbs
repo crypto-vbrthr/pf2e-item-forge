@@ -106,6 +106,34 @@
           </label>
           <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.AllowHeightenedSpells"}}</p>
         {{/if}}
+        {{#if isSpecificMagicCategory}}
+          <div class="form-group">
+            <label>{{localize "PF2E_ITEM_FORGE.Fields.SpecificItemMode"}}</label>
+            <select name="magic.specificMode">
+              {{#each specificModes}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+            </select>
+            <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.SpecificItemMode"}}</p>
+          </div>
+          {{#if generatedSpecific}}
+            <div class="form-group">
+              <label>{{localize "PF2E_ITEM_FORGE.Fields.SpecificItemProfile"}}</label>
+              <select name="magic.specificProfile">
+                {{#each specificProfiles}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+              </select>
+              <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.SpecificItemProfile"}}</p>
+            </div>
+            {{#if specificSupportsTheme}}
+              <div class="form-group">
+                <label>{{localize "PF2E_ITEM_FORGE.Fields.MagicTheme"}}</label>
+                <select name="magic.theme">
+                  {{#each specificMagicThemes}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+                </select>
+                <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.SpecificItemTheme"}}</p>
+              </div>
+            {{/if}}
+            <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.SpecificItemRunes"}}</p>
+          {{/if}}
+        {{/if}}
         {{#if isSpellheartCategory}}
           <div class="form-group">
             <label>{{localize "PF2E_ITEM_FORGE.Fields.SpellheartMode"}}</label>
@@ -358,12 +386,25 @@
               {{#if preview.magic.spellheartModeLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.SpellheartMode"}}</dt><dd>{{preview.magic.spellheartModeLabel}}</dd>{{/if}}
               {{#if preview.magic.themeLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.MagicTheme"}}</dt><dd>{{preview.magic.themeLabel}}</dd>{{/if}}
               {{#if preview.magic.spellheartProfileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.SpellheartProfile"}}</dt><dd>{{preview.magic.spellheartProfileLabel}}</dd>{{/if}}
+              {{#if preview.magic.specificModeLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.SpecificItemMode"}}</dt><dd>{{preview.magic.specificModeLabel}}</dd>{{/if}}
+              {{#if preview.magic.specificProfileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.SpecificItemProfile"}}</dt><dd>{{preview.magic.specificProfileLabel}}</dd>{{/if}}
               {{#if preview.magic.profileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.StaffProfile"}}</dt><dd>{{preview.magic.profileLabel}}</dd>{{/if}}
               {{#if preview.magic.variantLabelLocalized}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.StaffVariant"}}</dt><dd>{{preview.magic.variantLabelLocalized}}</dd>{{/if}}
               {{#if preview.magic.maxRank}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.HighestSpellRank"}}</dt><dd>{{preview.magic.maxRank}}</dd>{{/if}}
             {{/if}}
             {{#if preview.wand.effect}}
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.WandEffect"}}</dt><dd>{{preview.wand.effect}}</dd>
+            {{/if}}
+            {{#if preview.specificItem}}
+              {{#if preview.specificItem.variantLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.SpecificItemVariant"}}</dt><dd>{{preview.specificItem.variantLabel}}</dd>{{/if}}
+              {{#if preview.specificItem.baseItem}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.BaseItem"}}</dt><dd>{{preview.specificItem.baseItem.name}} ({{localize "PF2E_ITEM_FORGE.Preview.Level"}} {{preview.specificItem.baseItem.level}})</dd>{{/if}}
+              {{#if preview.specificItem.runeSummary}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.RuneProfile"}}</dt><dd>{{preview.specificItem.runeSummary}}</dd>{{/if}}
+              {{#if preview.specificItem.propertyRunes.length}}
+                <dt>{{localize "PF2E_ITEM_FORGE.Preview.PropertyRunes"}}</dt>
+                <dd>{{#each preview.specificItem.propertyRunes}}<span class="property-rune-chip">{{displayLabel}}</span>{{/each}}</dd>
+              {{/if}}
+              {{#if preview.specificItem.effect}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.SpecialAbility"}}</dt><dd>{{preview.specificItem.effect}}</dd>{{/if}}
+              {{#if preview.specificItem.automationLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.Automation"}}</dt><dd>{{preview.specificItem.automationLabel}}</dd>{{/if}}
             {{/if}}
             {{#if preview.spellheart}}
               {{#if preview.spellheart.variantLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.SpellheartVariant"}}</dt><dd>{{preview.spellheart.variantLabel}}</dd>{{/if}}

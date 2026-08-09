@@ -2,6 +2,7 @@ import { SeededRng } from "../seeded-rng.js";
 import { distanceToLevelRequest, ItemLevelResolver, levelAllowed } from "../item-level-resolver.js";
 import { applyFundamentalProfile, getFundamentalProfiles, propertyRuneCapacity } from "../equipment-rune-profiles.js";
 import { RARITY_ORDER } from "../registries/property-rune-registry.js";
+import { isSpecificSystemValue } from "../compendium-index.js";
 
 function hasRunes(entry) {
   const runes = entry.runes ?? {};
@@ -14,7 +15,7 @@ function hasRunes(entry) {
 
 function isUsableBase(entry) {
   if (!["weapon", "armor", "shield"].includes(entry.type)) return false;
-  if (entry.specific) return false;
+  if (isSpecificSystemValue(entry.specific)) return false;
   return !hasRunes(entry);
 }
 

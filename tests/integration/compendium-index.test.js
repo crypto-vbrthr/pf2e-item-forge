@@ -158,3 +158,55 @@ test("CompendiumIndex records spell cast actions and whether a spell deals damag
   assert.equal(utility.castActions, null);
   assert.equal(utility.hasDamage, false);
 });
+
+test("CompendiumIndex classifies specific magic weapons and armor separately", async () => {
+  const pack = makePack("pf2e.specific-items", [
+    raw("specific-weapon", "weapon", 7, {
+      specific: { material: { type: null, grade: null }, runes: { potency: 1, striking: 1, property: [] } },
+      traits: { value: ["magical"], rarity: "common" },
+      range: null
+    }),
+    raw("ordinary-weapon", "weapon", 7, { specific: null, traits: { value: ["magical"], rarity: "common" } }),
+    raw("specific-armor", "armor", 8, {
+      specific: { material: { type: null, grade: null }, runes: { potency: 1, resilient: 1, property: [] } },
+      category: "medium",
+      traits: { value: ["magical"], rarity: "common" }
+    }),
+    raw("ordinary-armor", "armor", 8, { specific: null, category: "medium", traits: { value: ["magical"], rarity: "common" } })
+  ]);
+  const categories = registerCoreCategories(new CategoryRegistry());
+  const game = { system: { id: "pf2e" }, packs: new FakePackCollection([pack]) };
+  const index = new CompendiumIndex({ categoryRegistry: categories, gameProvider: () => game });
+  await index.refresh();
+
+  assert.ok(index.entries.find((entry) => entry.id === "specific-weapon").categories.includes("magic.weapon"));
+  assert.equal(index.entries.find((entry) => entry.id === "ordinary-weapon").categories.includes("magic.weapon"), false);
+  assert.ok(index.entries.find((entry) => entry.id === "specific-armor").categories.includes("magic.armor"));
+  assert.equal(index.entries.find((entry) => entry.id === "ordinary-armor").categories.includes("magic.armor"), false);
+});
+
+
+test("CompendiumIndex recognizes PF2e v14 non-null specific data objects and legacy markers", async () => {
+  const pack = makePack("pf2e.specific-shapes", [
+    raw("v14-specific", "weapon", 9, {
+      specific: { material: { type: null, grade: null }, runes: { potency: 1, striking: 1, property: ["flaming"] } },
+      traits: { value: ["magical"], rarity: "common" }
+    }),
+    raw("legacy-specific", "weapon", 9, {
+      specific: { value: true },
+      traits: { value: ["magical"], rarity: "common" }
+    }),
+    raw("legacy-not-specific", "weapon", 9, {
+      specific: { value: false },
+      traits: { value: ["magical"], rarity: "common" }
+    })
+  ]);
+  const categories = registerCoreCategories(new CategoryRegistry());
+  const game = { system: { id: "pf2e" }, packs: new FakePackCollection([pack]) };
+  const index = new CompendiumIndex({ categoryRegistry: categories, gameProvider: () => game });
+  await index.refresh();
+
+  assert.ok(index.entries.find((entry) => entry.id === "v14-specific").categories.includes("magic.weapon"));
+  assert.ok(index.entries.find((entry) => entry.id === "legacy-specific").categories.includes("magic.weapon"));
+  assert.equal(index.entries.find((entry) => entry.id === "legacy-not-specific").categories.includes("magic.weapon"), false);
+});

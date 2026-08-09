@@ -3,6 +3,7 @@ import { distanceToLevelRequest, levelAllowed } from "../item-level-resolver.js"
 import { getHighestRarity, getMeaningfulSpellRanks, isNormalSlottedSpell, isStaffCantrip } from "../spell-item-utils.js";
 import { MAGIC_THEME_DEFINITIONS, getMagicTheme, spellMatchesMagicTheme } from "../magic-themes.js";
 import { registerCoreStaffProfiles, StaffProfileRegistry } from "../registries/staff-profile-registry.js";
+import { setSpecificSystemValue } from "../compendium-index.js";
 
 function clone(value) {
   if (globalThis.foundry?.utils?.deepClone) return globalThis.foundry.utils.deepClone(value);
@@ -424,7 +425,7 @@ export class StaffGenerator {
     if (Object.hasOwn(itemSource.system.traits, "rarity")) itemSource.system.traits.rarity = rarity;
     if (itemSource.system.rarity?.value !== undefined) itemSource.system.rarity.value = rarity;
     if (itemSource.system.runes) itemSource.system.runes = { potency: 0, striking: 0, property: [] };
-    if (itemSource.system.specific?.value !== undefined) itemSource.system.specific.value = true;
+    setSpecificSystemValue(itemSource.system);
 
     const themeName = staffThemeName(themeId, this.formatter);
     const variantNameKey = variantIndex === 0

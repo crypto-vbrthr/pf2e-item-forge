@@ -140,6 +140,10 @@ export class ItemForgeEditor extends HandlebarsApplication {
         NO_SPELLHEART_TEMPLATE: "PF2E_ITEM_FORGE.Errors.NoSpellheartTemplate",
         NO_SPELLHEART_SPELL_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoSpellheartSpellCandidate",
         UNKNOWN_SPELLHEART_PROFILE: "PF2E_ITEM_FORGE.Errors.UnknownSpellheartProfile",
+        NO_PREDEFINED_SPECIFIC_ITEM_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoPredefinedSpecificItemCandidate",
+        NO_SPECIFIC_BASE_ITEM: "PF2E_ITEM_FORGE.Errors.NoSpecificBaseItem",
+        NO_SPECIFIC_PROFILE_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoSpecificProfileCandidate",
+        UNKNOWN_SPECIFIC_ITEM_PROFILE: "PF2E_ITEM_FORGE.Errors.UnknownSpecificItemProfile",
         UNKNOWN_STAFF_PROFILE: "PF2E_ITEM_FORGE.Errors.UnknownStaffProfile",
         UNSUPPORTED_TREASURE_CATEGORY: "PF2E_ITEM_FORGE.Errors.UnsupportedTreasureCategory",
         NO_TREASURE_TYPE: "PF2E_ITEM_FORGE.Errors.NoTreasureType",
@@ -191,7 +195,14 @@ export class ItemForgeEditor extends HandlebarsApplication {
     const isMagicMode = this.request.mode === "magic";
     const isSpellheartCategory = isMagicMode && this.request.category === "magic.spellheart";
     const generatedSpellheart = isSpellheartCategory && this.request.magic?.spellheartMode === "generated";
-    const usesSpellSources = isScrollCategory || (isMagicMode && (!isSpellheartCategory || generatedSpellheart));
+    const isWandCategory = isMagicMode && this.request.category === "magic.wand";
+    const isStaffCategory = isMagicMode && this.request.category === "magic.staff";
+    const generatedStaff = isStaffCategory && this.request.magic?.staffMode !== "existing";
+    const isSpecificWeaponCategory = isMagicMode && this.request.category === "magic.weapon";
+    const isSpecificArmorCategory = isMagicMode && this.request.category === "magic.armor";
+    const isSpecificMagicCategory = isSpecificWeaponCategory || isSpecificArmorCategory;
+    const generatedSpecific = isSpecificMagicCategory && this.request.magic?.specificMode === "generated";
+    const usesSpellSources = isScrollCategory || isWandCategory || generatedStaff || generatedSpellheart;
     const packs = this.api.getAvailableItemPacks({ includeSpellPacks: usesSpellSources }).map((pack) => ({
       ...pack,
       checked: selectedPacks.has(pack.id),
@@ -240,7 +251,6 @@ export class ItemForgeEditor extends HandlebarsApplication {
       selected: this.request.source.mode === id,
       label: localizeMaybe(`PF2E_ITEM_FORGE.SourceMode.${{ all: "All", system: "System", selected: "Selected" }[id]}`)
     }));
-    const isWandCategory = isMagicMode && this.request.category === "magic.wand";
     const specialWand = isWandCategory && this.request.magic?.wandMode === "special";
     const wandModes = ["standard", "special"].map((id) => ({
       id,
@@ -255,8 +265,6 @@ export class ItemForgeEditor extends HandlebarsApplication {
         selected: this.request.magic?.wandProfile === profile.id
       })))
     ];
-    const isStaffCategory = isMagicMode && this.request.category === "magic.staff";
-    const generatedStaff = isStaffCategory && this.request.magic?.staffMode !== "existing";
     const staffModes = ["generated", "existing"].map((id) => ({
       id,
       selected: (this.request.magic?.staffMode ?? "generated") === id,
@@ -296,6 +304,41 @@ export class ItemForgeEditor extends HandlebarsApplication {
         selected: this.request.magic?.theme === theme.id
       }));
     if (allowedSpellheartThemes && !allowedSpellheartThemes.has(this.request.magic?.theme)) this.request.magic.theme = "automatic";
+
+    const specificModes = ["existing", "generated"].map((id) => ({
+      id,
+      selected: (this.request.magic?.specificMode ?? "existing") === id,
+      label: localizeMaybe(`PF2E_ITEM_FORGE.SpecificItemMode.${id === "existing" ? "Existing" : "Generated"}`)
+    }));
+    const specificItemType = isSpecificWeaponCategory ? "weapon" : isSpecificArmorCategory ? "armor" : null;
+    const availableSpecificProfiles = specificItemType ? (this.api.specificItemProfiles?.getForItemType?.(specificItemType) ?? []) : [];
+    if (generatedSpecific && this.request.magic?.specificProfile !== "automatic" && !availableSpecificProfiles.some((profile) => profile.id === this.request.magic.specificProfile)) {
+      this.request.magic.specificProfile = "automatic";
+    }
+    const specificProfiles = [
+      { id: "automatic", label: localizeMaybe("PF2E_ITEM_FORGE.SpecificItemProfiles.Automatic"), selected: (this.request.magic?.specificProfile ?? "automatic") === "automatic" },
+      ...availableSpecificProfiles.map((profile) => ({
+        id: profile.id,
+        label: localizeMaybe(profile.label),
+        selected: this.request.magic?.specificProfile === profile.id,
+        themes: [...(profile.allowedThemes ?? [])]
+      }))
+    ];
+    const activeSpecificProfile = generatedSpecific && this.request.magic?.specificProfile !== "automatic"
+      ? this.api.specificItemProfiles?.get?.(this.request.magic.specificProfile)
+      : null;
+    const supportedSpecificThemes = activeSpecificProfile
+      ? new Set(["automatic", ...(activeSpecificProfile.allowedThemes ?? [])])
+      : new Set(["automatic", ...availableSpecificProfiles.flatMap((profile) => profile.allowedThemes ?? [])]);
+    if (generatedSpecific && !supportedSpecificThemes.has(this.request.magic?.theme)) this.request.magic.theme = "automatic";
+    const specificMagicThemes = (this.api.magicThemes ?? [])
+      .filter((theme) => supportedSpecificThemes.has(theme.id))
+      .map((theme) => ({
+        id: theme.id,
+        label: localizeMaybe(theme.label),
+        selected: this.request.magic?.theme === theme.id
+      }));
+    const specificSupportsTheme = generatedSpecific && supportedSpecificThemes.size > 1;
 
     const categoryTreasureTypes = this.request.mode === "treasure"
       ? this.api.treasure.types.getAll().filter((type) => this.api.categories.matches(type.categories ?? [], this.request.category))
@@ -349,13 +392,28 @@ export class ItemForgeEditor extends HandlebarsApplication {
           spells: this.previewResult.metadata?.spells ?? [],
           spellheart: this.previewResult.metadata?.spellheart ?? null,
           wand: this.previewResult.metadata?.wand ?? null,
+          specificItem: this.previewResult.metadata?.specificItem
+            ? {
+                ...this.previewResult.metadata.specificItem,
+                runeSummary: this.#formatRuneSummary(this.previewResult.metadata.specificItem.runes),
+                propertyRunes: (this.previewResult.metadata.specificItem.propertyRunes ?? []).map((rune) => ({
+                  ...rune,
+                  displayLabel: localizeMaybe(rune.label ?? this.api.propertyRunes?.getBySlug?.(this.previewResult.metadata.specificItem.itemType, rune.slug)?.label ?? rune.slug)
+                })),
+                automationLabel: this.previewResult.metadata.specificItem.automation === "rules-text"
+                  ? localizeMaybe("PF2E_ITEM_FORGE.SpecificItemText.RulesTextAutomation")
+                  : this.previewResult.metadata.specificItem.automation
+              }
+            : null,
           magic: this.previewResult.metadata?.magic
             ? {
                 ...this.previewResult.metadata.magic,
                 kindLabel: ({
                   wand: localizeMaybe("PF2E_ITEM_FORGE.Categories.MagicWand"),
                   staff: localizeMaybe("PF2E_ITEM_FORGE.Categories.MagicStaff"),
-                  spellheart: localizeMaybe("PF2E_ITEM_FORGE.Categories.MagicSpellheart")
+                  spellheart: localizeMaybe("PF2E_ITEM_FORGE.Categories.MagicSpellheart"),
+                  "specific-weapon": localizeMaybe("PF2E_ITEM_FORGE.Categories.MagicWeapon"),
+                  "specific-armor": localizeMaybe("PF2E_ITEM_FORGE.Categories.MagicArmor")
                 })[this.previewResult.metadata.magic.kind] ?? this.previewResult.metadata.magic.kind,
                 wandModeLabel: this.previewResult.metadata.magic.wandMode
                   ? localizeMaybe(`PF2E_ITEM_FORGE.WandMode.${this.previewResult.metadata.magic.wandMode === "special" ? "Special" : "Standard"}`)
@@ -378,8 +436,14 @@ export class ItemForgeEditor extends HandlebarsApplication {
                 spellheartModeLabel: this.previewResult.metadata.magic.spellheartMode
                   ? localizeMaybe(`PF2E_ITEM_FORGE.SpellheartMode.${this.previewResult.metadata.magic.spellheartMode === "existing" ? "Existing" : "Generated"}`)
                   : null,
-                spellheartProfileLabel: this.previewResult.metadata.magic.profile
+                spellheartProfileLabel: this.previewResult.metadata.magic.kind === "spellheart" && this.previewResult.metadata.magic.profile
                   ? localizeMaybe(this.api.spellheartProfiles?.get?.(this.previewResult.metadata.magic.profile)?.label ?? this.previewResult.metadata.magic.profile)
+                  : null,
+                specificModeLabel: this.previewResult.metadata.magic.specificMode
+                  ? localizeMaybe(`PF2E_ITEM_FORGE.SpecificItemMode.${this.previewResult.metadata.magic.specificMode === "existing" ? "Existing" : "Generated"}`)
+                  : null,
+                specificProfileLabel: this.previewResult.metadata.magic.kind?.startsWith?.("specific-") && this.previewResult.metadata.magic.profile
+                  ? localizeMaybe(this.api.specificItemProfiles?.get?.(this.previewResult.metadata.magic.profile)?.label ?? this.previewResult.metadata.magic.profile)
                   : null
               }
             : null,
@@ -424,9 +488,17 @@ export class ItemForgeEditor extends HandlebarsApplication {
       isStaffCategory,
       isSpellheartCategory,
       generatedSpellheart,
+      isSpecificWeaponCategory,
+      isSpecificArmorCategory,
+      isSpecificMagicCategory,
+      generatedSpecific,
+      specificModes,
+      specificProfiles,
+      specificMagicThemes,
+      specificSupportsTheme,
       spellheartModes,
       spellheartProfiles,
-      showMagicSpellSettings: isMagicMode && !isStaffCategory && !isSpellheartCategory,
+      showMagicSpellSettings: isWandCategory,
       generatedStaff,
       staffModes,
       staffProfiles,
@@ -472,7 +544,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
         this.previewResult = null;
         this.error = null;
         this.onChange?.(this.getRequest(), this);
-        if (["mode", "category", "levelMode", "source.mode", "equipment.propertyRunes.mode", "value.mode", "treasure.type", "magic.wandMode", "magic.wandProfile", "magic.staffMode", "magic.staffProfile", "magic.spellheartMode", "magic.spellheartProfile"].includes(input.name)) {
+        if (["mode", "category", "levelMode", "source.mode", "equipment.propertyRunes.mode", "value.mode", "treasure.type", "magic.wandMode", "magic.wandProfile", "magic.staffMode", "magic.staffProfile", "magic.spellheartMode", "magic.spellheartProfile", "magic.specificMode", "magic.specificProfile"].includes(input.name)) {
           await this.#renderPreservingView();
         }
       });
@@ -540,7 +612,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
   }
 
   #isMagicCategory(category) {
-    return category === "magic.wand" || category === "magic.staff" || category === "magic.spellheart";
+    return ["magic.wand", "magic.staff", "magic.spellheart", "magic.weapon", "magic.armor"].includes(category);
   }
 
   #equipmentType(category) {
@@ -622,6 +694,8 @@ export class ItemForgeEditor extends HandlebarsApplication {
     this.request.magic.staffProfile = value("magic.staffProfile", this.request.magic.staffProfile ?? "automatic");
     this.request.magic.spellheartMode = value("magic.spellheartMode", this.request.magic.spellheartMode ?? "existing");
     this.request.magic.spellheartProfile = value("magic.spellheartProfile", this.request.magic.spellheartProfile ?? "automatic");
+    this.request.magic.specificMode = value("magic.specificMode", this.request.magic.specificMode ?? "existing");
+    this.request.magic.specificProfile = value("magic.specificProfile", this.request.magic.specificProfile ?? "automatic");
     this.request.magic.theme = value("magic.theme", this.request.magic.theme ?? "automatic");
     const heightenedInput = root.querySelector('[name="magic.allowHeightened"]');
     if (heightenedInput) this.request.magic.allowHeightened = Boolean(heightenedInput.checked);

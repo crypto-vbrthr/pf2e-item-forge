@@ -52,7 +52,9 @@
       "SpellheartMode": "Zauberherz-Erzeugung",
       "SpellheartProfile": "Zauberherz-Profil",
       "WandMode": "Zauberstab-Erzeugung",
-      "WandProfile": "Besonderes Zauberstabprofil"
+      "WandProfile": "Besonderes Zauberstabprofil",
+      "SpecificItemMode": "Spezifische Erzeugung",
+      "SpecificItemProfile": "Spezifisches Gegenstandsprofil"
     },
     "LevelMode": {
       "Single": "Einzelne Stufe",
@@ -88,8 +90,8 @@
       "TreasureMode": "Erzeugt genau einen nichtmagischen Verkaufs- oder Kunstschatz. Material, Verarbeitung und Zustand beeinflussen seinen Wert.",
       "ValueTolerance": "0,15 entspricht ±15 % um den Zielwert. Wird kein Treffer gefunden, liefert der ValueSolver das nächstgelegene gültige Ergebnis mit Warnung.",
       "TreasureType": "Optional kann eine konkrete Schatzart gewählt werden. „Beliebig“ lässt die Item Forge innerhalb der gewählten Kategorie würfeln.",
-      "MagicMode": "Erzeugt zaubergebundene magische Gegenstände. Zauberstäbe enthalten einen einzelnen passenden Zauber; Zauberstecken können entweder regelwerksgetreu aus Kompendien gewählt oder als thematische Variantenfamilie generiert werden.",
-      "MagicSources": "Die ausgewählten Kompendien bestimmen den Zauberpool. Systemvorlagen für den Gegenstand selbst werden nur als technische Basis verwendet.",
+      "MagicMode": "Erzeugt permanente magische Spezialgegenstände wie Zauberstäbe, Zauberstecken, Zauberherzen sowie spezifische magische Waffen und Rüstungen.",
+      "MagicSources": "Die ausgewählten Kompendien liefern die physischen Basisgegenstände und, bei zaubergebundenen Generatoren, zusätzlich den Zauberpool.",
       "MagicTheme": "Automatisch wählt ein Thema mit genügend passenden Zaubern. Ein festes Thema ist eine harte Vorgabe.",
       "AllowHeightenedSpells": "Nur Zauber mit einer echten Erhöhungsdefinition dürfen auf höheren Graden erneut in Zauberstäben oder Zauberstecken auftauchen.",
       "StaffMode": "Vordefiniert kopiert einen vorhandenen PF2e-Zauberstecken unverändert aus den ausgewählten Kompendien. Generiert erstellt eine neue thematische Zaubersteckenfamilie nach regelwerksnahen Stufenprofilen.",
@@ -98,7 +100,11 @@
       "SpellheartProfile": "Ein Profil legt Stufen, Preise, Rüstungs- und Waffeneffekte sowie die Struktur der enthaltenen Zauber gemeinsam fest. Effekte verschiedener Profile werden nicht frei vermischt.",
       "SpellheartTheme": "Das Thema bestimmt den Zauberpool und die thematische Schadens- oder Schutzart. Bei einem festen Profil werden nur dazu passende Themen angeboten.",
       "WandMode": "Standard erzeugt einen gewöhnlichen Zauberstab mit genau einem Zauber. Besonders ergänzt den Zauber um ein regelwerksnahes Zusatzprofil mit eigener Stufen- und Preisprogression; daher existiert nicht auf jeder Gegenstandsstufe ein passender besonderer Stab.",
-      "WandProfile": "Wähle ein Zusatzprofil oder lasse die Item Forge automatisch aus den kompatiblen Profilen wählen."
+      "WandProfile": "Wähle ein Zusatzprofil oder lasse die Item Forge automatisch aus den kompatiblen Profilen wählen.",
+      "SpecificItemMode": "Vordefiniert übernimmt einen vollständigen Regelwerksgegenstand unverändert. Generiert baut einen neuen spezifischen Gegenstand auf einer normalen Waffe oder Rüstung auf.",
+      "SpecificItemProfile": "Ein Profil hält Stufe, Preis, Basisrunen und die besondere Fähigkeit als zusammengehörige Balance-Einheit fest.",
+      "SpecificItemTheme": "Ein festes Thema beschränkt die Auswahl auf Profile und Varianten, die dieses Thema ausdrücklich unterstützen.",
+      "SpecificItemRunes": "Bei generierten spezifischen Gegenständen stammen Eigenschaftsrunen ausschließlich aus dem Profil. Basisrunen bleiben normal verbesserbar; zusätzliche Eigenschaftsrunen können nicht frei hinzugefügt werden."
     },
     "Preview": {
       "Empty": "Noch nichts geschmiedet. Parameter wählen und Generieren drücken.",
@@ -141,7 +147,12 @@
       "WeaponEffect": "Waffeneffekt",
       "WandMode": "Zauberstab-Erzeugung",
       "WandProfile": "Zauberstabprofil",
-      "WandEffect": "Zusatzwirkung"
+      "WandEffect": "Zusatzwirkung",
+      "SpecificItemMode": "Spezifische Erzeugung",
+      "SpecificItemProfile": "Gegenstandsprofil",
+      "SpecificItemVariant": "Variante",
+      "SpecialAbility": "Besondere Fähigkeit",
+      "Automation": "Automatisierung"
     },
     "Notifications": {
       "GenerationFailed": "Für diese Parameter konnte kein Gegenstand erzeugt werden.",
@@ -194,13 +205,15 @@
       "Magic": "Magischer Gegenstand",
       "MagicWand": "Zauberstab",
       "MagicStaff": "Zauberstecken",
-      "MagicSpellheart": "Zauberherz"
+      "MagicSpellheart": "Zauberherz",
+      "MagicWeapon": "Spezifische magische Waffe",
+      "MagicArmor": "Spezifische magische Rüstung"
     },
     "GenerationMode": {
       "Existing": "Vordefinierten Gegenstand auswählen",
       "Equipment": "Waffe, Rüstung oder Schild zusammensetzen",
       "Treasure": "Schatzgegenstand generieren",
-      "Magic": "Zaubergebundenen magischen Gegenstand erzeugen"
+      "Magic": "Magischen Spezialgegenstand erzeugen"
     },
     "FundamentalRunes": {
       "Automatic": "Automatisch stufengerecht",
@@ -218,7 +231,7 @@
       "NoTreasureType": "Für die gewählte Schatzkategorie ist keine passende Schatzart registriert.",
       "NoTreasureCandidate": "Mit den gewählten Material-, Zustands- und Wertvorgaben konnte kein gültiger Schatz erzeugt werden.",
       "UnknownTreasureContent": "Eine angeforderte Schatzdefinition ist nicht registriert oder nicht mehr verfügbar.",
-      "UnsupportedMagicCategory": "Diese Erzeugungsart unterstützt derzeit Zauberstäbe und Zauberstecken.",
+      "UnsupportedMagicCategory": "Diese Erzeugungsart unterstützt Zauberstäbe, Zauberstecken, Zauberherzen sowie spezifische magische Waffen und Rüstungen.",
       "NoWandSpellCandidate": "In den gewählten Quellen wurde kein für einen Zauberstab geeigneter Zauber gefunden.",
       "NoStaffSpellCandidate": "Für die gewählte Stufe und das gewählte Thema konnte keine passende Zauberliste für einen Zauberstecken zusammengestellt werden.",
       "NoStaffBaseItem": "Die PF2e-Basiswaffe für einen Zauberstecken konnte nicht gefunden werden.",
@@ -229,7 +242,11 @@
       "NoSpellheartSpellCandidate": "Für das gewählte Zauberherz-Profil, Thema und die gewählten Quellen stehen nicht genügend passende Zauber zur Verfügung.",
       "UnknownSpellheartProfile": "Das gewählte Zauberherz-Profil ist nicht registriert.",
       "NoSpecialWandSpellCandidate": "Für dieses besondere Zauberstabprofil wurde kein passender Zauber gefunden.",
-      "UnknownWandProfile": "Das ausgewählte besondere Zauberstabprofil ist nicht registriert."
+      "UnknownWandProfile": "Das ausgewählte besondere Zauberstabprofil ist nicht registriert.",
+      "NoPredefinedSpecificItemCandidate": "In den gewählten Kompendien wurde kein vordefinierter spezifischer Gegenstand für die Stufenvorgabe gefunden.",
+      "NoSpecificBaseItem": "In den gewählten Quellen wurde kein geeigneter nicht-spezifischer Basisgegenstand gefunden.",
+      "NoSpecificProfileCandidate": "Für Stufe, Profil, Thema und Basisgegenstand konnte kein gültiger spezifischer magischer Gegenstand erzeugt werden.",
+      "UnknownSpecificItemProfile": "Das ausgewählte Profil für einen spezifischen magischen Gegenstand ist nicht registriert."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatisch stufengerecht",
@@ -271,7 +288,7 @@
       "ValueRange": "Wertbereich"
     },
     "Magic": {
-      "SettingsHeading": "Zaubermagie",
+      "SettingsHeading": "Magische Gegenstände",
       "StaffName": "Zauberstecken – {theme}",
       "Cantrip": "Zaubertrick",
       "SpellRankLabel": "Grad {rank}",
@@ -394,6 +411,42 @@
       "MercyName": "Zauberstab der Gnade: {spell} (Grad {rank})",
       "MercyDescription": "Dieser besondere Zauberstab kann einen geeigneten Schadenszauber nichttödlich wirken lassen.",
       "MercyEffect": "Wenn du den gespeicherten Zauber wirkst, benötigt die Aktivierung 1 zusätzliche Aktion. Du kannst dem Zauber dabei die Kategorie Nichttödlich verleihen."
+    },
+    "SpecificItemMode": {
+      "Existing": "Vordefinierten spezifischen Gegenstand auswählen",
+      "Generated": "Neuen spezifischen Gegenstand generieren"
+    },
+    "SpecificItemProfiles": {
+      "Automatic": "Automatisch passend zur Stufe",
+      "RetributiveWeapon": "Vergeltungswaffe",
+      "ElementalWeapon": "Waffe der Elementarresonanz",
+      "ElementalArmor": "Rüstung der Elementarwehr",
+      "GuardianArmor": "Rüstung des Schutzreflexes"
+    },
+    "SpecificItemVariants": {
+      "Base": "Grundform",
+      "Greater": "Stark",
+      "Major": "Mächtig"
+    },
+    "SpecificItemText": {
+      "RetributiveWeaponName": "{base} der Vergeltung",
+      "RetributiveWeaponDescription": "Diese spezifische magische Waffe reagiert auf Angreifer ihres Trägers und prägt deren Bedrohung kurzzeitig in ihre Magie ein.",
+      "RetributiveWeaponEffect": "Wenn dir eine Kreatur mit einem Angriff Schaden zufügt, erhältst du einen Situationsbonus von +{bonus} auf deinen nächsten Schadenswurf gegen diese Kreatur, sofern dieser Schadenswurf vor Ende deines nächsten Zuges erfolgt. Erleidest du vorher durch einen Angriff einer anderen Kreatur Schaden, wechselt die Vergeltungsmagie zu diesem neuen Angreifer.",
+      "ElementalWeaponName": "{base} der Elementarresonanz ({theme})",
+      "ElementalWeaponDescription": "In dieser spezifischen Waffe schwingt dauerhaft gebundene Elementarmagie. Die eingebaute Eigenschaftsrune entspricht ihrem Element.",
+      "ElementalWeaponEffect": "Aktivieren – Resonanz entladen [freie Aktion] (Konzentration); Häufigkeit einmal pro Tag; Auslöser Du triffst mit dieser Waffe; Effekt Der getroffene Gegner erleidet zusätzlich {surgeDamage} {damageLabel}.",
+      "ElementalArmorName": "{base} der Elementarwehr ({theme})",
+      "ElementalArmorDescription": "Diese spezifische Rüstung leitet eine bestimmte Form elementarer Energie ab und kann ihre Schutzwirkung für einen einzelnen Treffer verdichten.",
+      "ElementalArmorEffect": "Du erhältst Resistenz {resistance} gegen {damageLabel}. Aktivieren [Reaktion] (Konzentration); Häufigkeit einmal pro Tag; Auslöser Du würdest {damageLabel} erleiden; Effekt Verdopple die Resistenz dieser Rüstung gegen den auslösenden Schaden.",
+      "GuardianArmorName": "{base} des Schutzreflexes",
+      "GuardianArmorDescription": "In die Rüstung ist eine defensive Resonanz eingearbeitet, die sich im Augenblick eines drohenden Treffers verhärtet.",
+      "GuardianArmorEffect": "Aktivieren [Reaktion] (Konzentration); Häufigkeit {frequency}; Auslöser Ein Angriff würde dich treffen; Effekt Du erhältst einen Situationsbonus von +{acBonus} auf deine RK gegen den auslösenden Angriff. Falls der Bonus den Angriff zu einem Fehlschlag macht, verfehlt er dich.",
+      "OncePerDay": "einmal pro Tag",
+      "OncePerHour": "einmal pro Stunde",
+      "OncePerTenMinutes": "einmal pro 10 Minuten",
+      "SpecialAbility": "Besondere Fähigkeit:",
+      "PropertyRuneRestriction": "Als spezifischer magischer Gegenstand kann dieses Item keine Eigenschaftsrunen erhalten, die nicht bereits in seinem Profil enthalten sind. Seine Basisrunen können normal verbessert oder übertragen werden.",
+      "RulesTextAutomation": "Regeltext / strukturierte Metadaten"
     }
   }
 }
