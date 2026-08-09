@@ -48,7 +48,8 @@ export class CompendiumIndex {
             "system.specific",
             "system.baseItem",
             "system.slug",
-            "system.material"
+            "system.material",
+            "system.damage.damageType"
           ]
         });
 
@@ -71,6 +72,11 @@ export class CompendiumIndex {
             baseItem: getProperty(raw, "system.baseItem") ?? null,
             slug: getProperty(raw, "system.slug") ?? null,
             material: structuredClone(getProperty(raw, "system.material") ?? null),
+            range: getProperty(raw, "system.range") ?? null,
+            group: getProperty(raw, "system.group") ?? null,
+            usage: getProperty(raw, "system.usage.value") ?? null,
+            armorCategory: getProperty(raw, "system.category") ?? null,
+            damageType: getProperty(raw, "system.damage.damageType") ?? null,
             categories
           });
         }

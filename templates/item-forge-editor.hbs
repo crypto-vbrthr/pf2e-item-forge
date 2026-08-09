@@ -29,8 +29,35 @@
           <option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>
         {{/each}}
       </select>
-      <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.PropertyRunesLater"}}</p>
     </div>
+
+    {{#if supportsPropertyRunes}}
+    <div class="form-group">
+      <label>{{localize "PF2E_ITEM_FORGE.Fields.PropertyRunes"}}</label>
+      <select name="equipment.propertyRunes.mode">
+        {{#each propertyRuneModes}}
+          <option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+      <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.PropertyRuneMode"}}</p>
+    </div>
+
+    {{#if fixedPropertyRunes}}
+    <fieldset class="property-rune-list">
+      <legend>{{localize "PF2E_ITEM_FORGE.Fields.FixedPropertyRunes"}}</legend>
+      {{#each propertyRunes}}
+        <label class="checkbox property-rune-list__entry">
+          <input type="checkbox" name="propertyRune" value="{{slug}}" {{#if checked}}checked{{/if}}>
+          <span>{{label}}</span>
+          <small>{{localize "PF2E_ITEM_FORGE.Preview.Level"}} {{level}} · {{rarityLabel}}</small>
+        </label>
+      {{else}}
+        <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.NoPropertyRunes"}}</p>
+      {{/each}}
+      <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.PropertyRuneCapacity"}}</p>
+    </fieldset>
+    {{/if}}
+    {{/if}}
     {{/if}}
 
     <div class="form-group">
@@ -133,6 +160,14 @@
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.BaseItem"}}</dt><dd>{{preview.baseItem.name}} ({{localize "PF2E_ITEM_FORGE.Preview.Level"}} {{preview.baseItem.level}})</dd>
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.RuneProfile"}}</dt><dd>{{preview.runeSummary}}</dd>
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.PropertySlots"}}</dt><dd>{{preview.propertyRuneCapacity}}</dd>
+              <dt>{{localize "PF2E_ITEM_FORGE.Preview.PropertyRunes"}}</dt>
+              <dd>
+                {{#each preview.propertyRunes}}
+                  <span class="property-rune-chip">{{displayLabel}} ({{localize "PF2E_ITEM_FORGE.Preview.Level"}} {{level}})</span>
+                {{else}}
+                  {{localize "PF2E_ITEM_FORGE.PropertyRuneMode.None"}}
+                {{/each}}
+              </dd>
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.EffectiveLevel"}}</dt><dd>{{preview.level}}</dd>
             {{/if}}
           </dl>

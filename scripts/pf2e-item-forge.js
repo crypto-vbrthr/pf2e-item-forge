@@ -5,6 +5,7 @@ import { GeneratorRegistry } from "../src/engine/generator-registry.js";
 import { ExistingItemGenerator } from "../src/engine/generators/existing-item-generator.js";
 import { EquipmentGenerator } from "../src/engine/generators/equipment-generator.js";
 import { TreasureRegistry } from "../src/engine/registries/treasure-registry.js";
+import { PropertyRuneRegistry, registerCorePropertyRunes } from "../src/engine/registries/property-rune-registry.js";
 import { ItemForgeEngine } from "../src/engine/item-forge-engine.js";
 import { ItemForgeApi } from "../src/api/item-forge-api.js";
 import { ItemForgeApplication } from "../src/app/item-forge-application.js";
@@ -50,8 +51,9 @@ function createApi() {
   const compendiumIndex = new CompendiumIndex({ categoryRegistry: categories });
   const generators = new GeneratorRegistry();
   const treasure = new TreasureRegistry();
+  const propertyRunes = registerCorePropertyRunes(new PropertyRuneRegistry());
   generators.register(new ExistingItemGenerator({ compendiumIndex }));
-  generators.register(new EquipmentGenerator({ compendiumIndex }));
+  generators.register(new EquipmentGenerator({ compendiumIndex, propertyRunes }));
 
   const engine = new ItemForgeEngine({
     categories,
@@ -69,7 +71,7 @@ function createApi() {
     return application;
   };
 
-  return new ItemForgeApi({ engine, categories, generators, compendiumIndex, treasure, openApplication });
+  return new ItemForgeApi({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, openApplication });
 }
 
 function exposeApi() {

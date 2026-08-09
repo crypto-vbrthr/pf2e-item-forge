@@ -2,9 +2,9 @@
 
 Reusable Item Forge architecture for Foundry VTT v14 and Pathfinder 2e.
 
-## v0.0.4 scope
+## v0.0.5 scope
 
-This release adds the first composed-equipment generator while keeping the public API and embedded-editor architecture introduced in the earlier foundation releases.
+This release completes the first property-rune block for composed weapons and armor while keeping property-rune content registry-driven and reusable through the public API.
 
 Implemented:
 
@@ -15,12 +15,18 @@ Implemented:
 - Exact level or level range with strict/nearest/not-above/not-below policies
 - Deterministic seeded random generation
 - Existing-item generator using indexed compendium items
-- New composed equipment mode for mundane base weapons, armor, and shields
+- Composed equipment mode for mundane base weapons, armor, and shields
 - Canonical Remaster fundamental-rune progressions for weapons and armor
 - Reinforcing-rune progression for shields
-- `ItemLevelResolver`: final composed-item level is derived from the highest relevant component level
-- Property-rune capacity is calculated now so the later property-rune block can plug into the same plan/validator
-- Embedded `ItemForgeEditor` with generation-mode selection and rune preview
+- Registry-driven property runes for weapons and armor
+- Property-rune modes: automatic, random, fixed selection, or none
+- Compatibility filtering for melee/ranged use, damage type, weapon group, traits, and armor category
+- Property-rune slot limits derived from the potency rune; shields never receive property runes
+- `ItemLevelResolver`: final composed-item level includes base, fundamental-rune, and property-rune levels
+- Final rarity can rise to the highest rarity contributed by a selected property rune
+- Property runes can bridge item levels not represented by the fundamental-rune progression alone
+- Extensible `game.pf2eItemForge.propertyRunes` registry for later add-ons
+- Embedded `ItemForgeEditor` with property-rune controls and rune preview
 - Standalone `ItemForgeApplication` container
 - Item Directory button, preview, reroll, and world-item creation
 - German and English localization
@@ -28,13 +34,15 @@ Implemented:
 - Generic bounded ValueSolver
 - Automated Node.js unit/integration tests
 
+The built-in property-rune catalog is deliberately a conservative starter set. More runes can be added through the registry without changing the generator.
+
 Not yet implemented:
 
-- Property-rune selection and compatibility filtering
 - Precious-material composition
 - Generated treasure objects and valuation content
 - Presets
 - Actor/folder output targets
+- Full catalog coverage for every property rune from every optional PF2e source
 
 ## API examples
 
@@ -50,16 +58,58 @@ await game.pf2eItemForge.generate({
 });
 ```
 
-Compose a weapon from a mundane base item and fundamental runes:
+Compose a weapon with automatically selected property runes:
 
 ```js
 await game.pf2eItemForge.generate({
   mode: "equipment",
   category: "weapon.melee",
-  level: 4,
+  level: { min: 7, max: 9 },
   levelPolicy: "strict",
   source: { mode: "system" },
-  equipment: { fundamentalRunes: "automatic" }
+  equipment: {
+    fundamentalRunes: "automatic",
+    propertyRunes: {
+      mode: "automatic"
+    }
+  }
+});
+```
+
+Compose a weapon with a fixed property rune:
+
+```js
+await game.pf2eItemForge.generate({
+  mode: "equipment",
+  category: "weapon.melee",
+  level: 8,
+  levelPolicy: "strict",
+  source: { mode: "system" },
+  equipment: {
+    fundamentalRunes: "automatic",
+    propertyRunes: {
+      mode: "fixed",
+      selected: ["flaming"]
+    }
+  }
+});
+```
+
+Register an additional property rune from an extension module:
+
+```js
+Hooks.once("pf2eItemForgeReady", (api) => {
+  api.propertyRunes.register({
+    id: "my-addon.example-rune",
+    slug: "example-rune",
+    label: "My Add-on: Example Rune",
+    itemType: "weapon",
+    level: 9,
+    rarity: "uncommon",
+    compatibility: {
+      melee: true
+    }
+  });
 });
 ```
 

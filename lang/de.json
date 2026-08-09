@@ -31,7 +31,9 @@
       "SolverAttempts": "Maximale ValueSolver-Versuche",
       "Seed": "Seed",
       "GenerationMode": "Erzeugungsart",
-      "FundamentalRunes": "Basisrunen"
+      "FundamentalRunes": "Basisrunen",
+      "PropertyRunes": "Eigenschaftsrunen",
+      "FixedPropertyRunes": "Feste Eigenschaftsrunen"
     },
     "LevelMode": {
       "Single": "Einzelne Stufe",
@@ -59,7 +61,10 @@
       "NoItemPacks": "Keine Item-Kompendien gefunden.",
       "SolverAttempts": "Ist bereits Teil des stabilen Request-Schemas; der Schatzgenerator verwendet diesen Wert in einer späteren Ausbaustufe.",
       "EquipmentMode": "Wählt einen nicht-spezifischen Basisgegenstand aus den gewählten Kompendien und versieht ihn mit einer stufengerechten Kombination von Basisrunen.",
-      "PropertyRunesLater": "Eigenschaftsrunen werden als eigener Komponentenblock ergänzt; diese Version legt bereits Stufenauflösung und Runenplätze dafür fest."
+      "PropertyRunesLater": "Eigenschaftsrunen werden als eigener Komponentenblock ergänzt; diese Version legt bereits Stufenauflösung und Runenplätze dafür fest.",
+      "PropertyRuneMode": "Automatisch füllt verfügbare Runenplätze stufengerecht; Zufällig variiert Anzahl und Auswahl; Fest verwendet nur die ausgewählten Runen.",
+      "NoPropertyRunes": "Für diese Gegenstandsart sind keine Eigenschaftsrunen registriert.",
+      "PropertyRuneCapacity": "Die tatsächliche Zahl möglicher Eigenschaftsrunen wird durch den Wert der Verbesserungsrune begrenzt."
     },
     "Preview": {
       "Empty": "Noch nichts geschmiedet. Parameter wählen und Generieren drücken.",
@@ -74,7 +79,8 @@
       "Potency": "Verbesserung",
       "Striking": "Schaden",
       "Resilient": "Widerstand",
-      "Reinforcing": "Verstärkung"
+      "Reinforcing": "Verstärkung",
+      "PropertyRunes": "Eigenschaftsrunen"
     },
     "Notifications": {
       "GenerationFailed": "Für diese Parameter konnte kein Gegenstand erzeugt werden.",
@@ -127,7 +133,36 @@
       "NoBaseEquipment": "Kein geeigneter, nicht-spezifischer Basisgegenstand wurde in den gewählten Kompendien gefunden.",
       "UnsupportedEquipmentCategory": "Die Erzeugungsart „Ausrüstung zusammensetzen“ unterstützt nur Waffen, Rüstungen und Schilde.",
       "NoItemInLevelRange": "Für die gewählte Kategorie und Stufenvorgabe wurde kein passender Gegenstand gefunden.",
-      "ItemDocumentNotFound": "Der ausgewählte Gegenstand konnte nicht aus dem Kompendium geladen werden."
+      "ItemDocumentNotFound": "Der ausgewählte Gegenstand konnte nicht aus dem Kompendium geladen werden.",
+      "InvalidPropertyRuneSelection": "Die ausgewählten Eigenschaftsrunen passen nicht zum Basisgegenstand, überschreiten die verfügbaren Runenplätze oder liegen außerhalb der erlaubten Stufe/Seltenheit."
+    },
+    "PropertyRuneMode": {
+      "Automatic": "Automatisch stufengerecht",
+      "Random": "Zufällig",
+      "Fixed": "Fest auswählen",
+      "None": "Keine Eigenschaftsrunen"
+    },
+    "PropertyRunes": {
+      "Returning": "Rückkehrend",
+      "GhostTouch": "Geisterberührend",
+      "Disrupting": "Untote zerstörend",
+      "Shifting": "Variabel",
+      "Wounding": "Verwundend",
+      "Astral": "Astral",
+      "Corrosive": "Ätzend",
+      "Flaming": "Flammend",
+      "Frost": "Frostig",
+      "Shock": "Elektrisch",
+      "Thundering": "Donnernd",
+      "Extending": "Verlängernd",
+      "Holy": "Heilig",
+      "Unholy": "Unheilig",
+      "Impactful": "Einschlagend",
+      "Shadow": "Schattenwandeln",
+      "Slick": "Schmierig",
+      "Glamered": "Unscheinbar",
+      "Invisibility": "Unsichtbarkeit",
+      "Fortification": "Befestigung"
     }
   }
 }

@@ -38,9 +38,16 @@ export class ItemForgeEditor extends HandlebarsApplication {
       rarity: request.rarity ?? [],
       source: request.source ?? { mode: "all", includePacks: [], excludePacks: [] },
       solver: request.solver ?? { maxAttempts: 50 },
-      equipment: request.equipment ?? { fundamentalRunes: "automatic" },
+      equipment: request.equipment ?? {
+        fundamentalRunes: "automatic",
+        propertyRunes: { mode: "automatic", selected: [] }
+      },
       seed: request.seed ?? createSeed()
     };
+    this.request.equipment ??= {};
+    this.request.equipment.fundamentalRunes ??= "automatic";
+    this.request.equipment.propertyRunes ??= { mode: "automatic", selected: [] };
+    this.request.equipment.propertyRunes.selected ??= [];
     if (this.request.levelMode === "single") this.request.level.max = this.request.level.min;
     this.#ensureEquipmentCategory();
     this.previewResult = null;
@@ -61,6 +68,10 @@ export class ItemForgeEditor extends HandlebarsApplication {
     if (!this.request.levelMode) {
       this.request.levelMode = this.request.level?.min === this.request.level?.max ? "single" : "range";
     }
+    this.request.equipment ??= {};
+    this.request.equipment.fundamentalRunes ??= "automatic";
+    this.request.equipment.propertyRunes ??= { mode: "automatic", selected: [] };
+    this.request.equipment.propertyRunes.selected ??= [];
     this.previewResult = null;
     this.error = null;
     return this.render();
@@ -92,7 +103,8 @@ export class ItemForgeEditor extends HandlebarsApplication {
         NO_BASE_EQUIPMENT: "PF2E_ITEM_FORGE.Errors.NoBaseEquipment",
         UNSUPPORTED_EQUIPMENT_CATEGORY: "PF2E_ITEM_FORGE.Errors.UnsupportedEquipmentCategory",
         NO_ITEM_IN_LEVEL_RANGE: "PF2E_ITEM_FORGE.Errors.NoItemInLevelRange",
-        ITEM_DOCUMENT_NOT_FOUND: "PF2E_ITEM_FORGE.Errors.ItemDocumentNotFound"
+        ITEM_DOCUMENT_NOT_FOUND: "PF2E_ITEM_FORGE.Errors.ItemDocumentNotFound",
+        INVALID_PROPERTY_RUNE_SELECTION: "PF2E_ITEM_FORGE.Errors.InvalidPropertyRuneSelection"
       }[code];
       this.error = { code, message: errorKey ? localizeMaybe(errorKey) : error.message };
       this.previewResult = null;
@@ -150,6 +162,23 @@ export class ItemForgeEditor extends HandlebarsApplication {
       selected: this.request.equipment?.fundamentalRunes === id,
       label: localizeMaybe(`PF2E_ITEM_FORGE.FundamentalRunes.${id === "automatic" ? "Automatic" : "None"}`)
     }));
+    const propertyRuneModes = ["automatic", "random", "fixed", "none"].map((id) => ({
+      id,
+      selected: this.request.equipment?.propertyRunes?.mode === id,
+      label: localizeMaybe(`PF2E_ITEM_FORGE.PropertyRuneMode.${{ automatic: "Automatic", random: "Random", fixed: "Fixed", none: "None" }[id]}`)
+    }));
+    const propertyRuneType = this.#equipmentType(this.request.category);
+    const selectedPropertyRunes = new Set(this.request.equipment?.propertyRunes?.selected ?? []);
+    const propertyRunes = propertyRuneType && propertyRuneType !== "shield"
+      ? this.api.propertyRunes.getForItemType(propertyRuneType).map((rune) => ({
+          slug: rune.slug,
+          level: rune.level,
+          rarity: rune.rarity,
+          rarityLabel: localizeMaybe(`PF2E_ITEM_FORGE.Rarity.${{ common: "Common", uncommon: "Uncommon", rare: "Rare", unique: "Unique" }[rune.rarity] ?? "Common"}`),
+          label: localizeMaybe(rune.label),
+          checked: selectedPropertyRunes.has(rune.slug)
+        }))
+      : [];
     const sourceModes = ["all", "system", "selected"].map((id) => ({
       id,
       selected: this.request.source.mode === id,
@@ -170,6 +199,10 @@ export class ItemForgeEditor extends HandlebarsApplication {
           runeProfile: this.previewResult.metadata?.runeProfile ?? null,
           runes: this.previewResult.metadata?.runes ?? null,
           propertyRuneCapacity: this.previewResult.metadata?.propertyRuneCapacity ?? null,
+          propertyRunes: (this.previewResult.metadata?.propertyRunes ?? []).map((rune) => ({
+            ...rune,
+            displayLabel: localizeMaybe(rune.label)
+          })),
           runeSummary: this.#formatRuneSummary(this.previewResult.metadata?.runes)
         }
       : null;
@@ -180,7 +213,11 @@ export class ItemForgeEditor extends HandlebarsApplication {
       categories,
       generationModes,
       fundamentalRuneModes,
+      propertyRuneModes,
+      propertyRunes,
       isEquipmentMode: this.request.mode === "equipment",
+      supportsPropertyRunes: ["weapon", "armor"].includes(propertyRuneType),
+      fixedPropertyRunes: this.request.equipment?.propertyRunes?.mode === "fixed",
       packs,
       levelPolicies,
       sourceModes,
@@ -208,7 +245,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
         this.previewResult = null;
         this.error = null;
         this.onChange?.(this.getRequest(), this);
-        if (["mode", "levelMode", "source.mode"].includes(input.name)) await this.render();
+        if (["mode", "category", "levelMode", "source.mode", "equipment.propertyRunes.mode"].includes(input.name)) await this.render();
       });
     });
   }
@@ -217,6 +254,13 @@ export class ItemForgeEditor extends HandlebarsApplication {
     return ["weapon", "armor", "shield"].some((root) =>
       category === root || this.api.categories.isDescendant(category, root)
     );
+  }
+
+  #equipmentType(category) {
+    for (const root of ["weapon", "armor", "shield"]) {
+      if (category === root || this.api.categories.isDescendant(category, root)) return root;
+    }
+    return null;
   }
 
   #ensureEquipmentCategory() {
@@ -260,8 +304,11 @@ export class ItemForgeEditor extends HandlebarsApplication {
     this.request.level.target = this.request.levelMode === "single" ? this.request.level.min : null;
     this.request.source.mode = value("source.mode", this.request.source.mode);
     this.request.solver.maxAttempts = number("solver.maxAttempts", this.request.solver.maxAttempts);
-    this.request.equipment ??= { fundamentalRunes: "automatic" };
-    this.request.equipment.fundamentalRunes = value("equipment.fundamentalRunes", this.request.equipment.fundamentalRunes);
+    this.request.equipment ??= {};
+    this.request.equipment.fundamentalRunes = value("equipment.fundamentalRunes", this.request.equipment.fundamentalRunes ?? "automatic");
+    this.request.equipment.propertyRunes ??= { mode: "automatic", selected: [] };
+    this.request.equipment.propertyRunes.mode = value("equipment.propertyRunes.mode", this.request.equipment.propertyRunes.mode ?? "automatic");
+    this.request.equipment.propertyRunes.selected = [...root.querySelectorAll('[name="propertyRune"]:checked')].map((input) => input.value);
 
     this.request.rarity = [...root.querySelectorAll('[name="rarity"]:checked')].map((input) => input.value);
     this.request.source.includePacks = [...root.querySelectorAll('[name="sourcePack"]:checked')].map((input) => input.value);

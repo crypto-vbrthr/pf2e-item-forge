@@ -31,7 +31,9 @@
       "SolverAttempts": "Maximum ValueSolver attempts",
       "Seed": "Seed",
       "GenerationMode": "Generation type",
-      "FundamentalRunes": "Fundamental runes"
+      "FundamentalRunes": "Fundamental runes",
+      "PropertyRunes": "Property runes",
+      "FixedPropertyRunes": "Fixed property runes"
     },
     "LevelMode": {
       "Single": "Single level",
@@ -59,7 +61,10 @@
       "NoItemPacks": "No item compendiums found.",
       "SolverAttempts": "Already part of the stable request schema; the treasure generator will use this value in a later phase.",
       "EquipmentMode": "Selects a non-specific base item from the chosen compendiums and applies a level-appropriate combination of fundamental runes.",
-      "PropertyRunesLater": "Property runes will be added as a separate component block; this version already establishes level resolution and property-rune capacity."
+      "PropertyRunesLater": "Property runes will be added as a separate component block; this version already establishes level resolution and property-rune capacity.",
+      "PropertyRuneMode": "Automatic fills available rune slots with level-appropriate runes; Random varies count and selection; Fixed uses only the selected runes.",
+      "NoPropertyRunes": "No property runes are registered for this item type.",
+      "PropertyRuneCapacity": "The actual number of property runes is limited by the potency rune value."
     },
     "Preview": {
       "Empty": "Nothing forged yet. Choose parameters and press Generate.",
@@ -74,7 +79,8 @@
       "Potency": "Potency",
       "Striking": "Striking",
       "Resilient": "Resilient",
-      "Reinforcing": "Reinforcing"
+      "Reinforcing": "Reinforcing",
+      "PropertyRunes": "Property runes"
     },
     "Notifications": {
       "GenerationFailed": "No item could be generated for these parameters.",
@@ -127,7 +133,36 @@
       "NoBaseEquipment": "No suitable non-specific base item was found in the selected compendiums.",
       "UnsupportedEquipmentCategory": "The “compose equipment” generation type supports only weapons, armor, and shields.",
       "NoItemInLevelRange": "No item matches the selected category and level constraint.",
-      "ItemDocumentNotFound": "The selected item could not be loaded from its compendium."
+      "ItemDocumentNotFound": "The selected item could not be loaded from its compendium.",
+      "InvalidPropertyRuneSelection": "The selected property runes are incompatible with the base item, exceed available rune slots, or fall outside the allowed level/rarity constraints."
+    },
+    "PropertyRuneMode": {
+      "Automatic": "Automatic level-appropriate",
+      "Random": "Random",
+      "Fixed": "Choose fixed runes",
+      "None": "No property runes"
+    },
+    "PropertyRunes": {
+      "Returning": "Returning",
+      "GhostTouch": "Ghost Touch",
+      "Disrupting": "Disrupting",
+      "Shifting": "Shifting",
+      "Wounding": "Wounding",
+      "Astral": "Astral",
+      "Corrosive": "Corrosive",
+      "Flaming": "Flaming",
+      "Frost": "Frost",
+      "Shock": "Shock",
+      "Thundering": "Thundering",
+      "Extending": "Extending",
+      "Holy": "Holy",
+      "Unholy": "Unholy",
+      "Impactful": "Impactful",
+      "Shadow": "Shadow",
+      "Slick": "Slick",
+      "Glamered": "Glamered",
+      "Invisibility": "Invisibility",
+      "Fortification": "Fortification"
     }
   }
 }

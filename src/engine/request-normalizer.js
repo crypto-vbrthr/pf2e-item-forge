@@ -10,6 +10,7 @@ const LEVEL_POLICIES = new Set(["strict", "nearest", "notAbove", "notBelow"]);
 const SOURCE_MODES = new Set(["all", "system", "selected"]);
 const GENERATION_MODES = new Set(["existing", "equipment"]);
 const FUNDAMENTAL_RUNE_MODES = new Set(["automatic", "none"]);
+const PROPERTY_RUNE_MODES = new Set(["automatic", "random", "fixed", "none"]);
 
 function integer(value, fallback) {
   const parsed = Number.parseInt(value, 10);
@@ -57,7 +58,17 @@ export function normalizeRequest(request = {}, options = {}) {
     equipment: {
       fundamentalRunes: FUNDAMENTAL_RUNE_MODES.has(request.equipment?.fundamentalRunes)
         ? request.equipment.fundamentalRunes
-        : "automatic"
+        : "automatic",
+      propertyRunes: {
+        mode: PROPERTY_RUNE_MODES.has(request.equipment?.propertyRunes?.mode)
+          ? request.equipment.propertyRunes.mode
+          : "automatic",
+        selected: [...new Set(
+          Array.isArray(request.equipment?.propertyRunes?.selected)
+            ? request.equipment.propertyRunes.selected.filter((slug) => typeof slug === "string" && slug)
+            : []
+        )]
+      }
     },
     seed: String(request.seed ?? createSeed()),
     filters: request.filters ?? {},

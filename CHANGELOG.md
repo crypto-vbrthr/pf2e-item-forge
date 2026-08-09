@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.0.5
+
+- Adds property-rune generation for composed weapons and armor.
+- Adds automatic, random, fixed-selection, and disabled property-rune modes.
+- Enforces property-rune slot limits from the potency rune; shields remain property-rune-free.
+- Adds compatibility filtering for melee/ranged weapons, weapon groups, damage types, traits, and armor categories.
+- Includes property-rune levels in effective item-level resolution so strict level requests remain hard constraints.
+- Adds an extensible public property-rune registry at `game.pf2eItemForge.propertyRunes`.
+- Extends the compendium index with weapon/armor metadata needed for rune compatibility.
+- Extends the embedded editor and preview with property-rune controls, fixed rune selection, capacity, levels, and rarity.
+- Adds German and English localization for the new property-rune UI and validation errors.
+- Adds regression coverage for incompatible fixed runes, level bridging, deterministic random rune selection, armor restrictions, and external rune registration.
+- Automated suite now contains 33 passing tests.
+
 ## 0.0.4
 
 - Adds a second generation mode for composing weapons, armor, and shields from mundane compendium base items.

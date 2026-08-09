@@ -25,3 +25,16 @@ test("normalizeRequest supports composed equipment mode and fundamental rune pol
   assert.equal(request.mode, "equipment");
   assert.equal(request.equipment.fundamentalRunes, "none");
 });
+
+
+test("normalizeRequest supports property rune modes and removes duplicate fixed selections", () => {
+  const request = normalizeRequest({
+    mode: "equipment",
+    equipment: {
+      propertyRunes: { mode: "fixed", selected: ["flaming", "flaming", "frost"] }
+    },
+    seed: "x"
+  });
+  assert.equal(request.equipment.propertyRunes.mode, "fixed");
+  assert.deepEqual(request.equipment.propertyRunes.selected, ["flaming", "frost"]);
+});
