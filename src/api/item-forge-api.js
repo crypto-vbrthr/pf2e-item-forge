@@ -1,7 +1,7 @@
 import { API_VERSION } from "../constants.js";
 
 export class ItemForgeApi {
-  constructor({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes = [], wandProfiles = null, staffProfiles = null, spellheartProfiles = null, specificItemProfiles = null, diagnostics = null, openApplication }) {
+  constructor({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes = [], wandProfiles = null, staffProfiles = null, spellheartProfiles = null, specificItemProfiles = null, specificShieldProfiles = null, diagnostics = null, openApplication }) {
     this.apiVersion = API_VERSION;
     this.engine = engine;
     this.categories = categories;
@@ -14,6 +14,7 @@ export class ItemForgeApi {
     this.staffProfiles = staffProfiles;
     this.spellheartProfiles = spellheartProfiles;
     this.specificItemProfiles = specificItemProfiles;
+    this.specificShieldProfiles = specificShieldProfiles;
     this.diagnostics = diagnostics;
     this.openApplication = openApplication;
   }
@@ -58,7 +59,7 @@ export class ItemForgeApi {
       fundamentalRuneModes: ["automatic", "none"],
       propertyRuneModes: ["automatic", "random", "fixed", "none"],
       magicThemes: this.magicThemes.map((theme) => theme.id),
-      magicItemKinds: ["wand", "staff", "spellheart", "specific-weapon", "specific-armor"],
+      magicItemKinds: ["wand", "staff", "spellheart", "specific-weapon", "specific-armor", "specific-shield"],
       automationLevels: ["native", "rules-text"],
       magicDiagnostics: Boolean(this.diagnostics),
       wandModes: ["standard", "special"],
@@ -69,6 +70,7 @@ export class ItemForgeApi {
       staffProfiles: this.staffProfiles?.getAll?.().map((profile) => ({ id: profile.id, label: profile.label, levels: profile.variants.map((variant) => variant.level), ...(profile.balance ? { balance: profile.balance } : {}) })) ?? [],
       spellheartProfiles: this.spellheartProfiles?.getAll?.().map((profile) => ({ id: profile.id, label: profile.label, themes: [...profile.allowedThemes], levels: profile.variants.map((variant) => variant.level), ...(profile.balance ? { balance: profile.balance } : {}) })) ?? [],
       specificItemProfiles: this.specificItemProfiles?.getAll?.().map((profile) => ({ id: profile.id, itemType: profile.itemType, label: profile.label, themes: [...profile.allowedThemes], levels: profile.variants.map((variant) => variant.level), ...(profile.balance ? { balance: profile.balance } : {}) })) ?? [],
+      specificShieldProfiles: this.specificShieldProfiles?.getAll?.().map((profile) => ({ id: profile.id, label: profile.label, themes: [...profile.allowedThemes], levels: profile.variants.map((variant) => variant.level), ...(profile.balance ? { balance: profile.balance } : {}) })) ?? [],
       propertyRunes: this.propertyRunes.getAll().map((rune) => ({ id: rune.id, slug: rune.slug, itemType: rune.itemType, level: rune.level, rarity: rune.rarity })),
       levelPolicies: ["strict", "nearest", "notAbove", "notBelow"],
       embeddedEditor: true,

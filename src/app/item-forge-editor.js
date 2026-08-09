@@ -200,7 +200,8 @@ export class ItemForgeEditor extends HandlebarsApplication {
     const generatedStaff = isStaffCategory && this.request.magic?.staffMode !== "existing";
     const isSpecificWeaponCategory = isMagicMode && this.request.category === "magic.weapon";
     const isSpecificArmorCategory = isMagicMode && this.request.category === "magic.armor";
-    const isSpecificMagicCategory = isSpecificWeaponCategory || isSpecificArmorCategory;
+    const isSpecificShieldCategory = isMagicMode && this.request.category === "magic.shield";
+    const isSpecificMagicCategory = isSpecificWeaponCategory || isSpecificArmorCategory || isSpecificShieldCategory;
     const generatedSpecific = isSpecificMagicCategory && this.request.magic?.specificMode === "generated";
     const usesSpellSources = isScrollCategory || isWandCategory || generatedStaff || generatedSpellheart;
     const packs = this.api.getAvailableItemPacks({ includeSpellPacks: usesSpellSources }).map((pack) => ({
@@ -310,8 +311,11 @@ export class ItemForgeEditor extends HandlebarsApplication {
       selected: (this.request.magic?.specificMode ?? "existing") === id,
       label: localizeMaybe(`PF2E_ITEM_FORGE.SpecificItemMode.${id === "existing" ? "Existing" : "Generated"}`)
     }));
-    const specificItemType = isSpecificWeaponCategory ? "weapon" : isSpecificArmorCategory ? "armor" : null;
-    const availableSpecificProfiles = specificItemType ? (this.api.specificItemProfiles?.getForItemType?.(specificItemType) ?? []) : [];
+    const specificItemType = isSpecificWeaponCategory ? "weapon" : isSpecificArmorCategory ? "armor" : isSpecificShieldCategory ? "shield" : null;
+    const specificProfileRegistry = isSpecificShieldCategory ? this.api.specificShieldProfiles : this.api.specificItemProfiles;
+    const availableSpecificProfiles = isSpecificShieldCategory
+      ? (specificProfileRegistry?.getAll?.() ?? [])
+      : specificItemType ? (specificProfileRegistry?.getForItemType?.(specificItemType) ?? []) : [];
     if (generatedSpecific && this.request.magic?.specificProfile !== "automatic" && !availableSpecificProfiles.some((profile) => profile.id === this.request.magic.specificProfile)) {
       this.request.magic.specificProfile = "automatic";
     }
@@ -325,7 +329,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
       }))
     ];
     const activeSpecificProfile = generatedSpecific && this.request.magic?.specificProfile !== "automatic"
-      ? this.api.specificItemProfiles?.get?.(this.request.magic.specificProfile)
+      ? specificProfileRegistry?.get?.(this.request.magic.specificProfile)
       : null;
     const supportedSpecificThemes = activeSpecificProfile
       ? new Set(["automatic", ...(activeSpecificProfile.allowedThemes ?? [])])
@@ -423,7 +427,8 @@ export class ItemForgeEditor extends HandlebarsApplication {
                   staff: localizeMaybe("PF2E_ITEM_FORGE.Categories.MagicStaff"),
                   spellheart: localizeMaybe("PF2E_ITEM_FORGE.Categories.MagicSpellheart"),
                   "specific-weapon": localizeMaybe("PF2E_ITEM_FORGE.Categories.MagicWeapon"),
-                  "specific-armor": localizeMaybe("PF2E_ITEM_FORGE.Categories.MagicArmor")
+                  "specific-armor": localizeMaybe("PF2E_ITEM_FORGE.Categories.MagicArmor"),
+                  "specific-shield": localizeMaybe("PF2E_ITEM_FORGE.Categories.MagicShield")
                 })[this.previewResult.metadata.magic.kind] ?? this.previewResult.metadata.magic.kind,
                 wandModeLabel: this.previewResult.metadata.magic.wandMode
                   ? localizeMaybe(`PF2E_ITEM_FORGE.WandMode.${this.previewResult.metadata.magic.wandMode === "special" ? "Special" : "Standard"}`)
@@ -453,7 +458,9 @@ export class ItemForgeEditor extends HandlebarsApplication {
                   ? localizeMaybe(`PF2E_ITEM_FORGE.SpecificItemMode.${this.previewResult.metadata.magic.specificMode === "existing" ? "Existing" : "Generated"}`)
                   : null,
                 specificProfileLabel: this.previewResult.metadata.magic.kind?.startsWith?.("specific-") && this.previewResult.metadata.magic.profile
-                  ? localizeMaybe(this.api.specificItemProfiles?.get?.(this.previewResult.metadata.magic.profile)?.label ?? this.previewResult.metadata.magic.profile)
+                  ? localizeMaybe((this.previewResult.metadata.magic.kind === "specific-shield"
+                      ? this.api.specificShieldProfiles?.get?.(this.previewResult.metadata.magic.profile)?.label
+                      : this.api.specificItemProfiles?.get?.(this.previewResult.metadata.magic.profile)?.label) ?? this.previewResult.metadata.magic.profile)
                   : null
               }
             : null,
@@ -500,6 +507,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
       generatedSpellheart,
       isSpecificWeaponCategory,
       isSpecificArmorCategory,
+      isSpecificShieldCategory,
       isSpecificMagicCategory,
       generatedSpecific,
       specificModes,
@@ -622,7 +630,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
   }
 
   #isMagicCategory(category) {
-    return ["magic.wand", "magic.staff", "magic.spellheart", "magic.weapon", "magic.armor"].includes(category);
+    return ["magic.wand", "magic.staff", "magic.spellheart", "magic.weapon", "magic.armor", "magic.shield"].includes(category);
   }
 
   #equipmentType(category) {

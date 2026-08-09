@@ -155,7 +155,10 @@
       "SpecialAbility": "Besondere Fähigkeit",
       "Automation": "Automatisierung",
       "ContentSources": "Inhaltsquellen",
-      "TemplateSource": "Technische Vorlage"
+      "TemplateSource": "Technische Vorlage",
+      "ShieldHardness": "Härte",
+      "ShieldHP": "TP",
+      "ShieldBT": "Bruchschwelle"
     },
     "Notifications": {
       "GenerationFailed": "Für diese Parameter konnte kein Gegenstand erzeugt werden.",
@@ -211,7 +214,8 @@
       "MagicStaff": "Zauberstecken",
       "MagicSpellheart": "Zauberherz",
       "MagicWeapon": "Spezifische magische Waffe",
-      "MagicArmor": "Spezifische magische Rüstung"
+      "MagicArmor": "Spezifische magische Rüstung",
+      "MagicShield": "Spezifischer magischer Schild"
     },
     "GenerationMode": {
       "Existing": "Vordefinierten Gegenstand auswählen",
@@ -463,6 +467,27 @@
       "Skipped": "Übersprungen",
       "SystemVersion": "PF2e-Version",
       "FoundryVersion": "Foundry-Version"
+    },
+    "SpecificShieldProfiles": {
+      "Automatic": "Automatisch passend zur Stufe",
+      "Restorative": "Schild der Erneuerung",
+      "ElementalBastion": "Elementarbollwerk",
+      "GuardianBulwark": "Wächterschild"
+    },
+    "SpecificShieldText": {
+      "RestorativeName": "Schild der Erneuerung ({base})",
+      "RestorativeDescription": "Magische Verstrebungen und selbstheilende Bindungen durchziehen diesen Schild.",
+      "RestorativeEffect": "Einmal pro Tag kannst du den Schild mit 1 Aktion (manipulieren) aktivieren; er erhält {repair} Trefferpunkte zurück.",
+      "ElementalBastionName": "{theme}-Bollwerk ({base})",
+      "ElementalBastionDescription": "Elementare Magie ist fest in die Struktur dieses Schildes gebunden.",
+      "ElementalBastionEffect": "Während der Schild erhoben ist, erhältst du Resistenz {resistance} gegen {damageLabel}.",
+      "GuardianBulwarkName": "Wächterschild ({base})",
+      "GuardianBulwarkDescription": "Dieser Schild reagiert auf die Bewegungen seines Trägers und richtet sich im entscheidenden Moment selbst neu aus.",
+      "GuardianBulwarkEffect": "{frequency}: Wenn du mit diesem Schild Schildblock einsetzt, erhältst du vor Beginn deines nächsten Zuges eine zusätzliche Reaktion, die nur für Schildblock verwendet werden kann.",
+      "OncePerDay": "Einmal pro Tag",
+      "OncePerHour": "Einmal pro Stunde",
+      "OncePerTenMinutes": "Einmal pro 10 Minuten",
+      "DurabilityNote": "Die angegebenen Härte-, TP- und Bruchschwellenwerte gehören fest zu diesem spezifischen Schild."
     }
   }
 }

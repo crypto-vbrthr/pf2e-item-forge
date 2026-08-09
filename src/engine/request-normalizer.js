@@ -192,7 +192,7 @@ export function validateRequest(request, {
   }
   if (normalized.mode === "magic") {
     const category = normalized.category;
-    const supported = ["magic.wand", "magic.staff", "magic.spellheart", "magic.weapon", "magic.armor"].includes(category);
+    const supported = ["magic.wand", "magic.staff", "magic.spellheart", "magic.weapon", "magic.armor", "magic.shield"].includes(category);
     if (!supported) errors.push({ code: "UNSUPPORTED_MAGIC_CATEGORY", field: "category", value: category });
   }
   return { valid: errors.length === 0, errors, request: normalized };

@@ -109,7 +109,11 @@ export class CompendiumIndex {
             "system.heightening",
             "system.time.value",
             "system.damage",
-            "system.description.value"
+            "system.description.value",
+            "system.hardness",
+            "system.hp",
+            "system.brokenThreshold",
+            "system.acBonus"
           ]
         });
 
@@ -144,6 +148,10 @@ export class CompendiumIndex {
             armorCategory: getProperty(raw, "system.category") ?? null,
             damageType: getProperty(raw, "system.damage.damageType") ?? null,
             description: getProperty(raw, "system.description.value") ?? "",
+            hardness: this.#numberValue(getProperty(raw, "system.hardness"), 0),
+            hp: this.#shieldHp(getProperty(raw, "system.hp")),
+            brokenThreshold: this.#brokenThreshold(raw),
+            acBonus: this.#numberValue(getProperty(raw, "system.acBonus"), null),
             categories
           });
         }
@@ -220,6 +228,30 @@ export class CompendiumIndex {
     return true;
   }
 
+  #numberValue(value, fallback = 0) {
+    const raw = value && typeof value === "object" ? value.value ?? value.max : value;
+    const number = Number(raw);
+    return Number.isFinite(number) ? number : fallback;
+  }
+
+  #shieldHp(value) {
+    if (value && typeof value === "object") {
+      const max = Number(value.max ?? value.value);
+      return Number.isFinite(max) ? max : 0;
+    }
+    const number = Number(value);
+    return Number.isFinite(number) ? number : 0;
+  }
+
+  #brokenThreshold(raw) {
+    const direct = this.#numberValue(getProperty(raw, "system.brokenThreshold"), null);
+    if (direct != null) return direct;
+    const nested = this.#numberValue(getProperty(raw, "system.hp.brokenThreshold"), null);
+    if (nested != null) return nested;
+    const hp = this.#shieldHp(getProperty(raw, "system.hp"));
+    return hp > 0 ? Math.floor(hp / 2) : 0;
+  }
+
   #spellEntry(raw, pack) {
     const traits = [...(getProperty(raw, "system.traits.value") ?? [])];
     const ritual = getProperty(raw, "system.ritual") ?? null;
@@ -293,6 +325,8 @@ export class CompendiumIndex {
       if (isSpecificSystemValue(system.specific)) categories.push("magic", "magic.armor");
     } else if (type === "shield") {
       categories.push("shield");
+      const shieldTraits = system.traits?.value ?? [];
+      if (shieldTraits.includes("magical")) categories.push("magic", "magic.shield");
     } else if (type === "consumable") {
       categories.push("consumable");
       const category = system.category;

@@ -163,7 +163,7 @@ test("ItemForgeEditor preserves spellheart as a supported embedded magic categor
 });
 
 test("ItemForgeEditor preserves specific weapon and armor magic categories", () => {
-  for (const category of ["magic.weapon", "magic.armor"]) {
+  for (const category of ["magic.weapon", "magic.armor", "magic.shield"]) {
     const editor = new ItemForgeEditor({ api: apiFixture(), request: { mode: "magic", category, level: 8, seed: category } });
     assert.equal(editor.getRequest().category, category);
   }

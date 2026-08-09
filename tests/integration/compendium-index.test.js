@@ -224,3 +224,22 @@ test("CompendiumIndex parses common PF2e spell action-time shapes defensively", 
   assert.equal(index.spellEntries.find((entry) => entry.id === "two").castActions, 2);
   assert.equal(index.spellEntries.find((entry) => entry.id === "reaction").castActions, null);
 });
+
+
+test("CompendiumIndex classifies magical shields separately and records shield durability", async () => {
+  const pack = makePack("pf2e.magic-shields", [
+    raw("specific-shield", "shield", 9, { traits: { value: ["magical"], rarity: "common" }, hardness: 10, hp: { value: 40, max: 40 }, acBonus: 2 }),
+    raw("mundane-shield", "shield", 0, { traits: { value: [], rarity: "common" }, hardness: 5, hp: { value: 20, max: 20 }, acBonus: 2 })
+  ]);
+  const categories = registerCoreCategories(new CategoryRegistry());
+  const game = { system: { id: "pf2e" }, packs: new FakePackCollection([pack]) };
+  const index = new CompendiumIndex({ categoryRegistry: categories, gameProvider: () => game });
+  await index.refresh();
+  const magical = index.entries.find((entry) => entry.id === "specific-shield");
+  const mundane = index.entries.find((entry) => entry.id === "mundane-shield");
+  assert.ok(magical.categories.includes("magic.shield"));
+  assert.equal(magical.hardness, 10);
+  assert.equal(magical.hp, 40);
+  assert.equal(magical.brokenThreshold, 20);
+  assert.equal(mundane.categories.includes("magic.shield"), false);
+});

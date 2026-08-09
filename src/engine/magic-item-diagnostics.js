@@ -40,7 +40,8 @@ export class MagicItemDiagnostics {
       { id: "spellheart-existing", request: { mode: "magic", category: "magic.spellheart", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { spellheartMode: "existing" }, seed: "diagnostic-spellheart-existing" } },
       { id: "spellheart-generated", request: { mode: "magic", category: "magic.spellheart", level: { min: 3, max: 16 }, levelPolicy: "strict", source: { mode: "system" }, magic: { spellheartMode: "generated", spellheartProfile: "automatic", theme: "automatic", allowHeightened: true }, seed: "diagnostic-spellheart-generated" } },
       { id: "specific-weapon-existing", request: { mode: "magic", category: "magic.weapon", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { specificMode: "existing" }, seed: "diagnostic-specific-weapon" } },
-      { id: "specific-armor-existing", request: { mode: "magic", category: "magic.armor", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { specificMode: "existing" }, seed: "diagnostic-specific-armor" } }
+      { id: "specific-armor-existing", request: { mode: "magic", category: "magic.armor", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { specificMode: "existing" }, seed: "diagnostic-specific-armor" } },
+      { id: "specific-shield-existing", request: { mode: "magic", category: "magic.shield", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { specificMode: "existing" }, seed: "diagnostic-specific-shield" } }
     ];
 
     for (const scenario of scenarios) checks.push(await this.#runScenario(scenario));
@@ -83,7 +84,7 @@ export class MagicItemDiagnostics {
         "NO_ITEM_IN_LEVEL_RANGE", "NO_SCROLL_SPELL_CANDIDATE", "NO_WAND_SPELL_CANDIDATE",
         "NO_PREDEFINED_STAFF_CANDIDATE", "NO_STAFF_SPELL_CANDIDATE",
         "NO_PREDEFINED_SPELLHEART_CANDIDATE", "NO_SPELLHEART_SPELL_CANDIDATE",
-        "NO_PREDEFINED_SPECIFIC_ITEM_CANDIDATE"
+        "NO_PREDEFINED_SPECIFIC_ITEM_CANDIDATE", "NO_PREDEFINED_SPECIFIC_SHIELD_CANDIDATE"
       ].includes(error?.code);
       return { id, status: skippable ? "skipped" : "failed", code: error?.code ?? null, message: error?.message ?? String(error) };
     }

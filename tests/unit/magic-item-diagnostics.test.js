@@ -25,6 +25,6 @@ test("MagicItemDiagnostics validates generated sources without persisting world 
   const diagnostics = new MagicItemDiagnostics({ api, documentFactory: (source) => { constructed += 1; return { source }; } });
   const result = await diagnostics.run();
   assert.equal(result.failed, 0);
-  assert.equal(constructed, 8);
+  assert.equal(constructed, 9);
   assert.ok(result.checks.some((check) => check.id === "pf2e-specific-schema" && check.status === "passed"));
 });

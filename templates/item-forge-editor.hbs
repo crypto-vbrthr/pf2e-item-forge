@@ -402,6 +402,11 @@
               {{#if preview.specificItem.variantLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.SpecificItemVariant"}}</dt><dd>{{preview.specificItem.variantLabel}}</dd>{{/if}}
               {{#if preview.specificItem.baseItem}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.BaseItem"}}</dt><dd>{{preview.specificItem.baseItem.name}} ({{localize "PF2E_ITEM_FORGE.Preview.Level"}} {{preview.specificItem.baseItem.level}})</dd>{{/if}}
               {{#if preview.specificItem.runeSummary}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.RuneProfile"}}</dt><dd>{{preview.specificItem.runeSummary}}</dd>{{/if}}
+              {{#if preview.specificItem.durability}}
+                <dt>{{localize "PF2E_ITEM_FORGE.Preview.ShieldHardness"}}</dt><dd>{{preview.specificItem.durability.hardness}}</dd>
+                <dt>{{localize "PF2E_ITEM_FORGE.Preview.ShieldHP"}}</dt><dd>{{preview.specificItem.durability.hp}}</dd>
+                <dt>{{localize "PF2E_ITEM_FORGE.Preview.ShieldBT"}}</dt><dd>{{preview.specificItem.durability.bt}}</dd>
+              {{/if}}
               {{#if preview.specificItem.propertyRunes.length}}
                 <dt>{{localize "PF2E_ITEM_FORGE.Preview.PropertyRunes"}}</dt>
                 <dd>{{#each preview.specificItem.propertyRunes}}<span class="property-rune-chip">{{displayLabel}}</span>{{/each}}</dd>

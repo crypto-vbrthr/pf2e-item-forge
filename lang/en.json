@@ -155,7 +155,10 @@
       "SpecialAbility": "Special ability",
       "Automation": "Automation",
       "ContentSources": "Content sources",
-      "TemplateSource": "Implementation template"
+      "TemplateSource": "Implementation template",
+      "ShieldHardness": "Hardness",
+      "ShieldHP": "HP",
+      "ShieldBT": "Broken Threshold"
     },
     "Notifications": {
       "GenerationFailed": "No item could be generated for these parameters.",
@@ -211,7 +214,8 @@
       "MagicStaff": "Staff",
       "MagicSpellheart": "Spellheart",
       "MagicWeapon": "Specific magic weapon",
-      "MagicArmor": "Specific magic armor"
+      "MagicArmor": "Specific magic armor",
+      "MagicShield": "Specific magic shield"
     },
     "GenerationMode": {
       "Existing": "Select a predefined item",
@@ -463,6 +467,27 @@
       "Skipped": "Skipped",
       "SystemVersion": "PF2e version",
       "FoundryVersion": "Foundry version"
+    },
+    "SpecificShieldProfiles": {
+      "Automatic": "Automatic for requested level",
+      "Restorative": "Restorative Shield",
+      "ElementalBastion": "Elemental Bastion",
+      "GuardianBulwark": "Guardian Bulwark"
+    },
+    "SpecificShieldText": {
+      "RestorativeName": "Restorative Shield ({base})",
+      "RestorativeDescription": "Magical braces and self-mending bonds run throughout this shield.",
+      "RestorativeEffect": "Once per day, you can Activate the shield with 1 action (manipulate); it regains {repair} Hit Points.",
+      "ElementalBastionName": "{theme} Bastion ({base})",
+      "ElementalBastionDescription": "Elemental magic is bound into the structure of this shield.",
+      "ElementalBastionEffect": "While the shield is raised, you gain resistance {resistance} to {damageLabel}.",
+      "GuardianBulwarkName": "Guardian Bulwark ({base})",
+      "GuardianBulwarkDescription": "This shield responds to its wielder’s movements and subtly realigns itself at a crucial moment.",
+      "GuardianBulwarkEffect": "{frequency}: When you Shield Block with this shield, you gain one additional reaction before the start of your next turn that can be used only to Shield Block.",
+      "OncePerDay": "Once per day",
+      "OncePerHour": "Once per hour",
+      "OncePerTenMinutes": "Once per 10 minutes",
+      "DurabilityNote": "The listed Hardness, Hit Points, and Broken Threshold are intrinsic to this specific shield."
     }
   }
 }

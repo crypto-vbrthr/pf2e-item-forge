@@ -1,18 +1,25 @@
 # Changelog
 
+## 0.0.21
+
+- Adds dedicated `magic.shield` support for specific magic shields.
+- Adds `SpecificMagicShieldGenerator` with separate predefined and generated paths. Predefined PF2e shields are cloned whole, preserving native system data and automation.
+- Adds public `SpecificShieldProfileRegistry` exposed as `game.pf2eItemForge.specificShieldProfiles`.
+- Adds three initial profile families for generated shields: restorative shield, elemental bastion, and guardian bulwark. Generated special abilities remain explicit rules text plus structured Item Forge metadata.
+- Generated shield profiles own their final Hardness, HP, Broken Threshold, item level, price, theme, and optional reinforcing-rune value as one validated unit. This avoids pretending that a reinforcing rune alone defines a published specific shield.
+- Compendium indexing now identifies magical shields as `magic.shield` and records shield durability data for previews/diagnostics.
+- Embedded editor supports predefined/generated specific shields, profile/theme selection, and previews Hardness, HP, Broken Threshold, and reinforcing rune.
+- Live magic diagnostics now include a predefined specific-shield smoke scenario.
+- Adds registry, generator, compendium-classification, deterministic, API, editor, and localization regression coverage.
+- Automated suite contains 159 passing tests.
+
 ## 0.0.20
 
-- Adds `CandidateLevelResolver` and migrates the major item/magic generators to one shared strict/nearest/not-above/not-below candidate policy while retaining generator-specific composition rules.
-- Adds `SpellCandidateService` to centralize ordinary spell eligibility, theme filtering, and meaningful fixed/interval heightening; higher-rank spells are never down-ranked.
-- Adds `MagicItemTemplateResolver` and explicitly separates user-selected content sources from internal PF2e implementation templates used for generic scroll/wand shells, generated staff bases, and generated Spellheart shells.
-- Magic preview/result metadata now distinguishes content sources, implementation template source, and automation level (`native` or `rules-text`).
-- Corrects generated Spellheart rules text to preserve the PF2e rule that a user may use their own higher spell attack modifier or spell DC when casting the Spellheart's cantrip.
-- Adds live `MagicItemDiagnostics` through the public API and a stethoscope button in the standalone Item Forge. Diagnostics instantiate temporary PF2e documents, inspect key live schema/price/trait/spell contracts, and do not persist world items.
-- Adds normalized balance-provenance metadata to core wand, staff, Spellheart, and specific-item profiles.
-- Hardens spell casting-time parsing for integer, nested-object, localized action-text, reaction, and free-action shapes.
-- Engine defaults are now supplied dynamically from current Foundry settings on each request, so source-mode/solver setting changes no longer require API reconstruction.
-- Synchronizes architecture/README documentation with the PF2e v14 non-null `system.specific` data-object contract and the current generated-magic capabilities.
-- Automated suite now contains 152 passing tests, including new shared-service, live-diagnostic, dynamic-settings, schema, localization, and profile-provenance coverage.
+- Magic hardening: shared candidate-level resolution, shared spell-candidate selection, and explicit technical-template resolution.
+- Separates user-selected content sources from internal PF2e implementation templates and surfaces that distinction in metadata/preview.
+- Adds live Foundry/PF2e magic diagnostics and explicit native-vs-rules-text automation metadata.
+- Improves spellheart cantrip rules text and spell cast-time parsing, and reads default settings dynamically per request.
+- Adds balance provenance metadata for custom magic profile registries.
 
 ## 0.0.19
 
