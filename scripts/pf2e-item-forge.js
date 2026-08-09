@@ -3,6 +3,7 @@ import { CategoryRegistry, registerCoreCategories } from "../src/engine/category
 import { CompendiumIndex } from "../src/engine/compendium-index.js";
 import { GeneratorRegistry } from "../src/engine/generator-registry.js";
 import { ExistingItemGenerator } from "../src/engine/generators/existing-item-generator.js";
+import { EquipmentGenerator } from "../src/engine/generators/equipment-generator.js";
 import { TreasureRegistry } from "../src/engine/registries/treasure-registry.js";
 import { ItemForgeEngine } from "../src/engine/item-forge-engine.js";
 import { ItemForgeApi } from "../src/api/item-forge-api.js";
@@ -50,6 +51,7 @@ function createApi() {
   const generators = new GeneratorRegistry();
   const treasure = new TreasureRegistry();
   generators.register(new ExistingItemGenerator({ compendiumIndex }));
+  generators.register(new EquipmentGenerator({ compendiumIndex }));
 
   const engine = new ItemForgeEngine({
     categories,

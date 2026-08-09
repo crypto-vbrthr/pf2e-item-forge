@@ -29,7 +29,9 @@
       "Rarity": "Seltenheit",
       "Sources": "Kompendien",
       "SolverAttempts": "Maximale ValueSolver-Versuche",
-      "Seed": "Seed"
+      "Seed": "Seed",
+      "GenerationMode": "Erzeugungsart",
+      "FundamentalRunes": "Basisrunen"
     },
     "LevelMode": {
       "Single": "Einzelne Stufe",
@@ -55,14 +57,24 @@
     "Hints": {
       "EmptyRarityMeansAll": "Keine Auswahl bedeutet: alle Seltenheiten zulassen.",
       "NoItemPacks": "Keine Item-Kompendien gefunden.",
-      "SolverAttempts": "Ist bereits Teil des stabilen Request-Schemas; der Schatzgenerator verwendet diesen Wert in einer späteren Ausbaustufe."
+      "SolverAttempts": "Ist bereits Teil des stabilen Request-Schemas; der Schatzgenerator verwendet diesen Wert in einer späteren Ausbaustufe.",
+      "EquipmentMode": "Wählt einen nicht-spezifischen Basisgegenstand aus den gewählten Kompendien und versieht ihn mit einer stufengerechten Kombination von Basisrunen.",
+      "PropertyRunesLater": "Eigenschaftsrunen werden als eigener Komponentenblock ergänzt; diese Version legt bereits Stufenauflösung und Runenplätze dafür fest."
     },
     "Preview": {
       "Empty": "Noch nichts geschmiedet. Parameter wählen und Generieren drücken.",
       "Generating": "Gegenstand wird geschmiedet …",
       "Level": "Stufe",
       "Source": "Quelle",
-      "Candidates": "Passende Kandidaten"
+      "Candidates": "Passende Kandidaten",
+      "BaseItem": "Basisgegenstand",
+      "RuneProfile": "Basisrunen",
+      "PropertySlots": "Plätze für Eigenschaftsrunen",
+      "EffectiveLevel": "Effektive Stufe",
+      "Potency": "Verbesserung",
+      "Striking": "Schaden",
+      "Resilient": "Widerstand",
+      "Reinforcing": "Verstärkung"
     },
     "Notifications": {
       "GenerationFailed": "Für diese Parameter konnte kein Gegenstand erzeugt werden.",
@@ -102,6 +114,20 @@
       "TreasureJewelry": "Schmuck",
       "TreasureBook": "Buch",
       "TreasureBeverage": "Wertvolles Getränk"
+    },
+    "GenerationMode": {
+      "Existing": "Vordefinierten Gegenstand auswählen",
+      "Equipment": "Waffe, Rüstung oder Schild zusammensetzen"
+    },
+    "FundamentalRunes": {
+      "Automatic": "Automatisch stufengerecht",
+      "None": "Keine Basisrunen"
+    },
+    "Errors": {
+      "NoBaseEquipment": "Kein geeigneter, nicht-spezifischer Basisgegenstand wurde in den gewählten Kompendien gefunden.",
+      "UnsupportedEquipmentCategory": "Die Erzeugungsart „Ausrüstung zusammensetzen“ unterstützt nur Waffen, Rüstungen und Schilde.",
+      "NoItemInLevelRange": "Für die gewählte Kategorie und Stufenvorgabe wurde kein passender Gegenstand gefunden.",
+      "ItemDocumentNotFound": "Der ausgewählte Gegenstand konnte nicht aus dem Kompendium geladen werden."
     }
   }
 }

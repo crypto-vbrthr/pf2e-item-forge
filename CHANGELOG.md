@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.0.4
+
+- Adds a second generation mode for composing weapons, armor, and shields from mundane compendium base items.
+- Adds canonical Remaster fundamental-rune profiles for weapons and armor plus reinforcing-rune profiles for shields.
+- Adds `ItemLevelResolver` and strict level validation based on the highest relevant component level.
+- Adds property-rune capacity calculation in preparation for the next property-rune block.
+- Extends the embedded editor with generation-mode and fundamental-rune controls.
+- Extends preview data with the selected base item, rune summary, effective level, and property-rune slots.
+- Extends the compendium index with rune, specific-item, base-item, slug, and material metadata.
+- Adds localized generator errors and new German/English UI labels.
+- Expands automated coverage for rune profiles, level resolution, deterministic equipment generation, armor, weapons, and shields.
+
 ## 0.0.3
 
 - Korrigiert die Foundry-v14-Lokalisierungsdateien auf die erwartete verschachtelte JSON-Struktur.

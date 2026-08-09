@@ -43,7 +43,12 @@ export class CompendiumIndex {
             "system.category",
             "system.group",
             "system.range",
-            "system.usage.value"
+            "system.usage.value",
+            "system.runes",
+            "system.specific",
+            "system.baseItem",
+            "system.slug",
+            "system.material"
           ]
         });
 
@@ -61,6 +66,11 @@ export class CompendiumIndex {
             level: Number(getProperty(raw, "system.level.value") ?? 0),
             rarity: getProperty(raw, "system.rarity.value") ?? "common",
             traits: [...(getProperty(raw, "system.traits.value") ?? [])],
+            runes: structuredClone(getProperty(raw, "system.runes") ?? {}),
+            specific: structuredClone(getProperty(raw, "system.specific") ?? null),
+            baseItem: getProperty(raw, "system.baseItem") ?? null,
+            slug: getProperty(raw, "system.slug") ?? null,
+            material: structuredClone(getProperty(raw, "system.material") ?? null),
             categories
           });
         }

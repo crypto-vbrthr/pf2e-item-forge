@@ -1,18 +1,5 @@
 import { SeededRng } from "../seeded-rng.js";
-
-function distanceToRange(level, { min, max, target }) {
-  if (target != null) return Math.abs(level - target);
-  if (level < min) return min - level;
-  if (level > max) return level - max;
-  return 0;
-}
-
-function levelAllowed(level, request) {
-  const { min, max } = request.level;
-  if (request.levelPolicy === "notAbove") return level <= max;
-  if (request.levelPolicy === "notBelow") return level >= min;
-  return level >= min && level <= max;
-}
+import { distanceToLevelRequest, levelAllowed } from "../item-level-resolver.js";
 
 export class ExistingItemGenerator {
   constructor({ compendiumIndex }) {
@@ -31,8 +18,8 @@ export class ExistingItemGenerator {
     const warnings = [];
 
     if (candidates.length === 0 && request.levelPolicy === "nearest" && pool.length > 0) {
-      const bestDistance = Math.min(...pool.map((entry) => distanceToRange(entry.level, request.level)));
-      candidates = pool.filter((entry) => distanceToRange(entry.level, request.level) === bestDistance);
+      const bestDistance = Math.min(...pool.map((entry) => distanceToLevelRequest(entry.level, request.level)));
+      candidates = pool.filter((entry) => distanceToLevelRequest(entry.level, request.level) === bestDistance);
       warnings.push({
         code: "LEVEL_TARGET_APPROXIMATED",
         requested: { ...request.level },

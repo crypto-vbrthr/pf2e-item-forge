@@ -3,6 +3,16 @@
     <h3>{{localize "PF2E_ITEM_FORGE.Editor.Parameters"}}</h3>
 
     <div class="form-group">
+      <label>{{localize "PF2E_ITEM_FORGE.Fields.GenerationMode"}}</label>
+      <select name="mode">
+        {{#each generationModes}}
+          <option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+      {{#if isEquipmentMode}}<p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.EquipmentMode"}}</p>{{/if}}
+    </div>
+
+    <div class="form-group">
       <label>{{localize "PF2E_ITEM_FORGE.Fields.Category"}}</label>
       <select name="category">
         {{#each categories}}
@@ -10,6 +20,18 @@
         {{/each}}
       </select>
     </div>
+
+    {{#if isEquipmentMode}}
+    <div class="form-group">
+      <label>{{localize "PF2E_ITEM_FORGE.Fields.FundamentalRunes"}}</label>
+      <select name="equipment.fundamentalRunes">
+        {{#each fundamentalRuneModes}}
+          <option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+      <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.PropertyRunesLater"}}</p>
+    </div>
+    {{/if}}
 
     <div class="form-group">
       <label>{{localize "PF2E_ITEM_FORGE.Fields.LevelMode"}}</label>
@@ -107,6 +129,12 @@
           <dl>
             <dt>{{localize "PF2E_ITEM_FORGE.Preview.Source"}}</dt><dd>{{preview.sourcePack}}</dd>
             <dt>{{localize "PF2E_ITEM_FORGE.Preview.Candidates"}}</dt><dd>{{preview.candidateCount}}</dd>
+            {{#if preview.baseItem}}
+              <dt>{{localize "PF2E_ITEM_FORGE.Preview.BaseItem"}}</dt><dd>{{preview.baseItem.name}} ({{localize "PF2E_ITEM_FORGE.Preview.Level"}} {{preview.baseItem.level}})</dd>
+              <dt>{{localize "PF2E_ITEM_FORGE.Preview.RuneProfile"}}</dt><dd>{{preview.runeSummary}}</dd>
+              <dt>{{localize "PF2E_ITEM_FORGE.Preview.PropertySlots"}}</dt><dd>{{preview.propertyRuneCapacity}}</dd>
+              <dt>{{localize "PF2E_ITEM_FORGE.Preview.EffectiveLevel"}}</dt><dd>{{preview.level}}</dd>
+            {{/if}}
           </dl>
           {{#if preview.warnings.length}}
             <div class="warning-box">

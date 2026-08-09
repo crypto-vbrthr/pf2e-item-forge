@@ -13,3 +13,15 @@ test("normalizeRequest sorts reversed ranges and clamps solver attempts", () => 
   assert.equal(request.level.max, 12);
   assert.equal(request.solver.maxAttempts, 1000);
 });
+
+
+test("normalizeRequest supports composed equipment mode and fundamental rune policy", () => {
+  const request = normalizeRequest({
+    mode: "equipment",
+    category: "weapon",
+    equipment: { fundamentalRunes: "none" },
+    seed: "x"
+  });
+  assert.equal(request.mode, "equipment");
+  assert.equal(request.equipment.fundamentalRunes, "none");
+});

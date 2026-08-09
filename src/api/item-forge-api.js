@@ -37,6 +37,8 @@ export class ItemForgeApi {
       generators: this.generators.getAll().map((generator) => generator.id),
       categories: this.categories.getAll().map((category) => category.id),
       sourceModes: ["all", "system", "selected"],
+      generationModes: ["existing", "equipment"],
+      fundamentalRuneModes: ["automatic", "none"],
       levelPolicies: ["strict", "nearest", "notAbove", "notBelow"],
       embeddedEditor: true,
       treasureRegistries: true

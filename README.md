@@ -1,39 +1,44 @@
 # PF2E Item Forge
 
-Early implementation of the reusable Item Forge architecture for Foundry VTT and Pathfinder 2e.
+Reusable Item Forge architecture for Foundry VTT v14 and Pathfinder 2e.
 
-## v0.0.3 scope
+## v0.0.4 scope
 
-This first implementation deliberately builds the foundation before rune composition and generated treasures are added.
+This release adds the first composed-equipment generator while keeping the public API and embedded-editor architecture introduced in the earlier foundation releases.
 
 Implemented:
 
 - Public `game.pf2eItemForge` API (API version 1)
 - Reusable `ItemForgeEngine`
 - Registry-based hierarchical item categories
-- Configurable compendium source selection
-- Compendium item index
+- Configurable compendium source selection and compendium item index
 - Exact level or level range with strict/nearest/not-above/not-below policies
 - Deterministic seeded random generation
 - Existing-item generator using indexed compendium items
-- Embedded `ItemForgeEditor` built as an ApplicationV2 child
+- New composed equipment mode for mundane base weapons, armor, and shields
+- Canonical Remaster fundamental-rune progressions for weapons and armor
+- Reinforcing-rune progression for shields
+- `ItemLevelResolver`: final composed-item level is derived from the highest relevant component level
+- Property-rune capacity is calculated now so the later property-rune block can plug into the same plan/validator
+- Embedded `ItemForgeEditor` with generation-mode selection and rune preview
 - Standalone `ItemForgeApplication` container
-- Item Directory button
-- Preview, reroll, and creation of the previewed world Item
+- Item Directory button, preview, reroll, and world-item creation
 - German and English localization
-- Extensible treasure content registries (types, materials, components, motifs, conditions, styles)
-- Generic ValueSolver with configurable max attempts and absolute safety cap
-- Node.js built-in unit/integration test suite
+- Extensible treasure content registries
+- Generic bounded ValueSolver
+- Automated Node.js unit/integration tests
 
 Not yet implemented:
 
-- Rune-composed weapon/armor/shield generation
-- Treasure object generation and valuation content
+- Property-rune selection and compatibility filtering
+- Precious-material composition
+- Generated treasure objects and valuation content
 - Presets
 - Actor/folder output targets
-- Advanced category-specific editor fields
 
 ## API examples
+
+Select a predefined item:
 
 ```js
 await game.pf2eItemForge.generate({
@@ -44,6 +49,21 @@ await game.pf2eItemForge.generate({
   source: { mode: "system" }
 });
 ```
+
+Compose a weapon from a mundane base item and fundamental runes:
+
+```js
+await game.pf2eItemForge.generate({
+  mode: "equipment",
+  category: "weapon.melee",
+  level: 4,
+  levelPolicy: "strict",
+  source: { mode: "system" },
+  equipment: { fundamentalRunes: "automatic" }
+});
+```
+
+Register treasure content for later treasure generation:
 
 ```js
 game.pf2eItemForge.treasure.materials.register({

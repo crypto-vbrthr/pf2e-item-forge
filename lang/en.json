@@ -29,7 +29,9 @@
       "Rarity": "Rarity",
       "Sources": "Compendiums",
       "SolverAttempts": "Maximum ValueSolver attempts",
-      "Seed": "Seed"
+      "Seed": "Seed",
+      "GenerationMode": "Generation type",
+      "FundamentalRunes": "Fundamental runes"
     },
     "LevelMode": {
       "Single": "Single level",
@@ -55,14 +57,24 @@
     "Hints": {
       "EmptyRarityMeansAll": "No selection means all rarities are allowed.",
       "NoItemPacks": "No item compendiums found.",
-      "SolverAttempts": "Already part of the stable request schema; the treasure generator will use this value in a later phase."
+      "SolverAttempts": "Already part of the stable request schema; the treasure generator will use this value in a later phase.",
+      "EquipmentMode": "Selects a non-specific base item from the chosen compendiums and applies a level-appropriate combination of fundamental runes.",
+      "PropertyRunesLater": "Property runes will be added as a separate component block; this version already establishes level resolution and property-rune capacity."
     },
     "Preview": {
       "Empty": "Nothing forged yet. Choose parameters and press Generate.",
       "Generating": "Forging item …",
       "Level": "Level",
       "Source": "Source",
-      "Candidates": "Matching candidates"
+      "Candidates": "Matching candidates",
+      "BaseItem": "Base item",
+      "RuneProfile": "Fundamental runes",
+      "PropertySlots": "Property rune slots",
+      "EffectiveLevel": "Effective level",
+      "Potency": "Potency",
+      "Striking": "Striking",
+      "Resilient": "Resilient",
+      "Reinforcing": "Reinforcing"
     },
     "Notifications": {
       "GenerationFailed": "No item could be generated for these parameters.",
@@ -102,6 +114,20 @@
       "TreasureJewelry": "Jewelry",
       "TreasureBook": "Book",
       "TreasureBeverage": "Valuable beverage"
+    },
+    "GenerationMode": {
+      "Existing": "Select a predefined item",
+      "Equipment": "Compose a weapon, armor, or shield"
+    },
+    "FundamentalRunes": {
+      "Automatic": "Automatic level-appropriate progression",
+      "None": "No fundamental runes"
+    },
+    "Errors": {
+      "NoBaseEquipment": "No suitable non-specific base item was found in the selected compendiums.",
+      "UnsupportedEquipmentCategory": "The “compose equipment” generation type supports only weapons, armor, and shields.",
+      "NoItemInLevelRange": "No item matches the selected category and level constraint.",
+      "ItemDocumentNotFound": "The selected item could not be loaded from its compendium."
     }
   }
 }

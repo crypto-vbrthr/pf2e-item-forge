@@ -38,9 +38,11 @@ export class ItemForgeEditor extends HandlebarsApplication {
       rarity: request.rarity ?? [],
       source: request.source ?? { mode: "all", includePacks: [], excludePacks: [] },
       solver: request.solver ?? { maxAttempts: 50 },
+      equipment: request.equipment ?? { fundamentalRunes: "automatic" },
       seed: request.seed ?? createSeed()
     };
     if (this.request.levelMode === "single") this.request.level.max = this.request.level.min;
+    this.#ensureEquipmentCategory();
     this.previewResult = null;
     this.error = null;
     this.busy = false;
@@ -85,7 +87,14 @@ export class ItemForgeEditor extends HandlebarsApplication {
       return this.previewResult;
     } catch (error) {
       console.error("PF2E Item Forge | Preview failed", error);
-      this.error = { code: error.code ?? "GENERATION_FAILED", message: error.message };
+      const code = error.code ?? "GENERATION_FAILED";
+      const errorKey = {
+        NO_BASE_EQUIPMENT: "PF2E_ITEM_FORGE.Errors.NoBaseEquipment",
+        UNSUPPORTED_EQUIPMENT_CATEGORY: "PF2E_ITEM_FORGE.Errors.UnsupportedEquipmentCategory",
+        NO_ITEM_IN_LEVEL_RANGE: "PF2E_ITEM_FORGE.Errors.NoItemInLevelRange",
+        ITEM_DOCUMENT_NOT_FOUND: "PF2E_ITEM_FORGE.Errors.ItemDocumentNotFound"
+      }[code];
+      this.error = { code, message: errorKey ? localizeMaybe(errorKey) : error.message };
       this.previewResult = null;
       throw error;
     } finally {
@@ -109,14 +118,17 @@ export class ItemForgeEditor extends HandlebarsApplication {
     const context = await super._prepareContext(options);
     const selectedPacks = new Set(this.request.source.includePacks ?? []);
     const rarity = new Set(this.request.rarity ?? []);
-    const categories = this.api.categories.getAll().map((category) => {
-      const depth = this.api.categories.getAncestors(category.id).length;
-      return {
-        id: category.id,
-        label: `${"  ".repeat(depth)}${localizeMaybe(category.label)}`,
-        selected: category.id === this.request.category
-      };
-    });
+    this.#ensureEquipmentCategory();
+    const categories = this.api.categories.getAll()
+      .filter((category) => this.request.mode !== "equipment" || this.#isEquipmentCategory(category.id))
+      .map((category) => {
+        const depth = this.api.categories.getAncestors(category.id).length;
+        return {
+          id: category.id,
+          label: `${"  ".repeat(depth)}${localizeMaybe(category.label)}`,
+          selected: category.id === this.request.category
+        };
+      });
 
     const packs = this.api.getAvailableItemPacks().map((pack) => ({
       ...pack,
@@ -127,6 +139,16 @@ export class ItemForgeEditor extends HandlebarsApplication {
       id,
       selected: this.request.levelPolicy === id,
       label: localizeMaybe(`PF2E_ITEM_FORGE.LevelPolicy.${{ strict: "Strict", nearest: "Nearest", notAbove: "NotAbove", notBelow: "NotBelow" }[id]}`)
+    }));
+    const generationModes = ["existing", "equipment"].map((id) => ({
+      id,
+      selected: this.request.mode === id,
+      label: localizeMaybe(`PF2E_ITEM_FORGE.GenerationMode.${id === "existing" ? "Existing" : "Equipment"}`)
+    }));
+    const fundamentalRuneModes = ["automatic", "none"].map((id) => ({
+      id,
+      selected: this.request.equipment?.fundamentalRunes === id,
+      label: localizeMaybe(`PF2E_ITEM_FORGE.FundamentalRunes.${id === "automatic" ? "Automatic" : "None"}`)
     }));
     const sourceModes = ["all", "system", "selected"].map((id) => ({
       id,
@@ -143,7 +165,12 @@ export class ItemForgeEditor extends HandlebarsApplication {
           rarity: this.previewResult.metadata?.rarity,
           sourcePack: this.previewResult.metadata?.sourcePack,
           candidateCount: this.previewResult.metadata?.candidateCount,
-          warnings: this.previewResult.warnings ?? []
+          warnings: this.previewResult.warnings ?? [],
+          baseItem: this.previewResult.plan?.baseItem ?? null,
+          runeProfile: this.previewResult.metadata?.runeProfile ?? null,
+          runes: this.previewResult.metadata?.runes ?? null,
+          propertyRuneCapacity: this.previewResult.metadata?.propertyRuneCapacity ?? null,
+          runeSummary: this.#formatRuneSummary(this.previewResult.metadata?.runes)
         }
       : null;
 
@@ -151,6 +178,9 @@ export class ItemForgeEditor extends HandlebarsApplication {
       ...context,
       request: this.request,
       categories,
+      generationModes,
+      fundamentalRuneModes,
+      isEquipmentMode: this.request.mode === "equipment",
       packs,
       levelPolicies,
       sourceModes,
@@ -174,12 +204,43 @@ export class ItemForgeEditor extends HandlebarsApplication {
     element.querySelectorAll("input, select").forEach((input) => {
       input.addEventListener("change", async () => {
         this.#syncFromDom();
+        if (input.name === "mode") this.#ensureEquipmentCategory();
         this.previewResult = null;
         this.error = null;
         this.onChange?.(this.getRequest(), this);
-        if (["levelMode", "source.mode"].includes(input.name)) await this.render();
+        if (["mode", "levelMode", "source.mode"].includes(input.name)) await this.render();
       });
     });
+  }
+
+  #isEquipmentCategory(category) {
+    return ["weapon", "armor", "shield"].some((root) =>
+      category === root || this.api.categories.isDescendant(category, root)
+    );
+  }
+
+  #ensureEquipmentCategory() {
+    if (this.request.mode === "equipment" && !this.#isEquipmentCategory(this.request.category)) {
+      this.request.category = "weapon";
+    }
+  }
+
+  #formatRuneSummary(runes) {
+    if (!runes) return null;
+    const parts = [];
+    if ((Number(runes.potency) || 0) > 0) {
+      parts.push(`${localizeMaybe("PF2E_ITEM_FORGE.Preview.Potency")} +${Number(runes.potency)}`);
+    }
+    if ((Number(runes.striking) || 0) > 0) {
+      parts.push(`${localizeMaybe("PF2E_ITEM_FORGE.Preview.Striking")} ${Number(runes.striking)}`);
+    }
+    if ((Number(runes.resilient) || 0) > 0) {
+      parts.push(`${localizeMaybe("PF2E_ITEM_FORGE.Preview.Resilient")} ${Number(runes.resilient)}`);
+    }
+    if ((Number(runes.reinforcing) || 0) > 0) {
+      parts.push(`${localizeMaybe("PF2E_ITEM_FORGE.Preview.Reinforcing")} ${Number(runes.reinforcing)}`);
+    }
+    return parts.length ? parts.join(" · ") : localizeMaybe("PF2E_ITEM_FORGE.FundamentalRunes.None");
   }
 
   #syncFromDom() {
@@ -188,6 +249,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
     const value = (name, fallback = "") => root.querySelector(`[name="${name}"]`)?.value ?? fallback;
     const number = (name, fallback) => Number.parseInt(value(name, fallback), 10);
 
+    this.request.mode = value("mode", this.request.mode);
     this.request.category = value("category", this.request.category);
     this.request.levelMode = value("levelMode", this.request.levelMode);
     this.request.levelPolicy = value("levelPolicy", this.request.levelPolicy);
@@ -198,6 +260,8 @@ export class ItemForgeEditor extends HandlebarsApplication {
     this.request.level.target = this.request.levelMode === "single" ? this.request.level.min : null;
     this.request.source.mode = value("source.mode", this.request.source.mode);
     this.request.solver.maxAttempts = number("solver.maxAttempts", this.request.solver.maxAttempts);
+    this.request.equipment ??= { fundamentalRunes: "automatic" };
+    this.request.equipment.fundamentalRunes = value("equipment.fundamentalRunes", this.request.equipment.fundamentalRunes);
 
     this.request.rarity = [...root.querySelectorAll('[name="rarity"]:checked')].map((input) => input.value);
     this.request.source.includePacks = [...root.querySelectorAll('[name="sourcePack"]:checked')].map((input) => input.value);

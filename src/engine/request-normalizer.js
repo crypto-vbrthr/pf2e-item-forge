@@ -8,6 +8,8 @@ import { createSeed } from "./seeded-rng.js";
 
 const LEVEL_POLICIES = new Set(["strict", "nearest", "notAbove", "notBelow"]);
 const SOURCE_MODES = new Set(["all", "system", "selected"]);
+const GENERATION_MODES = new Set(["existing", "equipment"]);
+const FUNDAMENTAL_RUNE_MODES = new Set(["automatic", "none"]);
 
 function integer(value, fallback) {
   const parsed = Number.parseInt(value, 10);
@@ -39,7 +41,7 @@ export function normalizeRequest(request = {}, options = {}) {
   const configuredAttempts = integer(request.solver?.maxAttempts, options.defaultSolverAttempts ?? DEFAULT_SOLVER_ATTEMPTS);
 
   return {
-    mode: request.mode ?? "existing",
+    mode: GENERATION_MODES.has(request.mode) ? request.mode : "existing",
     category: request.category ?? "item",
     level,
     levelPolicy: policy,
@@ -51,6 +53,11 @@ export function normalizeRequest(request = {}, options = {}) {
     },
     solver: {
       maxAttempts: Math.max(1, Math.min(ABSOLUTE_SOLVER_ATTEMPTS, configuredAttempts))
+    },
+    equipment: {
+      fundamentalRunes: FUNDAMENTAL_RUNE_MODES.has(request.equipment?.fundamentalRunes)
+        ? request.equipment.fundamentalRunes
+        : "automatic"
     },
     seed: String(request.seed ?? createSeed()),
     filters: request.filters ?? {},
@@ -72,6 +79,13 @@ export function validateRequest(request, { categories } = {}) {
   }
   if (normalized.source.mode === "selected" && normalized.source.includePacks.length === 0) {
     errors.push({ code: "NO_SOURCE_PACKS", field: "source.includePacks" });
+  }
+  if (normalized.mode === "equipment") {
+    const category = normalized.category;
+    const supported = ["weapon", "armor", "shield"].some((root) =>
+      category === root || categories?.isDescendant?.(category, root)
+    );
+    if (!supported) errors.push({ code: "UNSUPPORTED_EQUIPMENT_CATEGORY", field: "category", value: category });
   }
   return { valid: errors.length === 0, errors, request: normalized };
 }
