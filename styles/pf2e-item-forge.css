@@ -228,3 +228,24 @@
   border-radius: 999px;
   font-size: 0.85em;
 }
+
+.preview-description {
+  grid-column: 1 / -1;
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border-light-2, #7775);
+}
+
+.preview-description h4 {
+  margin: 0 0 0.45rem;
+}
+
+.preview-description__content {
+  max-height: 320px;
+  overflow: auto;
+  padding-right: 0.35rem;
+  line-height: 1.4;
+}
+
+.preview-description__content > :first-child { margin-top: 0; }
+.preview-description__content > :last-child { margin-bottom: 0; }

@@ -2,9 +2,9 @@
 
 Reusable Item Forge architecture for Foundry VTT v14 and Pathfinder 2e.
 
-## v0.0.5 scope
+## v0.0.7 scope
 
-This release completes the first property-rune block for composed weapons and armor while keeping property-rune content registry-driven and reusable through the public API.
+This release adds complete spell-bearing scroll generation and description previews on top of the existing reusable item, equipment, and property-rune architecture.
 
 Implemented:
 
@@ -15,6 +15,11 @@ Implemented:
 - Exact level or level range with strict/nearest/not-above/not-below policies
 - Deterministic seeded random generation
 - Existing-item generator using indexed compendium items
+- Dedicated scroll generator that embeds an eligible spell into the PF2e scroll consumable
+- Scroll rank/item-level alignment through PF2e's generic scroll templates
+- Meaningful interval/fixed spell heightening, while non-heightening spells remain at base rank
+- Cantrips, focus spells, and rituals excluded from normal scroll generation
+- Spell compendiums exposed as selectable sources only when the Scroll category needs them
 - Composed equipment mode for mundane base weapons, armor, and shields
 - Canonical Remaster fundamental-rune progressions for weapons and armor
 - Reinforcing-rune progression for shields
@@ -26,7 +31,7 @@ Implemented:
 - Final rarity can rise to the highest rarity contributed by a selected property rune
 - Property runes can bridge item levels not represented by the fundamental-rune progression alone
 - Extensible `game.pf2eItemForge.propertyRunes` registry for later add-ons
-- Embedded `ItemForgeEditor` with property-rune controls and rune preview
+- Embedded `ItemForgeEditor` with property-rune controls, spell-aware scroll preview, and enriched item descriptions
 - Standalone `ItemForgeApplication` container
 - Item Directory button, preview, reroll, and world-item creation
 - German and English localization
@@ -34,7 +39,7 @@ Implemented:
 - Generic bounded ValueSolver
 - Automated Node.js unit/integration tests
 
-The built-in property-rune catalog is deliberately a conservative starter set. More runes can be added through the registry without changing the generator.
+The built-in property-rune catalog is deliberately a conservative starter set. More runes can be added through the registry without changing the generator. Scroll generation uses spell documents only as support data; spells themselves remain excluded from direct physical-item generation.
 
 Not yet implemented:
 
@@ -130,3 +135,8 @@ The module emits `pf2eItemForgeReady(api)` after initialization so optional exte
 ```bash
 npm test
 ```
+
+
+## Supported compendium content
+
+Direct generation only accepts supported physical PF2e item document types. Feats, actions, effects, conditions, and similar rule documents are excluded. Spell documents are indexed separately only so generators such as the ScrollGenerator can embed an eligible spell into a physical item.

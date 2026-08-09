@@ -64,7 +64,8 @@
       "PropertyRunesLater": "Eigenschaftsrunen werden als eigener Komponentenblock ergänzt; diese Version legt bereits Stufenauflösung und Runenplätze dafür fest.",
       "PropertyRuneMode": "Automatisch füllt verfügbare Runenplätze stufengerecht; Zufällig variiert Anzahl und Auswahl; Fest verwendet nur die ausgewählten Runen.",
       "NoPropertyRunes": "Für diese Gegenstandsart sind keine Eigenschaftsrunen registriert.",
-      "PropertyRuneCapacity": "Die tatsächliche Zahl möglicher Eigenschaftsrunen wird durch den Wert der Verbesserungsrune begrenzt."
+      "PropertyRuneCapacity": "Die tatsächliche Zahl möglicher Eigenschaftsrunen wird durch den Wert der Verbesserungsrune begrenzt.",
+      "ScrollSources": "Bei Schriftrollen werden zusätzlich Zauber-Kompendien als Quellen angeboten. Die generische Schriftrolle dient nur als Vorlage; der erzeugte Gegenstand erhält einen passenden Zauber."
     },
     "Preview": {
       "Empty": "Noch nichts geschmiedet. Parameter wählen und Generieren drücken.",
@@ -80,7 +81,11 @@
       "Striking": "Schaden",
       "Resilient": "Widerstand",
       "Reinforcing": "Verstärkung",
-      "PropertyRunes": "Eigenschaftsrunen"
+      "PropertyRunes": "Eigenschaftsrunen",
+      "Spell": "Enthaltener Zauber",
+      "SpellRank": "Zaubergrad",
+      "HeightenedFrom": "erhöht von Grad",
+      "Description": "Beschreibung"
     },
     "Notifications": {
       "GenerationFailed": "Für diese Parameter konnte kein Gegenstand erzeugt werden.",
@@ -134,7 +139,9 @@
       "UnsupportedEquipmentCategory": "Die Erzeugungsart „Ausrüstung zusammensetzen“ unterstützt nur Waffen, Rüstungen und Schilde.",
       "NoItemInLevelRange": "Für die gewählte Kategorie und Stufenvorgabe wurde kein passender Gegenstand gefunden.",
       "ItemDocumentNotFound": "Der ausgewählte Gegenstand konnte nicht aus dem Kompendium geladen werden.",
-      "InvalidPropertyRuneSelection": "Die ausgewählten Eigenschaftsrunen passen nicht zum Basisgegenstand, überschreiten die verfügbaren Runenplätze oder liegen außerhalb der erlaubten Stufe/Seltenheit."
+      "InvalidPropertyRuneSelection": "Die ausgewählten Eigenschaftsrunen passen nicht zum Basisgegenstand, überschreiten die verfügbaren Runenplätze oder liegen außerhalb der erlaubten Stufe/Seltenheit.",
+      "NoScrollSpellCandidate": "In den gewählten Quellen wurde kein für eine Schriftrolle geeigneter Zauber gefunden. Zaubertricks, Fokuszauber und Rituale werden ausgeschlossen.",
+      "SpellDocumentNotFound": "Der ausgewählte Zauber konnte nicht aus seinem Kompendium geladen werden."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatisch stufengerecht",
@@ -163,6 +170,10 @@
       "Glamered": "Unscheinbar",
       "Invisibility": "Unsichtbarkeit",
       "Fortification": "Befestigung"
+    },
+    "Sources": {
+      "Items": "Gegenstände",
+      "Spells": "Zauber"
     }
   }
 }

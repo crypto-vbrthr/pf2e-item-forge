@@ -28,8 +28,8 @@ export class ItemForgeApi {
     return this.compendiumIndex.refresh();
   }
 
-  getAvailableItemPacks() {
-    return this.compendiumIndex.getAvailablePacks();
+  getAvailableItemPacks(options = {}) {
+    return this.compendiumIndex.getAvailablePacks(options);
   }
 
   getCapabilities() {

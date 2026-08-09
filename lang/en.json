@@ -64,7 +64,8 @@
       "PropertyRunesLater": "Property runes will be added as a separate component block; this version already establishes level resolution and property-rune capacity.",
       "PropertyRuneMode": "Automatic fills available rune slots with level-appropriate runes; Random varies count and selection; Fixed uses only the selected runes.",
       "NoPropertyRunes": "No property runes are registered for this item type.",
-      "PropertyRuneCapacity": "The actual number of property runes is limited by the potency rune value."
+      "PropertyRuneCapacity": "The actual number of property runes is limited by the potency rune value.",
+      "ScrollSources": "For scrolls, spell compendiums are also offered as sources. The generic scroll is only a template; the generated item receives a suitable spell."
     },
     "Preview": {
       "Empty": "Nothing forged yet. Choose parameters and press Generate.",
@@ -80,7 +81,11 @@
       "Striking": "Striking",
       "Resilient": "Resilient",
       "Reinforcing": "Reinforcing",
-      "PropertyRunes": "Property runes"
+      "PropertyRunes": "Property runes",
+      "Spell": "Contained spell",
+      "SpellRank": "Spell rank",
+      "HeightenedFrom": "heightened from rank",
+      "Description": "Description"
     },
     "Notifications": {
       "GenerationFailed": "No item could be generated for these parameters.",
@@ -134,7 +139,9 @@
       "UnsupportedEquipmentCategory": "The “compose equipment” generation type supports only weapons, armor, and shields.",
       "NoItemInLevelRange": "No item matches the selected category and level constraint.",
       "ItemDocumentNotFound": "The selected item could not be loaded from its compendium.",
-      "InvalidPropertyRuneSelection": "The selected property runes are incompatible with the base item, exceed available rune slots, or fall outside the allowed level/rarity constraints."
+      "InvalidPropertyRuneSelection": "The selected property runes are incompatible with the base item, exceed available rune slots, or fall outside the allowed level/rarity constraints.",
+      "NoScrollSpellCandidate": "No spell suitable for a scroll was found in the selected sources. Cantrips, focus spells, and rituals are excluded.",
+      "SpellDocumentNotFound": "The selected spell could not be loaded from its compendium."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatic level-appropriate",
@@ -163,6 +170,10 @@
       "Glamered": "Glamered",
       "Invisibility": "Invisibility",
       "Fortification": "Fortification"
+    },
+    "Sources": {
+      "Items": "items",
+      "Spells": "spells"
     }
   }
 }

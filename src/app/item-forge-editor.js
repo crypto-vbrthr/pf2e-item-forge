@@ -13,6 +13,20 @@ function localizeMaybe(key) {
   return localized === key ? key : localized;
 }
 
+async function enrichHtml(html) {
+  if (!html) return "";
+  const implementation = globalThis.foundry?.applications?.ux?.TextEditor?.implementation
+    ?? globalThis.TextEditor?.implementation
+    ?? globalThis.TextEditor;
+  if (typeof implementation?.enrichHTML !== "function") return html;
+  try {
+    return await implementation.enrichHTML(html, { async: true });
+  } catch (error) {
+    console.warn("PF2E Item Forge | Could not enrich preview description", error);
+    return html;
+  }
+}
+
 export class ItemForgeEditor extends HandlebarsApplication {
   static DEFAULT_OPTIONS = {
     id: `${MODULE_ID}-editor-{id}`,
@@ -104,7 +118,9 @@ export class ItemForgeEditor extends HandlebarsApplication {
         UNSUPPORTED_EQUIPMENT_CATEGORY: "PF2E_ITEM_FORGE.Errors.UnsupportedEquipmentCategory",
         NO_ITEM_IN_LEVEL_RANGE: "PF2E_ITEM_FORGE.Errors.NoItemInLevelRange",
         ITEM_DOCUMENT_NOT_FOUND: "PF2E_ITEM_FORGE.Errors.ItemDocumentNotFound",
-        INVALID_PROPERTY_RUNE_SELECTION: "PF2E_ITEM_FORGE.Errors.InvalidPropertyRuneSelection"
+        INVALID_PROPERTY_RUNE_SELECTION: "PF2E_ITEM_FORGE.Errors.InvalidPropertyRuneSelection",
+        NO_SCROLL_SPELL_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoScrollSpellCandidate",
+        SPELL_DOCUMENT_NOT_FOUND: "PF2E_ITEM_FORGE.Errors.SpellDocumentNotFound"
       }[code];
       this.error = { code, message: errorKey ? localizeMaybe(errorKey) : error.message };
       this.previewResult = null;
@@ -142,9 +158,14 @@ export class ItemForgeEditor extends HandlebarsApplication {
         };
       });
 
-    const packs = this.api.getAvailableItemPacks().map((pack) => ({
+    const isScrollCategory = this.request.mode === "existing" && this.request.category === "consumable.scroll";
+    const packs = this.api.getAvailableItemPacks({ includeSpellPacks: isScrollCategory }).map((pack) => ({
       ...pack,
-      checked: selectedPacks.has(pack.id)
+      checked: selectedPacks.has(pack.id),
+      contentSummary: [
+        pack.physicalCount ? `${pack.physicalCount} ${localizeMaybe("PF2E_ITEM_FORGE.Sources.Items")}` : null,
+        pack.spellCount ? `${pack.spellCount} ${localizeMaybe("PF2E_ITEM_FORGE.Sources.Spells")}` : null
+      ].filter(Boolean).join(" · ")
     }));
 
     const levelPolicies = ["strict", "nearest", "notAbove", "notBelow"].map((id) => ({
@@ -195,6 +216,8 @@ export class ItemForgeEditor extends HandlebarsApplication {
           sourcePack: this.previewResult.metadata?.sourcePack,
           candidateCount: this.previewResult.metadata?.candidateCount,
           warnings: this.previewResult.warnings ?? [],
+          description: await enrichHtml(this.previewResult.itemSource?.system?.description?.value ?? ""),
+          spell: this.previewResult.metadata?.spell ?? null,
           baseItem: this.previewResult.plan?.baseItem ?? null,
           runeProfile: this.previewResult.metadata?.runeProfile ?? null,
           runes: this.previewResult.metadata?.runes ?? null,
@@ -223,6 +246,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
       sourceModes,
       isRange: this.request.levelMode === "range",
       selectedSources: this.request.source.mode === "selected",
+      isScrollCategory,
       rarity: {
         common: rarity.has("common"),
         uncommon: rarity.has("uncommon"),

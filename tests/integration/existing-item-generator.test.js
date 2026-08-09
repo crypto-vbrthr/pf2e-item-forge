@@ -37,3 +37,20 @@ test("ExistingItemGenerator returns a controlled error when strict filtering has
     (error) => error?.code === "NO_ITEM_IN_LEVEL_RANGE"
   );
 });
+
+test("ExistingItemGenerator never returns a generic scroll template", async () => {
+  const entries = [
+    { id: "scroll", uuid: "scroll", pack: "test", level: 5, rarity: "common", consumableCategory: "scroll" },
+    { id: "potion", uuid: "potion", pack: "test", level: 5, rarity: "common", consumableCategory: "potion" }
+  ];
+  const index = {
+    ready: true,
+    query: () => entries,
+    getDocument: async (entry) => ({ toObject: () => ({ name: entry.id, type: "consumable" }) })
+  };
+  const result = await new ExistingItemGenerator({ compendiumIndex: index }).generate(request({
+    category: "consumable",
+    level: { min: 5, max: 5, target: 5 }
+  }));
+  assert.equal(result.itemSource.name, "potion");
+});

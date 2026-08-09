@@ -13,7 +13,9 @@ export class ExistingItemGenerator {
 
   async generate(request) {
     if (!this.index.ready) await this.index.refresh();
-    const pool = this.index.query(request);
+    // Generic scroll compendium entries are templates rather than complete
+    // generated items. The dedicated ScrollGenerator attaches a spell first.
+    const pool = this.index.query(request).filter((entry) => entry.consumableCategory !== "scroll");
     let candidates = pool.filter((entry) => levelAllowed(entry.level, request));
     const warnings = [];
 

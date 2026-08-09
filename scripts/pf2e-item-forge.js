@@ -3,6 +3,7 @@ import { CategoryRegistry, registerCoreCategories } from "../src/engine/category
 import { CompendiumIndex } from "../src/engine/compendium-index.js";
 import { GeneratorRegistry } from "../src/engine/generator-registry.js";
 import { ExistingItemGenerator } from "../src/engine/generators/existing-item-generator.js";
+import { ScrollGenerator } from "../src/engine/generators/scroll-generator.js";
 import { EquipmentGenerator } from "../src/engine/generators/equipment-generator.js";
 import { TreasureRegistry } from "../src/engine/registries/treasure-registry.js";
 import { PropertyRuneRegistry, registerCorePropertyRunes } from "../src/engine/registries/property-rune-registry.js";
@@ -52,6 +53,7 @@ function createApi() {
   const generators = new GeneratorRegistry();
   const treasure = new TreasureRegistry();
   const propertyRunes = registerCorePropertyRunes(new PropertyRuneRegistry());
+  generators.register(new ScrollGenerator({ compendiumIndex }));
   generators.register(new ExistingItemGenerator({ compendiumIndex }));
   generators.register(new EquipmentGenerator({ compendiumIndex, propertyRunes }));
 

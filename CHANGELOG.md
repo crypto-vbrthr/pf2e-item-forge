@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.0.7
+
+- Adds a dedicated `ScrollGenerator` for `consumable.scroll` requests.
+- Scrolls now contain an actual spell instead of returning an empty generic scroll template.
+- Excludes cantrips, focus spells, and rituals from normal scroll generation.
+- Selects the scroll rank through the PF2e scroll templates so the generated scroll's item level and spell rank remain aligned.
+- Supports meaningful spell heightening: interval-heightened spells may use their valid interval ranks, fixed-heightened spells may use their defined ranks, and spells without heightening data remain at their base rank.
+- Embeds the selected spell into `system.spell` with the chosen heightened rank, matching the current PF2e spell-consumable data model.
+- Uses the contained spell's rarity and adds the spell reference to the generated scroll description.
+- Generic scroll templates are no longer eligible for broad predefined-item generation unless a spell has first been attached by the dedicated generator.
+- Spell-only Item compendiums are offered in the source picker when the Scroll category is selected, while remaining hidden for ordinary item generation.
+- The preview panel now displays the item's enriched description text for all generated items.
+- Scroll previews additionally show contained spell, spell rank, and whether it was heightened.
+- Adds German and English localization for scroll generation, spell source counts, and description preview.
+- Adds regression/integration tests for scroll embedding, legal heightening ranks, excluded spell types, determinism, and generic-scroll suppression.
+- Automated suite now contains 40 passing tests.
+
+## 0.0.6
+
+- Fixes generic Item Forge generation incorrectly treating every Foundry `Item` document as a supported physical item.
+- Feats, spells, actions, effects, conditions, class/ancestry/background documents, NPC melee actions, and other non-item rule documents are now excluded from the generation index.
+- Adds an explicit allowlist for supported physical PF2e item document types.
+- Maps PF2e backpacks, books, and kits into the general equipment category so they remain available as ordinary predefined items.
+- Compendium source selection now hides Item compendiums that contain no supported physical items, reducing noise from spell- and feat-only packs.
+- Adds regression tests proving that feats and spells cannot be selected even through the broad `item` category.
+
 ## 0.0.5
 
 - Adds property-rune generation for composed weapons and armor.

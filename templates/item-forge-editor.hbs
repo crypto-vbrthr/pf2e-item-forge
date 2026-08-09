@@ -99,6 +99,7 @@
 
     <fieldset>
       <legend>{{localize "PF2E_ITEM_FORGE.Fields.Sources"}}</legend>
+      {{#if isScrollCategory}}<p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.ScrollSources"}}</p>{{/if}}
       <div class="form-group">
         <select name="source.mode">
           {{#each sourceModes}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
@@ -110,7 +111,7 @@
           <label class="checkbox pack-list__entry">
             <input type="checkbox" name="sourcePack" value="{{id}}" {{#if checked}}checked{{/if}}>
             <span>{{label}}</span>
-            <small>{{id}}</small>
+            <small>{{id}}{{#if contentSummary}} · {{contentSummary}}{{/if}}</small>
           </label>
         {{else}}
           <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.NoItemPacks"}}</p>
@@ -156,6 +157,11 @@
           <dl>
             <dt>{{localize "PF2E_ITEM_FORGE.Preview.Source"}}</dt><dd>{{preview.sourcePack}}</dd>
             <dt>{{localize "PF2E_ITEM_FORGE.Preview.Candidates"}}</dt><dd>{{preview.candidateCount}}</dd>
+            {{#if preview.spell}}
+              <dt>{{localize "PF2E_ITEM_FORGE.Preview.Spell"}}</dt><dd>{{preview.spell.name}}</dd>
+              <dt>{{localize "PF2E_ITEM_FORGE.Preview.SpellRank"}}</dt>
+              <dd>{{preview.spell.rank}}{{#if preview.spell.heightened}} ({{localize "PF2E_ITEM_FORGE.Preview.HeightenedFrom"}} {{preview.spell.baseRank}}){{/if}}</dd>
+            {{/if}}
             {{#if preview.baseItem}}
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.BaseItem"}}</dt><dd>{{preview.baseItem.name}} ({{localize "PF2E_ITEM_FORGE.Preview.Level"}} {{preview.baseItem.level}})</dd>
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.RuneProfile"}}</dt><dd>{{preview.runeSummary}}</dd>
@@ -171,6 +177,12 @@
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.EffectiveLevel"}}</dt><dd>{{preview.level}}</dd>
             {{/if}}
           </dl>
+          {{#if preview.description}}
+            <section class="preview-description">
+              <h4>{{localize "PF2E_ITEM_FORGE.Preview.Description"}}</h4>
+              <div class="preview-description__content">{{{preview.description}}}</div>
+            </section>
+          {{/if}}
           {{#if preview.warnings.length}}
             <div class="warning-box">
               {{#each preview.warnings}}<div><i class="fa-solid fa-triangle-exclamation"></i> {{code}}</div>{{/each}}
