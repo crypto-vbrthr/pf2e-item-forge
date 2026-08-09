@@ -14,6 +14,7 @@ const WAND_MODES = new Set(["standard", "special"]);
 const STAFF_MODES = new Set(["generated", "existing"]);
 const SPELLHEART_MODES = new Set(["generated", "existing"]);
 const SPECIFIC_ITEM_MODES = new Set(["generated", "existing"]);
+const WORN_ITEM_MODES = new Set(["generated", "existing"]);
 
 function integer(value, fallback) {
   const parsed = Number.parseInt(value, 10);
@@ -125,7 +126,9 @@ export function normalizeRequest(request = {}, options = {}) {
       spellheartMode: SPELLHEART_MODES.has(request.magic?.spellheartMode) ? request.magic.spellheartMode : "existing",
       spellheartProfile: typeof request.magic?.spellheartProfile === "string" && request.magic.spellheartProfile ? request.magic.spellheartProfile : "automatic",
       specificMode: SPECIFIC_ITEM_MODES.has(request.magic?.specificMode) ? request.magic.specificMode : "existing",
-      specificProfile: typeof request.magic?.specificProfile === "string" && request.magic.specificProfile ? request.magic.specificProfile : "automatic"
+      specificProfile: typeof request.magic?.specificProfile === "string" && request.magic.specificProfile ? request.magic.specificProfile : "automatic",
+      wornMode: WORN_ITEM_MODES.has(request.magic?.wornMode) ? request.magic.wornMode : "existing",
+      wornProfile: typeof request.magic?.wornProfile === "string" && request.magic.wornProfile ? request.magic.wornProfile : "automatic"
     },
     seed: String(request.seed ?? createSeed()),
     filters: request.filters && typeof request.filters === "object" ? request.filters : {},
@@ -192,7 +195,7 @@ export function validateRequest(request, {
   }
   if (normalized.mode === "magic") {
     const category = normalized.category;
-    const supported = ["magic.wand", "magic.staff", "magic.spellheart", "magic.weapon", "magic.armor", "magic.shield"].includes(category);
+    const supported = ["magic.wand", "magic.staff", "magic.spellheart", "magic.weapon", "magic.armor", "magic.shield", "magic.worn"].includes(category) || categories?.isDescendant?.(category, "magic.worn");
     if (!supported) errors.push({ code: "UNSUPPORTED_MAGIC_CATEGORY", field: "category", value: category });
   }
   return { valid: errors.length === 0, errors, request: normalized };

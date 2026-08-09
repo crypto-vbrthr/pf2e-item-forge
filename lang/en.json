@@ -55,7 +55,9 @@
       "WandMode": "Wand generation",
       "WandProfile": "Special wand profile",
       "SpecificItemMode": "Specific generation",
-      "SpecificItemProfile": "Specific item profile"
+      "SpecificItemProfile": "Specific item profile",
+      "WornItemMode": "Generation Type",
+      "WornItemProfile": "Worn Item Profile"
     },
     "LevelMode": {
       "Single": "Single level",
@@ -91,7 +93,7 @@
       "TreasureMode": "Generates exactly one nonmagical sale or art treasure. Material, craftsmanship, and condition affect its value.",
       "ValueTolerance": "0.15 means ±15% around the target value. If no match is found, the ValueSolver returns the closest valid result with a warning.",
       "TreasureType": "Optionally select one exact treasure type. “Any” lets Item Forge roll within the selected category.",
-      "MagicMode": "Generates permanent special magic items such as wands, staves, spellhearts, and specific magic weapons and armor.",
+      "MagicMode": "Generates permanent special magic items such as wands, staves, spellhearts, specific magic weapons/armor/shields, and worn magic items.",
       "MagicSources": "Selected compendia provide physical base items and, for spell-bound generators, the spell pool as well.",
       "MagicTheme": "Automatic chooses a theme with enough eligible spells. A selected theme is a hard constraint.",
       "AllowHeightenedSpells": "Only spells with actual heightening data may reappear at higher ranks in generated wands or staves.",
@@ -105,7 +107,9 @@
       "SpecificItemMode": "Predefined copies a complete published item unchanged. Generated builds a new specific item on a normal weapon or suit of armor.",
       "SpecificItemProfile": "A profile keeps item level, price, fundamental runes, and the special ability together as one balance unit.",
       "SpecificItemTheme": "A fixed theme restricts selection to profiles and variants that explicitly support that theme.",
-      "SpecificItemRunes": "For generated specific items, property runes come only from the profile. Fundamental runes remain normally upgradeable; additional property runes cannot be freely added."
+      "SpecificItemRunes": "For generated specific items, property runes come only from the profile. Fundamental runes remain normally upgradeable; additional property runes cannot be freely added.",
+      "WornItemMode": "Predefined copies a complete PF2e item from the selected compendia. Generated creates a new invested item from a validated Item Forge profile.",
+      "WornItemProfile": "The profile defines worn usage, level progression, price, and special ability as one coherent package."
     },
     "Preview": {
       "Empty": "Nothing forged yet. Choose parameters and press Generate.",
@@ -158,7 +162,13 @@
       "TemplateSource": "Implementation template",
       "ShieldHardness": "Hardness",
       "ShieldHP": "HP",
-      "ShieldBT": "Broken Threshold"
+      "ShieldBT": "Broken Threshold",
+      "WornItemMode": "Generation Type",
+      "WornItemProfile": "Profile",
+      "WornItemVariant": "Variant",
+      "WornSlot": "Worn Usage Type",
+      "WornUsage": "PF2e Usage",
+      "WornEffect": "Special Effect"
     },
     "Notifications": {
       "GenerationFailed": "No item could be generated for these parameters.",
@@ -215,7 +225,22 @@
       "MagicSpellheart": "Spellheart",
       "MagicWeapon": "Specific magic weapon",
       "MagicArmor": "Specific magic armor",
-      "MagicShield": "Specific magic shield"
+      "MagicShield": "Specific magic shield",
+      "MagicWorn": "Worn Magic Item",
+      "MagicWornUnrestricted": "Worn (Unrestricted)",
+      "MagicWornBackpack": "Magic Backpack",
+      "MagicWornBelt": "Magic Belt",
+      "MagicWornCloak": "Magic Cloak",
+      "MagicWornEyepiece": "Magic Eyepiece",
+      "MagicWornGarment": "Magic Garment",
+      "MagicWornGloves": "Magic Gloves",
+      "MagicWornBracers": "Magic Bracers",
+      "MagicWornHeadwear": "Magic Headwear",
+      "MagicWornCirclet": "Magic Circlet",
+      "MagicWornMask": "Magic Mask",
+      "MagicWornFootwear": "Magic Footwear",
+      "MagicWornCollar": "Magic Collar",
+      "MagicWornOther": "Other Worn Magic Item"
     },
     "GenerationMode": {
       "Existing": "Select a predefined item",
@@ -258,7 +283,11 @@
       "NoPredefinedSpecificShieldCandidate": "No predefined specific magic shield in the selected compendia matches the requested level.",
       "NoSpecificShieldBaseItem": "No suitable mundane base shield was found in the selected sources.",
       "NoSpecificShieldProfileCandidate": "No valid specific magic shield could be generated for the requested level, profile, theme, and base shield.",
-      "UnknownSpecificShieldProfile": "The selected specific magic shield profile is not registered."
+      "UnknownSpecificShieldProfile": "The selected specific magic shield profile is not registered.",
+      "NoPredefinedWornItemCandidate": "No predefined worn magic item matches the selected constraints.",
+      "NoWornItemProfileCandidate": "No generated worn-item profile matches the selected level, rarity, and worn category.",
+      "NoWornItemTemplate": "No suitable PF2e structural template is available for this worn category.",
+      "UnknownWornItemProfile": "The selected worn magic item profile is not registered."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatic level-appropriate",
@@ -493,6 +522,59 @@
       "OncePerHour": "Once per hour",
       "OncePerTenMinutes": "Once per 10 minutes",
       "DurabilityNote": "The listed Hardness, Hit Points, and Broken Threshold are intrinsic to this specific shield."
+    },
+    "WornItemMode": {
+      "Existing": "Select Predefined Item",
+      "Generated": "Generate New Worn Item"
+    },
+    "WornSlots": {
+      "Unrestricted": "Worn (Unrestricted)",
+      "Backpack": "Backpack",
+      "Belt": "Belt",
+      "Cloak": "Cloak",
+      "Eyepiece": "Eyepiece",
+      "Garment": "Garment",
+      "Gloves": "Gloves",
+      "Bracers": "Bracers",
+      "Headwear": "Headwear",
+      "Circlet": "Circlet",
+      "Mask": "Mask",
+      "Footwear": "Footwear",
+      "Collar": "Collar",
+      "Other": "Other Usage"
+    },
+    "WornProfiles": {
+      "Automatic": "Automatic",
+      "WayfarerFootwear": "Wayfarer Footwear",
+      "WatchfulEyepiece": "Watchful Eyepiece",
+      "SteadfastBelt": "Steadfast Belt",
+      "GuardianCloak": "Guardian Cloak",
+      "MercifulMask": "Merciful Mask",
+      "ScholarCirclet": "Scholar Circlet"
+    },
+    "WornText": {
+      "WayfarerFootwearName": "Wayfarer Shoes",
+      "WayfarerFootwearDescription": "These enchanted shoes respond to changing ground and support sure, fluid movement.",
+      "WayfarerFootwearEffect": "You gain a +{bonus} item bonus to Acrobatics. Activate [one-action] (concentrate); Frequency {frequency}; Effect For 1 minute, you treat non-magical difficult terrain on the ground as normal terrain and greater difficult terrain as difficult terrain.",
+      "WatchfulEyepieceName": "Watchful Eyepiece",
+      "WatchfulEyepieceDescription": "Fine magical lines in this lens emphasize minute motion and irregularities.",
+      "WatchfulEyepieceEffect": "You gain a +{bonus} item bonus to visual Perception checks. Activate [one-action] (concentrate); Frequency {frequency}; Effect Your next Seek check before the end of your turn gains a +{activationBonus} circumstance bonus. Non-magical smoke or mist does not make what you Seek concealed for that check.",
+      "SteadfastBeltName": "Steadfast Belt",
+      "SteadfastBeltDescription": "This broad belt seems to brace itself against any force trying to shift its wearer.",
+      "SteadfastBeltEffect": "You gain a +{bonus} item bonus to Athletics. Activate [reaction] (concentrate); Frequency {frequency}; Trigger An effect would move you against your will; Effect Reduce the forced movement by {resist} feet (minimum 0 feet).",
+      "GuardianCloakName": "Guardian Cloak",
+      "GuardianCloakDescription": "The fabric of this cloak tightens at the instant of danger and folds protectively around its wearer.",
+      "GuardianCloakEffect": "You gain a +{bonus} item bonus to saves against environmental hazards and weather effects. Activate [reaction] (concentrate); Frequency {frequency}; Trigger You are targeted by a ranged attack; Effect You gain a +1 circumstance bonus to AC against the triggering attack.",
+      "MercifulMaskName": "Merciful Mask",
+      "MercifulMaskDescription": "The calm features of this mask help its wearer perform precise healing work under pressure.",
+      "MercifulMaskEffect": "You gain a +{bonus} item bonus to Medicine. Activate [free-action] (concentrate, fortune); Frequency {frequency}; Trigger You roll a variable number of Hit Points restored by an action with the healing trait; Effect Choose one healing die, roll it twice, and use the higher result.",
+      "ScholarCircletName": "Scholar Circlet",
+      "ScholarCircletDescription": "Tiny glyphs drift across this circlet while its wearer orders memories and searches for connections.",
+      "ScholarCircletEffect": "You gain a +{bonus} item bonus to Society. Activate [free-action] (concentrate); Frequency {frequency}; Trigger You fail a Recall Knowledge check; Effect You can immediately reroll the triggering check and must use the new result. This is a fortune effect.",
+      "SpecialAbility": "Special Ability:",
+      "InvestmentNote": "This generated item has the invested trait and uses the listed worn usage. Its special ability is stored as rules text plus a structured Item Forge manifest.",
+      "OncePerDay": "once per day",
+      "OncePerHour": "once per hour"
     }
   }
 }

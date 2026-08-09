@@ -28,6 +28,7 @@ function apiFixture() {
     spellheartProfiles: { getAll: () => [{ id: "core.elemental-conduit", label: "Elemental", allowedThemes: ["fire", "cold"], variants: [{ level: 3 }, { level: 8 }, { level: 13 }] }] },
     specificItemProfiles: { getAll: () => [{ id: "core.retributive-weapon", itemType: "weapon", label: "Retributive", allowedThemes: [], variants: [{ level: 3 }, { level: 10 }, { level: 16 }] }] },
     specificShieldProfiles: { getAll: () => [{ id: "core.restorative-shield", label: "Restorative", allowedThemes: [], variants: [{ level: 5 }, { level: 10 }, { level: 15 }] }] },
+    wornMagicProfiles: { getAll: () => [{ id: "core.wayfarer-footwear", slot: "footwear", label: "Wayfarer", variants: [{ level: 4 }, { level: 10 }, { level: 17 }] }] },
     openApplication: () => "opened"
   });
 }
@@ -55,9 +56,12 @@ test("ItemForgeApi capabilities expose generator priority metadata and registere
   assert.ok(capabilities.magicItemKinds.includes("specific-weapon"));
   assert.ok(capabilities.magicItemKinds.includes("specific-armor"));
   assert.ok(capabilities.magicItemKinds.includes("specific-shield"));
+  assert.ok(capabilities.magicItemKinds.includes("worn"));
   assert.deepEqual(capabilities.specificItemModes, ["generated", "existing"]);
   assert.deepEqual(capabilities.specificItemProfiles, [{ id: "core.retributive-weapon", itemType: "weapon", label: "Retributive", themes: [], levels: [3, 10, 16] }]);
   assert.deepEqual(capabilities.specificShieldProfiles, [{ id: "core.restorative-shield", label: "Restorative", themes: [], levels: [5, 10, 15] }]);
+  assert.deepEqual(capabilities.wornItemModes, ["generated", "existing"]);
+  assert.deepEqual(capabilities.wornMagicProfiles, [{ id: "core.wayfarer-footwear", slot: "footwear", label: "Wayfarer", levels: [4, 10, 17] }]);
 });
 
 

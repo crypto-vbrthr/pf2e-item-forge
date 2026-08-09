@@ -134,6 +134,24 @@
             <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.SpecificItemRunes"}}</p>
           {{/if}}
         {{/if}}
+        {{#if isWornMagicCategory}}
+          <div class="form-group">
+            <label>{{localize "PF2E_ITEM_FORGE.Fields.WornItemMode"}}</label>
+            <select name="magic.wornMode">
+              {{#each wornModes}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+            </select>
+            <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.WornItemMode"}}</p>
+          </div>
+          {{#if generatedWorn}}
+            <div class="form-group">
+              <label>{{localize "PF2E_ITEM_FORGE.Fields.WornItemProfile"}}</label>
+              <select name="magic.wornProfile">
+                {{#each wornProfiles}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+              </select>
+              <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.WornItemProfile"}}</p>
+            </div>
+          {{/if}}
+        {{/if}}
         {{#if isSpellheartCategory}}
           <div class="form-group">
             <label>{{localize "PF2E_ITEM_FORGE.Fields.SpellheartMode"}}</label>
@@ -391,6 +409,8 @@
               {{#if preview.magic.spellheartProfileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.SpellheartProfile"}}</dt><dd>{{preview.magic.spellheartProfileLabel}}</dd>{{/if}}
               {{#if preview.magic.specificModeLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.SpecificItemMode"}}</dt><dd>{{preview.magic.specificModeLabel}}</dd>{{/if}}
               {{#if preview.magic.specificProfileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.SpecificItemProfile"}}</dt><dd>{{preview.magic.specificProfileLabel}}</dd>{{/if}}
+              {{#if preview.magic.wornModeLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.WornItemMode"}}</dt><dd>{{preview.magic.wornModeLabel}}</dd>{{/if}}
+              {{#if preview.magic.wornProfileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.WornItemProfile"}}</dt><dd>{{preview.magic.wornProfileLabel}}</dd>{{/if}}
               {{#if preview.magic.profileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.StaffProfile"}}</dt><dd>{{preview.magic.profileLabel}}</dd>{{/if}}
               {{#if preview.magic.variantLabelLocalized}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.StaffVariant"}}</dt><dd>{{preview.magic.variantLabelLocalized}}</dd>{{/if}}
               {{#if preview.magic.maxRank}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.HighestSpellRank"}}</dt><dd>{{preview.magic.maxRank}}</dd>{{/if}}
@@ -413,6 +433,13 @@
               {{/if}}
               {{#if preview.specificItem.effect}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.SpecialAbility"}}</dt><dd>{{preview.specificItem.effect}}</dd>{{/if}}
               {{#if preview.specificItem.automationLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.Automation"}}</dt><dd>{{preview.specificItem.automationLabel}}</dd>{{/if}}
+            {{/if}}
+            {{#if preview.wornItem}}
+              {{#if preview.wornItem.slotLabelLocalized}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.WornSlot"}}</dt><dd>{{preview.wornItem.slotLabelLocalized}}</dd>{{/if}}
+              {{#if preview.wornItem.usage}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.WornUsage"}}</dt><dd>{{preview.wornItem.usage}}</dd>{{/if}}
+              {{#if preview.wornItem.variantLabelLocalized}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.WornItemVariant"}}</dt><dd>{{preview.wornItem.variantLabelLocalized}}</dd>{{/if}}
+              {{#if preview.wornItem.effect}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.WornEffect"}}</dt><dd>{{preview.wornItem.effect}}</dd>{{/if}}
+              {{#if preview.wornItem.automationLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.Automation"}}</dt><dd>{{preview.wornItem.automationLabel}}</dd>{{/if}}
             {{/if}}
             {{#if preview.spellheart}}
               {{#if preview.spellheart.variantLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.SpellheartVariant"}}</dt><dd>{{preview.spellheart.variantLabel}}</dd>{{/if}}

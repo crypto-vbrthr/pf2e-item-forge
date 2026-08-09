@@ -40,14 +40,21 @@ function apiFixture() {
     normalize: (request) => normalizeRequest(request, { defaultSourceMode: "system", defaultSolverAttempts: 23 }),
     validate: (request) => ({ valid: true, request }),
     preview: async (request) => ({ request, itemSource: { name: "Preview", type: "treasure", system: { description: { value: "" } } }, metadata: {} }),
-    getCapabilities: () => ({ generationModes: ["existing", "equipment", "treasure"] }),
+    getCapabilities: () => ({ generationModes: ["existing", "equipment", "magic", "treasure"] }),
     categories: {
-      isDescendant: (child, parent) => child === parent || (parent === "treasure" && child.startsWith("treasure.")),
+      isDescendant: (child, parent) => child === parent || child.startsWith(`${parent}.`),
       getAll: () => [],
       getAncestors: () => []
     },
     getAvailableItemPacks: () => [],
     propertyRunes: { getForItemType: () => [] },
+    wandProfiles: { getAll: () => [], get: () => null },
+    staffProfiles: { getAll: () => [], get: () => null },
+    spellheartProfiles: { getAll: () => [], get: () => null },
+    specificItemProfiles: { getAll: () => [], getForItemType: () => [], get: () => null },
+    specificShieldProfiles: { getAll: () => [], get: () => null },
+    wornMagicProfiles: { getAll: () => [], getForSlot: () => [], get: () => null },
+    magicThemes: [],
     treasure: {
       types: { getAll: () => [], get: () => null },
       materials: { getAll: () => [] },
@@ -184,5 +191,15 @@ test("runtime preview preparation can expose PF2e-derived price without persisti
     assert.deepEqual(prepared.system.price.value, { gp: 65 });
   } finally {
     globalThis.CONFIG = previousConfig;
+  }
+});
+
+
+test("ItemForgeEditor preserves worn magic root and usage subcategories", () => {
+  for (const category of ["magic.worn", "magic.worn.cloak", "magic.worn.footwear"]) {
+    const editor = new ItemForgeEditor({ api: apiFixture(), request: { mode: "magic", category, level: 8, magic: { wornMode: "generated", wornProfile: "automatic" }, seed: category } });
+    const request = editor.getRequest();
+    assert.equal(request.category, category);
+    assert.equal(request.magic.wornMode, "generated");
   }
 });

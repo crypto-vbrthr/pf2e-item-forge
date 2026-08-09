@@ -18,6 +18,7 @@ ItemForgeEngine (canonical normalization, validation, generation)
         |     +-- WandGenerator
         |     +-- SpecificMagicShieldGenerator
         |     +-- SpecificMagicEquipmentGenerator
+        |     +-- WornMagicItemGenerator
         |     +-- SpellheartGenerator
         |     +-- StaffGenerator
         |     +-- TreasureGenerator
@@ -38,6 +39,7 @@ ItemForgeEngine (canonical normalization, validation, generation)
         +-- SpellheartProfileRegistry
         +-- SpecificItemProfileRegistry
         +-- SpecificShieldProfileRegistry
+        +-- WornMagicProfileRegistry
         +-- ValueSolver
         +-- TreasureRegistry
               +-- types
@@ -58,7 +60,7 @@ ItemForgeEngine (canonical normalization, validation, generation)
 - Other modules should use the public engine API and may embed `ItemForgeEditor` without the standalone Item Forge window.
 - Future Loot Forge integration should distribute budgets/counts/themes and issue individual Item Forge requests.
 - Built-in and external treasure content use the same validated registries.
-- Spell documents are support data, not directly generatable physical items. `ScrollGenerator` and `WandGenerator` may select eligible spells and embed them into physical item results; `StaffGenerator` either copies a predefined PF2e staff unchanged or uses the spell index to build a structured staff-family manifest. `SpellheartGenerator` has separate predefined and generated paths. `SpecificMagicEquipmentGenerator` does not require spell sources and either preserves a complete published specific weapon/armor or composes one validated profile onto a mundane base item. Predefined magic items preserve native PF2e automation; generated custom abilities remain explicit rules text plus structured flags unless a verified system contract exists.
+- Spell documents are support data, not directly generatable physical items. `ScrollGenerator` and `WandGenerator` may select eligible spells and embed them into physical item results; `StaffGenerator` either copies a predefined PF2e staff unchanged or uses the spell index to build a structured staff-family manifest. `SpellheartGenerator` has separate predefined and generated paths. `SpecificMagicEquipmentGenerator` does not require spell sources and either preserves a complete published specific weapon/armor or composes one validated profile onto a mundane base item. Predefined magic items preserve native PF2e automation; generated custom abilities remain explicit rules text plus structured flags unless a verified system contract exists. Worn magic items follow the same split: published worn items are cloned whole, while generated worn items select a validated usage-specific profile and use an indexed PF2e worn item only as a structural implementation template.
 
 ## Generator resolution
 
@@ -70,6 +72,7 @@ Core priorities:
 WandGenerator                    220  mode magic
 SpecificMagicShieldGenerator     219  mode magic
 SpecificMagicEquipmentGenerator  218  mode magic
+WornMagicItemGenerator           217  mode magic
 SpellheartGenerator              215  mode magic
 StaffGenerator                   210  mode magic
 TreasureGenerator     200  mode treasure
@@ -83,7 +86,7 @@ Registered generation modes are exposed through the public capabilities API and 
 
 ## Spell-bound permanent magic items
 
-`mode: "magic"` owns `magic.wand`, `magic.staff`, `magic.spellheart`, `magic.weapon`, `magic.armor`, and `magic.shield`. Wands, generated staves, and generated spellhearts reuse the spell-support index and meaningful-heightening helpers. Specific weapons/armor and shields instead use the physical-item index and dedicated profile registries. Predefined items preserve complete native PF2e documents, while generated custom items compose from validated whole-effect profiles rather than arbitrary effect fragments.
+`mode: "magic"` owns `magic.wand`, `magic.staff`, `magic.spellheart`, `magic.weapon`, `magic.armor`, `magic.shield`, and `magic.worn` with worn-usage subcategories. Wands, generated staves, and generated spellhearts reuse the spell-support index and meaningful-heightening helpers. Specific weapons/armor, shields, and worn items instead use the physical-item index and dedicated profile registries. Predefined items preserve complete native PF2e documents, while generated custom items compose from validated whole-effect profiles rather than arbitrary effect fragments.
 
 ### Wands
 
@@ -126,6 +129,15 @@ Generated unique abilities are rendered into the description and stored in `flag
 
 Generated shield profiles currently use explicit final durability as their contract. Non-zero reinforcing runes are therefore rejected by the registry until their interaction with explicit profile durability has been verified against the live PF2e preparation pipeline. This avoids accidental double-scaling. Generated profile automation is always `rules-text`; only copied published items may report `native`.
 
+
+
+### Worn magic items
+
+`WornMagicItemGenerator` resolves `magic.worn` and its usage-aware descendants such as `magic.worn.cloak`, `magic.worn.eyepiece`, and `magic.worn.footwear`. The compendium index normalizes PF2e usage strings defensively so human-readable and slug-like forms such as `worn cloak`, `worn-cloak`, and `worncloak` map to the same usage family. Worn armor remains an armor concern, and spellhearts are explicitly excluded from worn-item classification.
+
+`magic.wornMode: "existing"` selects a published worn magic item from the configured content sources and clones the complete source document. Native usage, Rule Elements, activations, traits, price, and automation remain untouched. `magic.wornMode: "generated"` selects a validated `WornMagicProfileRegistry` family. Each profile owns one worn usage, rarity, whole-effect description, balance provenance, and a strictly increasing level/price variant progression. Core profiles cover footwear, eyepieces, belts, cloaks, masks, and circlets. External modules can register additional validated families through `game.pf2eItemForge.wornMagicProfiles`.
+
+A generated worn item uses a system-indexed item with the same normalized usage only as a structural implementation template. Its original description, slug, Rule Elements, and unrelated special data are cleared before composition, while the PF2e usage field is deliberately preserved from the template instead of guessing a version-specific storage value. The generated result always carries `invested` and `magical` traits, uses `automation.level: "rules-text"`, and stores profile, variant, usage, special effect, seed, and balance provenance in `flags.pf2e-item-forge.wornItem`.
 
 
 ## Equipment/Magic result contracts

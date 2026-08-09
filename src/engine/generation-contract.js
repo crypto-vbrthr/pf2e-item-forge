@@ -42,6 +42,12 @@ export function applyGenerationContract(result) {
     metadata.automation = { level: "rules-text" };
   }
 
+  if (metadata.wornItem && typeof metadata.wornItem === "object") {
+    const expected = metadata.wornItem.mode === "existing" ? "native" : "rules-text";
+    metadata.wornItem.automation = expected;
+    metadata.automation = { level: expected };
+  }
+
   return result;
 }
 

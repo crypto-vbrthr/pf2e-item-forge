@@ -2,9 +2,9 @@
 
 Reusable Item Forge architecture for Foundry VTT v14 and Pathfinder 2e.
 
-## v0.0.22 scope
+## v0.0.23 scope
 
-This release hardens the shared Equipment/Magic contracts after adding specific magic shields. It focuses on stable metadata for downstream modules, live PF2e schema diagnostics, safe custom-profile contracts, correct copied-vs-generated provenance, and runtime-derived preview values.
+This release adds worn magic items as a first-class Magic generation family. Published PF2e worn items can be selected intact, while generated homebrew worn items use validated usage-aware profiles, structural PF2e templates, and the same hardened metadata/automation contracts as the rest of the Magic subsystem.
 
 Implemented:
 
@@ -18,13 +18,15 @@ Implemented:
 - Deterministic seeded generation
 - Existing physical compendium items, excluding feats/spells/rule documents
 - Spell-bearing scroll generation with meaningful legal heightening
-- Special magic-item mode for wands, staves, spellhearts, specific magic weapons, specific magic armor, and specific magic shields
+- Special magic-item mode for wands, staves, spellhearts, specific magic weapons, specific magic armor, specific magic shields, and worn magic items
 - Wands use the PF2e generic wand templates and embed one real spell at a legal base or meaningful heightened rank
 - Staves can either be copied exactly from selected compendia or generated as rulebook-style variant families with inherited lower variants
 - Spellhearts can either be selected as complete predefined PF2e items or generated from validated custom Spellheart profiles with coherent armor/weapon benefits, spell progressions, prices, and themes
 - Specific magic weapons and armor can either be copied exactly from selected compendia or generated from validated profiles that own level, price, runes, theme, and special ability as one unit
 - Specific magic shields have their own predefined/generated paths plus a dedicated `specificShieldProfiles` registry and explicit Hardness/HP/Broken Threshold contracts
-- Public `specificItemProfiles` and `specificShieldProfiles` registries for extension modules and campaign content
+- Worn magic items have predefined/generated paths, usage-aware categories such as cloak/eyepiece/footwear/belt/mask, and a public `wornMagicProfiles` registry
+- Published worn items preserve native PF2e usage, Rule Elements, activations, price, traits, and automation; generated worn items use whole-effect profiles plus rules-text manifests
+- Public `specificItemProfiles`, `specificShieldProfiles`, and `wornMagicProfiles` registries for extension modules and campaign content
 - Magic themes for fire, cold, electricity, healing, illusion, mental, vitality, void, arcane, divine, occult, primal, and summoning
 - Composed weapons, armor, and shields with fundamental runes
 - Registry-driven property runes with automatic/random/fixed/none modes and compatibility rules
@@ -45,8 +47,8 @@ Implemented:
 - Standalone `ItemForgeApplication` container owning Foundry document creation and preserving `createdByForge` versus `generated` provenance
 - German and English localization
 - Shared generation-result contract for `contentSources`, `templateSource`, and automation level
-- Live Magic diagnostics for predefined and generated magic paths, strict source-shape checks, pack-index failures, and composed-equipment price preparation
-- 172 automated unit/integration/statistical/contract tests
+- Live Magic diagnostics for predefined and generated magic paths including worn items, strict source-shape checks, pack-index failures, and composed-equipment price preparation
+- 188 automated unit/integration/statistical/contract tests
 
 Not yet implemented:
 
@@ -60,6 +62,22 @@ Not yet implemented:
 - Loot Forge integration itself (the API contract is prepared for it)
 
 ## API examples
+
+Generate a worn magic item from a validated profile:
+
+```js
+await game.pf2eItemForge.generate({
+  mode: "magic",
+  category: "magic.worn.footwear",
+  level: 10,
+  levelPolicy: "strict",
+  source: { mode: "system" },
+  magic: {
+    wornMode: "generated",
+    wornProfile: "core.wayfarer-footwear"
+  }
+});
+```
 
 Select a predefined item:
 

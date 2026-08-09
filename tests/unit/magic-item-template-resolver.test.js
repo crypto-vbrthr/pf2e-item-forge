@@ -7,11 +7,14 @@ test("MagicItemTemplateResolver keeps implementation templates separate from sel
     { id: "addon-staff", type: "weapon", level: 0, slug: "staff", pack: "addon.items", packageType: "module", packageName: "addon", categories: ["weapon"] },
     { id: "system-staff", type: "weapon", level: 0, slug: "staff", pack: "pf2e.equipment", packageType: "system", packageName: "pf2e", categories: ["weapon"] },
     { id: "addon-heart", pack: "addon.items", packageType: "module", packageName: "addon", categories: ["magic.spellheart"] },
-    { id: "system-heart", pack: "pf2e.equipment", packageType: "system", packageName: "pf2e", categories: ["magic.spellheart"] }
+    { id: "system-heart", pack: "pf2e.equipment", packageType: "system", packageName: "pf2e", categories: ["magic.spellheart"] },
+    { id: "addon-cloak", level: 2, pack: "addon.items", packageType: "module", packageName: "addon", categories: ["magic.worn", "magic.worn.cloak"] },
+    { id: "system-cloak", level: 5, pack: "pf2e.equipment", packageType: "system", packageName: "pf2e", categories: ["magic.worn", "magic.worn.cloak"] }
   ];
   const resolver = new MagicItemTemplateResolver({ compendiumIndex: { entries } });
   assert.equal(resolver.resolveStaffBaseEntry().id, "system-staff");
   assert.equal(resolver.resolveSpellheartTemplateEntry().id, "system-heart");
+  assert.equal(resolver.resolveWornTemplateEntry("cloak").id, "system-cloak");
   assert.equal(resolver.templateMetadata(resolver.resolveStaffBaseEntry(), { kind: "staff-base" }).source, "implementation-template");
 });
 

@@ -35,3 +35,13 @@ test("custom generated profiles cannot claim native automation", () => {
     /cannot declare native automation/
   );
 });
+
+test("applyGenerationContract normalizes predefined/generated worn automation", () => {
+  const existing = applyGenerationContract({ metadata: { automation: { level: "rules-text" }, wornItem: { mode: "existing", automation: "rules-text" } } });
+  assert.equal(existing.metadata.automation.level, "native");
+  assert.equal(existing.metadata.wornItem.automation, "native");
+
+  const generated = applyGenerationContract({ metadata: { automation: { level: "native" }, wornItem: { mode: "generated", automation: "native" } } });
+  assert.equal(generated.metadata.automation.level, "rules-text");
+  assert.equal(generated.metadata.wornItem.automation, "rules-text");
+});

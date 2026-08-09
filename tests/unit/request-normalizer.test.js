@@ -148,3 +148,32 @@ test("validation accepts specific magic weapon, armor, and shield categories", a
     assert.equal(result.valid, true, category);
   }
 });
+
+test("normalizeRequest hydrates worn magic item settings", () => {
+  const defaults = normalizeRequest({ mode: "magic", category: "magic.worn", seed: "x" });
+  assert.equal(defaults.magic.wornMode, "existing");
+  assert.equal(defaults.magic.wornProfile, "automatic");
+
+  const explicit = normalizeRequest({
+    mode: "magic",
+    category: "magic.worn.footwear",
+    magic: { wornMode: "generated", wornProfile: "core.wayfarer-footwear" },
+    seed: "x"
+  });
+  assert.equal(explicit.magic.wornMode, "generated");
+  assert.equal(explicit.magic.wornProfile, "core.wayfarer-footwear");
+  assert.equal(explicit.category, "magic.worn.footwear");
+});
+
+test("validation accepts worn magic root and worn usage subcategories", async () => {
+  const { validateRequest } = await import("../../src/engine/request-normalizer.js");
+  const { CategoryRegistry, registerCoreCategories } = await import("../../src/engine/category-registry.js");
+  const categories = registerCoreCategories(new CategoryRegistry());
+  for (const category of ["magic.worn", "magic.worn.cloak", "magic.worn.eyepiece", "magic.worn.footwear"]) {
+    const result = validateRequest(
+      { mode: "magic", category, level: 8, source: { mode: "system" }, seed: "x" },
+      { categories, generationModes: ["magic"] }
+    );
+    assert.equal(result.valid, true, category);
+  }
+});

@@ -55,7 +55,9 @@
       "WandMode": "Zauberstab-Erzeugung",
       "WandProfile": "Besonderes Zauberstabprofil",
       "SpecificItemMode": "Spezifische Erzeugung",
-      "SpecificItemProfile": "Spezifisches Gegenstandsprofil"
+      "SpecificItemProfile": "Spezifisches Gegenstandsprofil",
+      "WornItemMode": "Erzeugungsart",
+      "WornItemProfile": "Profil für getragenen Gegenstand"
     },
     "LevelMode": {
       "Single": "Einzelne Stufe",
@@ -91,7 +93,7 @@
       "TreasureMode": "Erzeugt genau einen nichtmagischen Verkaufs- oder Kunstschatz. Material, Verarbeitung und Zustand beeinflussen seinen Wert.",
       "ValueTolerance": "0,15 entspricht ±15 % um den Zielwert. Wird kein Treffer gefunden, liefert der ValueSolver das nächstgelegene gültige Ergebnis mit Warnung.",
       "TreasureType": "Optional kann eine konkrete Schatzart gewählt werden. „Beliebig“ lässt die Item Forge innerhalb der gewählten Kategorie würfeln.",
-      "MagicMode": "Erzeugt permanente magische Spezialgegenstände wie Zauberstäbe, Zauberstecken, Zauberherzen sowie spezifische magische Waffen und Rüstungen.",
+      "MagicMode": "Erzeugt permanente magische Spezialgegenstände wie Zauberstäbe, Zauberstecken, Zauberherzen, spezifische magische Waffen/Rüstungen/Schilde und getragene magische Gegenstände.",
       "MagicSources": "Die ausgewählten Kompendien liefern die physischen Basisgegenstände und, bei zaubergebundenen Generatoren, zusätzlich den Zauberpool.",
       "MagicTheme": "Automatisch wählt ein Thema mit genügend passenden Zaubern. Ein festes Thema ist eine harte Vorgabe.",
       "AllowHeightenedSpells": "Nur Zauber mit einer echten Erhöhungsdefinition dürfen auf höheren Graden erneut in Zauberstäben oder Zauberstecken auftauchen.",
@@ -105,7 +107,9 @@
       "SpecificItemMode": "Vordefiniert übernimmt einen vollständigen Regelwerksgegenstand unverändert. Generiert baut einen neuen spezifischen Gegenstand auf einer normalen Waffe oder Rüstung auf.",
       "SpecificItemProfile": "Ein Profil hält Stufe, Preis, Basisrunen und die besondere Fähigkeit als zusammengehörige Balance-Einheit fest.",
       "SpecificItemTheme": "Ein festes Thema beschränkt die Auswahl auf Profile und Varianten, die dieses Thema ausdrücklich unterstützen.",
-      "SpecificItemRunes": "Bei generierten spezifischen Gegenständen stammen Eigenschaftsrunen ausschließlich aus dem Profil. Basisrunen bleiben normal verbesserbar; zusätzliche Eigenschaftsrunen können nicht frei hinzugefügt werden."
+      "SpecificItemRunes": "Bei generierten spezifischen Gegenständen stammen Eigenschaftsrunen ausschließlich aus dem Profil. Basisrunen bleiben normal verbesserbar; zusätzliche Eigenschaftsrunen können nicht frei hinzugefügt werden.",
+      "WornItemMode": "Vordefiniert übernimmt einen vollständigen PF2e-Gegenstand aus den gewählten Kompendien. Generiert erschafft einen neuen investierten Gegenstand aus einem geprüften Item-Forge-Profil.",
+      "WornItemProfile": "Das Profil legt Nutzungsart, Stufenprogression, Preis und besondere Wirkung als zusammenhängendes Paket fest."
     },
     "Preview": {
       "Empty": "Noch nichts geschmiedet. Parameter wählen und Generieren drücken.",
@@ -158,7 +162,13 @@
       "TemplateSource": "Technische Vorlage",
       "ShieldHardness": "Härte",
       "ShieldHP": "TP",
-      "ShieldBT": "Bruchschwelle"
+      "ShieldBT": "Bruchschwelle",
+      "WornItemMode": "Erzeugungsart",
+      "WornItemProfile": "Profil",
+      "WornItemVariant": "Variante",
+      "WornSlot": "Trageplatz / Nutzungsart",
+      "WornUsage": "PF2e-Nutzung",
+      "WornEffect": "Besondere Wirkung"
     },
     "Notifications": {
       "GenerationFailed": "Für diese Parameter konnte kein Gegenstand erzeugt werden.",
@@ -215,7 +225,22 @@
       "MagicSpellheart": "Zauberherz",
       "MagicWeapon": "Spezifische magische Waffe",
       "MagicArmor": "Spezifische magische Rüstung",
-      "MagicShield": "Spezifischer magischer Schild"
+      "MagicShield": "Spezifischer magischer Schild",
+      "MagicWorn": "Getragener magischer Gegenstand",
+      "MagicWornUnrestricted": "Getragen (ohne festen Platz)",
+      "MagicWornBackpack": "Magischer Rucksack",
+      "MagicWornBelt": "Magischer Gürtel",
+      "MagicWornCloak": "Magischer Mantel",
+      "MagicWornEyepiece": "Magische Brille / Augenstück",
+      "MagicWornGarment": "Magisches Kleidungsstück",
+      "MagicWornGloves": "Magische Handschuhe",
+      "MagicWornBracers": "Magische Armschienen",
+      "MagicWornHeadwear": "Magische Kopfbedeckung",
+      "MagicWornCirclet": "Magischer Reif",
+      "MagicWornMask": "Magische Maske",
+      "MagicWornFootwear": "Magisches Schuhwerk",
+      "MagicWornCollar": "Magischer Kragen",
+      "MagicWornOther": "Sonstiger getragener magischer Gegenstand"
     },
     "GenerationMode": {
       "Existing": "Vordefinierten Gegenstand auswählen",
@@ -258,7 +283,11 @@
       "NoPredefinedSpecificShieldCandidate": "In den gewählten Kompendien wurde kein vordefinierter spezifischer magischer Schild für die Stufenvorgabe gefunden.",
       "NoSpecificShieldBaseItem": "In den gewählten Quellen wurde kein geeigneter nichtmagischer Basisschild gefunden.",
       "NoSpecificShieldProfileCandidate": "Für Stufe, Profil, Thema und Basisschild konnte kein gültiger spezifischer magischer Schild erzeugt werden.",
-      "UnknownSpecificShieldProfile": "Das ausgewählte Profil für einen spezifischen magischen Schild ist nicht registriert."
+      "UnknownSpecificShieldProfile": "Das ausgewählte Profil für einen spezifischen magischen Schild ist nicht registriert.",
+      "NoPredefinedWornItemCandidate": "Für die gewählten Vorgaben wurde kein vordefinierter getragener magischer Gegenstand gefunden.",
+      "NoWornItemProfileCandidate": "Für Stufe, Seltenheit und Tragekategorie passt kein Profil für einen generierten getragenen Gegenstand.",
+      "NoWornItemTemplate": "Für diese Tragekategorie wurde keine geeignete PF2e-Strukturvorlage gefunden.",
+      "UnknownWornItemProfile": "Das gewählte Profil für getragene magische Gegenstände ist nicht registriert."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatisch stufengerecht",
@@ -493,6 +522,59 @@
       "OncePerHour": "Einmal pro Stunde",
       "OncePerTenMinutes": "Einmal pro 10 Minuten",
       "DurabilityNote": "Die angegebenen Härte-, TP- und Bruchschwellenwerte gehören fest zu diesem spezifischen Schild."
+    },
+    "WornItemMode": {
+      "Existing": "Vordefinierten Gegenstand auswählen",
+      "Generated": "Neuen getragenen Gegenstand generieren"
+    },
+    "WornSlots": {
+      "Unrestricted": "Getragen (ohne festen Platz)",
+      "Backpack": "Rucksack",
+      "Belt": "Gürtel",
+      "Cloak": "Mantel",
+      "Eyepiece": "Augenstück",
+      "Garment": "Kleidungsstück",
+      "Gloves": "Handschuhe",
+      "Bracers": "Armschienen",
+      "Headwear": "Kopfbedeckung",
+      "Circlet": "Reif",
+      "Mask": "Maske",
+      "Footwear": "Schuhe",
+      "Collar": "Kragen",
+      "Other": "Sonstige Nutzungsart"
+    },
+    "WornProfiles": {
+      "Automatic": "Automatisch",
+      "WayfarerFootwear": "Wegfinder-Schuhwerk",
+      "WatchfulEyepiece": "Wachsames Augenstück",
+      "SteadfastBelt": "Standhafter Gürtel",
+      "GuardianCloak": "Wächtermantel",
+      "MercifulMask": "Maske der Fürsorge",
+      "ScholarCirclet": "Gelehrtenreif"
+    },
+    "WornText": {
+      "WayfarerFootwearName": "Wegfinder-Schuhe",
+      "WayfarerFootwearDescription": "Diese verzauberten Schuhe reagieren auf wechselnden Untergrund und unterstützen sichere, flüssige Bewegung.",
+      "WayfarerFootwearEffect": "Du erhältst einen Gegenstandsbonus von +{bonus} auf Akrobatik. Aktivieren [one-action] (konzentrieren); Häufigkeit {frequency}; Effekt Für 1 Minute behandelst du nichtmagisches schwieriges Gelände am Boden als normales Gelände und sehr schwieriges Gelände als schwieriges Gelände.",
+      "WatchfulEyepieceName": "Wachsames Augenstück",
+      "WatchfulEyepieceDescription": "Feine magische Linien im Glas heben kleinste Bewegungen und Unregelmäßigkeiten hervor.",
+      "WatchfulEyepieceEffect": "Du erhältst einen Gegenstandsbonus von +{bonus} auf visuelle Wahrnehmungswürfe. Aktivieren [one-action] (konzentrieren); Häufigkeit {frequency}; Effekt Dein nächster Suchen-Wurf vor Ende deines Zuges erhält einen Situationsbonus von +{activationBonus}. Nichtmagischer Rauch oder Nebel verleiht dem Gesuchten bei diesem Wurf keine Verborgenheit.",
+      "SteadfastBeltName": "Standhafter Gürtel",
+      "SteadfastBeltDescription": "Dieser breite Gürtel scheint sich gegen jede Kraft zu stemmen, die seinen Träger aus der Position bringen will.",
+      "SteadfastBeltEffect": "Du erhältst einen Gegenstandsbonus von +{bonus} auf Athletik. Aktivieren [reaction] (konzentrieren); Häufigkeit {frequency}; Auslöser Ein Effekt würde dich gegen deinen Willen bewegen; Effekt Verringere die erzwungene Bewegung um {resist} Fuß (Minimum 0 Fuß).",
+      "GuardianCloakName": "Wächtermantel",
+      "GuardianCloakDescription": "Der Stoff dieses Mantels strafft sich im Augenblick der Gefahr und legt sich schützend um seinen Träger.",
+      "GuardianCloakEffect": "Du erhältst einen Gegenstandsbonus von +{bonus} auf Rettungswürfe gegen Umweltgefahren und Wettereffekte. Aktivieren [reaction] (konzentrieren); Häufigkeit {frequency}; Auslöser Du wirst Ziel eines Fernkampfangriffs; Effekt Du erhältst einen Situationsbonus von +1 auf RK gegen den auslösenden Angriff.",
+      "MercifulMaskName": "Maske der Fürsorge",
+      "MercifulMaskDescription": "Die ruhigen Züge dieser Maske helfen ihrem Träger, unter Druck präzise heilende Handgriffe auszuführen.",
+      "MercifulMaskEffect": "Du erhältst einen Gegenstandsbonus von +{bonus} auf Heilkunde. Aktivieren [free-action] (konzentrieren, Glück); Häufigkeit {frequency}; Auslöser Du würfelst eine variable Anzahl an Trefferpunkten, die du mit einer Handlung mit dem Merkmal Heilung wiederherstellst; Effekt Wähle einen der Heilungswürfel, würfle ihn zweimal und verwende das höhere Ergebnis.",
+      "ScholarCircletName": "Gelehrtenreif",
+      "ScholarCircletDescription": "Winzige Glyphen wandern über diesen Reif, während sein Träger Erinnerungen ordnet und Zusammenhänge sucht.",
+      "ScholarCircletEffect": "Du erhältst einen Gegenstandsbonus von +{bonus} auf Gesellschaftskunde. Aktivieren [free-action] (konzentrieren); Häufigkeit {frequency}; Auslöser Du scheiterst bei Wissen abrufen; Effekt Du kannst den auslösenden Wurf sofort wiederholen und musst das neue Ergebnis verwenden. Dies ist ein Glückseffekt.",
+      "SpecialAbility": "Besondere Fähigkeit:",
+      "InvestmentNote": "Dieser generierte Gegenstand besitzt das Merkmal Investiert und verwendet die angegebene Nutzungsart. Seine besondere Fähigkeit wird als Regeltext und strukturiertes Item-Forge-Manifest gespeichert.",
+      "OncePerDay": "einmal pro Tag",
+      "OncePerHour": "einmal pro Stunde"
     }
   }
 }

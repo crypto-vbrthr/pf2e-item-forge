@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.0.23
+
+- Adds `magic.worn` plus usage-aware subcategories for unrestricted worn items, backpacks, belts, cloaks, eyepieces, garments, gloves, bracers/armbands, headwear, circlets, masks, footwear, collars, and other worn usages.
+- Adds `WornMagicItemGenerator` with separate predefined and generated paths. Published PF2e worn items are copied whole and retain native Rule Elements, activations, usage, price, traits, and automation.
+- Adds `WornMagicProfileRegistry` exposed publicly as `game.pf2eItemForge.wornMagicProfiles`.
+- Adds six reviewed core homebrew profile families for footwear, eyepieces, belts, cloaks, masks, and circlets, each with a coherent level/price/effect progression.
+- Generated worn items use a slot-matched indexed PF2e item only as a structural implementation template; published Rule Elements and descriptions are removed before the Item Forge profile is applied.
+- Generated worn abilities deliberately use `rules-text` automation plus structured `flags.pf2e-item-forge.wornItem` metadata rather than guessed PF2e Rule Elements.
+- Compendium indexing now recognizes PF2e worn usage in both human-readable and slug-like forms and records a normalized worn-usage category. Spellhearts and non-worn held/affixed items remain excluded from this family.
+- Adds embedded-editor controls, preview fields, German/English localization, canonical request hydration, capability metadata, and source/template provenance for worn items.
+- Extends live Magic diagnostics with predefined and generated worn-item scenarios, including usage and invested/magical trait checks.
+- Automated suite now contains 188 passing tests.
+
 ## 0.0.22
 
 - Adds a shared generation-result contract so API consumers receive consistent `contentSources`, `templateSource`, and `automation.level` metadata across generators.

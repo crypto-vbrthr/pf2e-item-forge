@@ -36,6 +36,14 @@ export class MagicItemTemplateResolver {
     return this.#preferSystem(this.index.entries.filter((entry) => entry.categories?.includes?.("magic.spellheart")));
   }
 
+  resolveWornTemplateEntry(slot = null) {
+    const category = slot ? `magic.worn.${slot}` : "magic.worn";
+    const entries = this.index.entries
+      .filter((entry) => entry.categories?.includes?.(category))
+      .sort((a, b) => Number(a.level ?? 0) - Number(b.level ?? 0) || a.uuid.localeCompare(b.uuid));
+    return this.#preferSystem(entries);
+  }
+
   templateMetadata(entryOrTemplate, { kind = null } = {}) {
     if (!entryOrTemplate) return null;
     return {

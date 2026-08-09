@@ -11,11 +11,13 @@ import { StaffGenerator } from "../src/engine/generators/staff-generator.js";
 import { SpellheartGenerator } from "../src/engine/generators/spellheart-generator.js";
 import { SpecificMagicEquipmentGenerator } from "../src/engine/generators/specific-magic-equipment-generator.js";
 import { SpecificMagicShieldGenerator } from "../src/engine/generators/specific-magic-shield-generator.js";
+import { WornMagicItemGenerator } from "../src/engine/generators/worn-magic-item-generator.js";
 import { SpellheartProfileRegistry, registerCoreSpellheartProfiles } from "../src/engine/registries/spellheart-profile-registry.js";
 import { WandProfileRegistry, registerCoreWandProfiles } from "../src/engine/registries/wand-profile-registry.js";
 import { StaffProfileRegistry, registerCoreStaffProfiles } from "../src/engine/registries/staff-profile-registry.js";
 import { SpecificItemProfileRegistry, registerCoreSpecificItemProfiles } from "../src/engine/registries/specific-item-profile-registry.js";
 import { SpecificShieldProfileRegistry, registerCoreSpecificShieldProfiles } from "../src/engine/registries/specific-shield-profile-registry.js";
+import { WornMagicProfileRegistry, registerCoreWornMagicProfiles } from "../src/engine/registries/worn-magic-profile-registry.js";
 import { getSelectableMagicThemes } from "../src/engine/magic-themes.js";
 import { TreasureRegistry } from "../src/engine/registries/treasure-registry.js";
 import { registerCoreTreasureContent } from "../src/engine/treasure/core-treasure-content.js";
@@ -73,12 +75,14 @@ function createApi() {
   const spellheartProfiles = registerCoreSpellheartProfiles(new SpellheartProfileRegistry());
   const specificItemProfiles = registerCoreSpecificItemProfiles(new SpecificItemProfileRegistry());
   const specificShieldProfiles = registerCoreSpecificShieldProfiles(new SpecificShieldProfileRegistry());
+  const wornMagicProfiles = registerCoreWornMagicProfiles(new WornMagicProfileRegistry());
   const templateResolver = new MagicItemTemplateResolver({ compendiumIndex });
   generators.register(new TreasureGenerator({ categories, treasure }), { priority: 200, modes: ["treasure"] });
   generators.register(new WandGenerator({ compendiumIndex, wandProfiles, templateResolver }), { priority: 220, modes: ["magic"] });
   generators.register(new StaffGenerator({ compendiumIndex, staffProfiles, templateResolver }), { priority: 210, modes: ["magic"] });
   generators.register(new SpecificMagicShieldGenerator({ compendiumIndex, specificShieldProfiles }), { priority: 219, modes: ["magic"] });
   generators.register(new SpecificMagicEquipmentGenerator({ compendiumIndex, specificItemProfiles, propertyRunes }), { priority: 218, modes: ["magic"] });
+  generators.register(new WornMagicItemGenerator({ compendiumIndex, wornMagicProfiles, templateResolver }), { priority: 217, modes: ["magic"] });
   generators.register(new SpellheartGenerator({ compendiumIndex, spellheartProfiles, templateResolver }), { priority: 215, modes: ["magic"] });
   generators.register(new ScrollGenerator({ compendiumIndex, templateResolver }), { priority: 200, modes: ["existing"] });
   generators.register(new EquipmentGenerator({ compendiumIndex, propertyRunes }), { priority: 150, modes: ["equipment"] });
@@ -100,7 +104,7 @@ function createApi() {
     return application;
   };
 
-  const itemForgeApi = new ItemForgeApi({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes: getSelectableMagicThemes(), wandProfiles, staffProfiles, spellheartProfiles, specificItemProfiles, specificShieldProfiles, openApplication });
+  const itemForgeApi = new ItemForgeApi({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes: getSelectableMagicThemes(), wandProfiles, staffProfiles, spellheartProfiles, specificItemProfiles, specificShieldProfiles, wornMagicProfiles, openApplication });
   itemForgeApi.diagnostics = new MagicItemDiagnostics({ api: itemForgeApi });
   return itemForgeApi;
 }

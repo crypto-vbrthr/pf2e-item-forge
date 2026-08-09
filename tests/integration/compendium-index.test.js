@@ -266,3 +266,31 @@ test("CompendiumIndex records pack indexing failures for diagnostics", async () 
     message: "index exploded"
   });
 });
+
+test("CompendiumIndex classifies invested worn magic items by PF2e worn usage", async () => {
+  const pack = makePack("pf2e.worn-items", [
+    raw("cloak", "equipment", 5, { traits: { value: ["invested", "magical"], rarity: "common" }, usage: { value: "worn cloak" } }),
+    raw("goggles", "equipment", 8, { traits: { value: ["invested", "magical"], rarity: "common" }, usage: { value: "worn-eyepiece" } }),
+    raw("boots", "equipment", 4, { traits: { value: ["invested", "magical"], rarity: "common" }, usage: { value: "wornshoes" } }),
+    raw("ring", "equipment", 3, { traits: { value: ["invested", "magical"], rarity: "common" }, usage: { value: "worn" } }),
+    raw("divine-circlet", "equipment", 6, { traits: { value: ["divine"], rarity: "uncommon" }, usage: { value: "worn circlet" } }),
+    raw("held-magic", "equipment", 5, { traits: { value: ["invested", "magical"], rarity: "common" }, usage: { value: "held in 1 hand" } }),
+    raw("spellheart", "equipment", 5, { traits: { value: ["invested", "magical", "spellheart"], rarity: "common" }, usage: { value: "worn cloak" } })
+  ]);
+  const categories = registerCoreCategories(new CategoryRegistry());
+  const game = { system: { id: "pf2e" }, packs: new FakePackCollection([pack]) };
+  const index = new CompendiumIndex({ categoryRegistry: categories, gameProvider: () => game });
+  await index.refresh();
+
+  const byId = (id) => index.entries.find((entry) => entry.id === id);
+  assert.equal(byId("cloak").wornSlot, "cloak");
+  assert.ok(byId("cloak").categories.includes("magic.worn.cloak"));
+  assert.equal(byId("goggles").wornSlot, "eyepiece");
+  assert.ok(byId("goggles").categories.includes("magic.worn.eyepiece"));
+  assert.equal(byId("boots").wornSlot, "footwear");
+  assert.equal(byId("ring").wornSlot, "unrestricted");
+  assert.ok(byId("ring").categories.includes("magic.worn.unrestricted"));
+  assert.ok(byId("divine-circlet").categories.includes("magic.worn.circlet"));
+  assert.equal(byId("held-magic").categories.includes("magic.worn"), false);
+  assert.equal(byId("spellheart").categories.includes("magic.worn"), false);
+});

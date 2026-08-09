@@ -1,3 +1,5 @@
+import { parseWornUsage, wornCategoryForSlot, isMagicWornTraits } from "./worn-item-utils.js";
+
 export const SUPPORTED_ITEM_TYPES = new Set([
   "weapon",
   "armor",
@@ -147,6 +149,7 @@ export class CompendiumIndex {
             range: getProperty(raw, "system.range") ?? null,
             group: getProperty(raw, "system.group") ?? null,
             usage: getProperty(raw, "system.usage.value") ?? null,
+            wornSlot: this.#wornSlot(raw),
             armorCategory: getProperty(raw, "system.category") ?? null,
             damageType: getProperty(raw, "system.damage.damageType") ?? null,
             description: getProperty(raw, "system.description.value") ?? "",
@@ -309,6 +312,11 @@ export class CompendiumIndex {
     return Boolean(value && typeof value === "object" && Object.keys(value).length > 0);
   }
 
+  #wornSlot(raw) {
+    const parsed = parseWornUsage(getProperty(raw, "system.usage.value"));
+    return parsed.worn ? parsed.slot : null;
+  }
+
   #classify(raw) {
     const type = raw.type;
     if (!SUPPORTED_ITEM_TYPES.has(type)) return [];
@@ -353,6 +361,10 @@ export class CompendiumIndex {
       const equipmentTraits = system.traits?.value ?? [];
       if (equipmentTraits.includes("spellheart")) {
         categories.push("magic", "magic.spellheart");
+      }
+      const worn = parseWornUsage(system.usage?.value);
+      if (worn.worn && isMagicWornTraits(equipmentTraits) && !equipmentTraits.includes("spellheart")) {
+        categories.push("magic", "magic.worn", wornCategoryForSlot(worn.slot));
       }
     } else if (type === "treasure") {
       categories.push("treasure");

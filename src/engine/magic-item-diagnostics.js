@@ -1,3 +1,5 @@
+import { parseWornUsage } from "./worn-item-utils.js";
+
 function clone(value) {
   if (globalThis.foundry?.utils?.deepClone) return globalThis.foundry.utils.deepClone(value);
   return structuredClone(value);
@@ -82,6 +84,8 @@ export class MagicItemDiagnostics {
       { id: "specific-armor-generated", request: { mode: "magic", category: "magic.armor", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { specificMode: "generated", specificProfile: "automatic", theme: "automatic" }, seed: "diagnostic-specific-armor-generated" } },
       { id: "specific-shield-existing", request: { mode: "magic", category: "magic.shield", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { specificMode: "existing" }, seed: "diagnostic-specific-shield-existing" } },
       { id: "specific-shield-generated", request: { mode: "magic", category: "magic.shield", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { specificMode: "generated", specificProfile: "automatic", theme: "automatic" }, seed: "diagnostic-specific-shield-generated" } },
+      { id: "worn-existing", request: { mode: "magic", category: "magic.worn", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { wornMode: "existing", wornProfile: "automatic" }, seed: "diagnostic-worn-existing" } },
+      { id: "worn-generated", request: { mode: "magic", category: "magic.worn", level: { min: 4, max: 18 }, levelPolicy: "strict", source: { mode: "system" }, magic: { wornMode: "generated", wornProfile: "automatic" }, seed: "diagnostic-worn-generated" } },
       { id: "equipment-composed-price", priceAudit: true, request: { mode: "equipment", category: "weapon", level: { min: 4, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, equipment: { fundamentalRunes: "automatic", propertyRunes: { mode: "none", selected: [] } }, seed: "diagnostic-equipment-price" } }
     ];
 
@@ -129,6 +133,16 @@ export class MagicItemDiagnostics {
         const durability = shieldDurability(source);
         if (durability.hardness == null || durability.hp == null || durability.bt == null) issues.push("generated shield durability is incomplete");
       }
+      if (["worn-existing", "worn-generated"].includes(id)) {
+        const usage = source.system?.usage?.value;
+        if (!parseWornUsage(usage).worn) issues.push("worn item lacks a recognized worn usage");
+      }
+      if (id === "worn-generated") {
+        const traits = source.system?.traits?.value ?? [];
+        if (!traits.includes("invested")) issues.push("generated worn item lacks invested trait");
+        if (!traits.includes("magical")) issues.push("generated worn item lacks magical trait");
+        if (result.metadata?.automation?.level !== "rules-text") issues.push("generated worn item is not marked rules-text automation");
+      }
       if (issues.length) return { id, status: "failed", message: issues.join(", "), generator: result.metadata?.generator ?? null };
 
       if (priceAudit) {
@@ -147,7 +161,8 @@ export class MagicItemDiagnostics {
         "NO_PREDEFINED_STAFF_CANDIDATE", "NO_STAFF_SPELL_CANDIDATE", "NO_STAFF_BASE_ITEM",
         "NO_PREDEFINED_SPELLHEART_CANDIDATE", "NO_SPELLHEART_SPELL_CANDIDATE", "NO_SPELLHEART_TEMPLATE",
         "NO_PREDEFINED_SPECIFIC_ITEM_CANDIDATE", "NO_SPECIFIC_BASE_ITEM", "NO_SPECIFIC_PROFILE_CANDIDATE",
-        "NO_PREDEFINED_SPECIFIC_SHIELD_CANDIDATE", "NO_SPECIFIC_SHIELD_BASE_ITEM", "NO_SPECIFIC_SHIELD_PROFILE_CANDIDATE"
+        "NO_PREDEFINED_SPECIFIC_SHIELD_CANDIDATE", "NO_SPECIFIC_SHIELD_BASE_ITEM", "NO_SPECIFIC_SHIELD_PROFILE_CANDIDATE",
+        "NO_PREDEFINED_WORN_ITEM_CANDIDATE", "NO_WORN_ITEM_PROFILE_CANDIDATE", "NO_WORN_ITEM_TEMPLATE"
       ].includes(error?.code);
       return { id, status: skippable ? "skipped" : "failed", code: error?.code ?? null, message: error?.message ?? String(error) };
     }

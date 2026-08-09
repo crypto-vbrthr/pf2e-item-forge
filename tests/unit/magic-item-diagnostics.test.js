@@ -25,13 +25,17 @@ function sourceFor(request) {
     source.system.hardness = 8;
     source.system.hp = { value: 40, max: 40, brokenThreshold: 20 };
   }
+  if (request.category === "magic.worn") {
+    source.system.usage = { value: "worn cloak" };
+    source.system.traits.value = request.magic?.wornMode === "generated" ? ["invested", "magical"] : ["invested", "magical"];
+  }
   return source;
 }
 
 test("MagicItemDiagnostics validates generated sources without persisting world items", async () => {
   let constructed = 0;
   const api = {
-    async preview(request) { return { itemSource: sourceFor(request), metadata: { generator: "test" } }; },
+    async preview(request) { return { itemSource: sourceFor(request), metadata: { generator: "test", automation: { level: request.magic?.wornMode === "generated" ? "rules-text" : "native" } } }; },
     compendiumIndex: {
       entries: [{ categories: ["magic.weapon"], specific: { material: {}, runes: {} } }],
       spellEntries: [{ castActions: 1 }, { castActions: 2 }],
@@ -45,17 +49,19 @@ test("MagicItemDiagnostics validates generated sources without persisting world 
   const result = await diagnostics.run();
   assert.equal(result.failed, 0);
   assert.equal(result.warnings, 1, "price audit warns when the runtime document does not derive a different price");
-  assert.equal(constructed, 13);
+  assert.equal(constructed, 15);
   assert.ok(result.checks.some((check) => check.id === "pf2e-specific-schema" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "specific-weapon-generated" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "specific-armor-generated" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "specific-shield-generated" && check.status === "passed"));
+  assert.ok(result.checks.some((check) => check.id === "worn-existing" && check.status === "passed"));
+  assert.ok(result.checks.some((check) => check.id === "worn-generated" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "compendium-index-errors" && check.status === "passed"));
 });
 
 test("MagicItemDiagnostics exposes compendium indexing failures as a failed contract check", async () => {
   const api = {
-    async preview(request) { return { itemSource: sourceFor(request), metadata: { generator: "test" } }; },
+    async preview(request) { return { itemSource: sourceFor(request), metadata: { generator: "test", automation: { level: request.magic?.wornMode === "generated" ? "rules-text" : "native" } } }; },
     compendiumIndex: {
       entries: [],
       spellEntries: [],
