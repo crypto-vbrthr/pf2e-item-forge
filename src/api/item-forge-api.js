@@ -1,7 +1,7 @@
 import { API_VERSION } from "../constants.js";
 
 export class ItemForgeApi {
-  constructor({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes = [], staffProfiles = null, openApplication }) {
+  constructor({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes = [], staffProfiles = null, spellheartProfiles = null, openApplication }) {
     this.apiVersion = API_VERSION;
     this.engine = engine;
     this.categories = categories;
@@ -11,6 +11,7 @@ export class ItemForgeApi {
     this.propertyRunes = propertyRunes;
     this.magicThemes = magicThemes;
     this.staffProfiles = staffProfiles;
+    this.spellheartProfiles = spellheartProfiles;
     this.openApplication = openApplication;
   }
 
@@ -51,7 +52,9 @@ export class ItemForgeApi {
       magicThemes: this.magicThemes.map((theme) => theme.id),
       magicItemKinds: ["wand", "staff", "spellheart"],
       staffModes: ["generated", "existing"],
+      spellheartModes: ["generated", "existing"],
       staffProfiles: this.staffProfiles?.getAll?.().map((profile) => ({ id: profile.id, label: profile.label, levels: profile.variants.map((variant) => variant.level) })) ?? [],
+      spellheartProfiles: this.spellheartProfiles?.getAll?.().map((profile) => ({ id: profile.id, label: profile.label, themes: [...profile.allowedThemes], levels: profile.variants.map((variant) => variant.level) })) ?? [],
       propertyRunes: this.propertyRunes.getAll().map((rune) => ({ id: rune.id, slug: rune.slug, itemType: rune.itemType, level: rune.level, rarity: rune.rarity })),
       levelPolicies: ["strict", "nearest", "notAbove", "notBelow"],
       embeddedEditor: true,

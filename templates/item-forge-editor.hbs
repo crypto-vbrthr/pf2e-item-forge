@@ -89,7 +89,34 @@
           <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.AllowHeightenedSpells"}}</p>
         {{/if}}
         {{#if isSpellheartCategory}}
-          <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.SpellheartMode"}}</p>
+          <div class="form-group">
+            <label>{{localize "PF2E_ITEM_FORGE.Fields.SpellheartMode"}}</label>
+            <select name="magic.spellheartMode">
+              {{#each spellheartModes}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+            </select>
+            <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.SpellheartMode"}}</p>
+          </div>
+          {{#if generatedSpellheart}}
+            <div class="form-group">
+              <label>{{localize "PF2E_ITEM_FORGE.Fields.SpellheartProfile"}}</label>
+              <select name="magic.spellheartProfile">
+                {{#each spellheartProfiles}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+              </select>
+              <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.SpellheartProfile"}}</p>
+            </div>
+            <div class="form-group">
+              <label>{{localize "PF2E_ITEM_FORGE.Fields.MagicTheme"}}</label>
+              <select name="magic.theme">
+                {{#each magicThemes}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+              </select>
+              <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.SpellheartTheme"}}</p>
+            </div>
+            <label class="checkbox">
+              <input type="checkbox" name="magic.allowHeightened" {{#if request.magic.allowHeightened}}checked{{/if}}>
+              {{localize "PF2E_ITEM_FORGE.Fields.AllowHeightenedSpells"}}
+            </label>
+            <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.AllowHeightenedSpells"}}</p>
+          {{/if}}
         {{/if}}
         {{#if generatedStaff}}
           <div class="form-group">
@@ -308,10 +335,19 @@
             {{#if preview.magic}}
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.MagicKind"}}</dt><dd>{{preview.magic.kindLabel}}</dd>
               {{#if preview.magic.staffModeLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.StaffMode"}}</dt><dd>{{preview.magic.staffModeLabel}}</dd>{{/if}}
+              {{#if preview.magic.spellheartModeLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.SpellheartMode"}}</dt><dd>{{preview.magic.spellheartModeLabel}}</dd>{{/if}}
               {{#if preview.magic.themeLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.MagicTheme"}}</dt><dd>{{preview.magic.themeLabel}}</dd>{{/if}}
+              {{#if preview.magic.spellheartProfileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.SpellheartProfile"}}</dt><dd>{{preview.magic.spellheartProfileLabel}}</dd>{{/if}}
               {{#if preview.magic.profileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.StaffProfile"}}</dt><dd>{{preview.magic.profileLabel}}</dd>{{/if}}
               {{#if preview.magic.variantLabelLocalized}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.StaffVariant"}}</dt><dd>{{preview.magic.variantLabelLocalized}}</dd>{{/if}}
               {{#if preview.magic.maxRank}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.HighestSpellRank"}}</dt><dd>{{preview.magic.maxRank}}</dd>{{/if}}
+            {{/if}}
+            {{#if preview.spellheart}}
+              {{#if preview.spellheart.variantLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.SpellheartVariant"}}</dt><dd>{{preview.spellheart.variantLabel}}</dd>{{/if}}
+              {{#if preview.spellheart.spellDC}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.SpellDC"}}</dt><dd>{{preview.spellheart.spellDC}}</dd>{{/if}}
+              {{#if preview.spellheart.spellAttack}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.SpellAttack"}}</dt><dd>+{{preview.spellheart.spellAttack}}</dd>{{/if}}
+              {{#if preview.spellheart.armorEffect}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.ArmorEffect"}}</dt><dd>{{preview.spellheart.armorEffect}}</dd>{{/if}}
+              {{#if preview.spellheart.weaponEffect}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.WeaponEffect"}}</dt><dd>{{preview.spellheart.weaponEffect}}</dd>{{/if}}
             {{/if}}
             {{#if preview.spells.length}}
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.SpellList"}}</dt>

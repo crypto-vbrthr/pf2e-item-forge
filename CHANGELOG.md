@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.0.16
+
+- Adds custom Spellheart generation beside the existing full-copy path for published PF2e Spellhearts.
+- Adds public `SpellheartProfileRegistry` and four coherent core profile families: elemental conduit, sonic resonator, void fang, and vitality/healing feather.
+- Each profile keeps armor benefit, weapon benefit, item-level progression, price, spell statistics, themes, and daily spell ranks together as one validated balance unit instead of mixing arbitrary effect fragments.
+- Generated Spellhearts select a themed cantrip plus profile-required daily spells from the configured spell compendia.
+- Supports meaningful spell heightening using actual indexed heightening data and explicitly prevents down-ranking higher-rank spells.
+- Adds `magic.spellheartMode` (`existing` / `generated`) and `magic.spellheartProfile` to the canonical request contract, public capabilities API, and Embedded Item Forge Editor.
+- Generated Spellhearts use an indexed PF2e Spellheart only as a structural equipment template and remove its original slug, description, and Rule Elements before composition, preventing unrelated published automation from leaking into custom items.
+- Generated armor/weapon benefits are rendered as rules text and stored with complete structured Spellheart metadata in `flags.pf2e-item-forge.spellheart`; predefined Spellhearts continue to preserve native PF2e automation unchanged.
+- Adds German/English UI and preview data for profile, generation mode, variant, spell DC/attack, attachment effects, and selected spells.
+- Adds registry validation and integration/regression coverage for custom profile generation, scaling, heightening, no-down-ranking, deterministic seeds, canonical request hydration, and public capability metadata.
+- Automated suite now contains 118 passing tests.
+
 ## 0.0.15
 
 - Adds the dedicated `magic.spellheart` category and `SpellheartGenerator`.

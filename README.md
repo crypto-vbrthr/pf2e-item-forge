@@ -2,9 +2,9 @@
 
 Reusable Item Forge architecture for Foundry VTT v14 and Pathfinder 2e.
 
-## v0.0.15 scope
+## v0.0.16 scope
 
-This release adds dedicated spellheart support while preserving PF2e spellheart rules data exactly, alongside the existing spell-bearing wand/staff and reusable API/editor architecture.
+This release adds generated custom Spellhearts alongside the existing path that preserves published PF2e Spellhearts exactly, building on the spell-bearing wand/staff and reusable API/editor architecture.
 
 Implemented:
 
@@ -21,7 +21,7 @@ Implemented:
 - Spell-bound/special magic-item mode for wands, staves, and spellhearts
 - Wands use the PF2e generic wand templates and embed one real spell at a legal base or meaningful heightened rank
 - Staves can either be copied exactly from selected compendia or generated as rulebook-style variant families with inherited lower variants
-- Spellhearts are selected as complete predefined PF2e items so their bespoke armor/weapon benefits, activations, prices, and native automation remain intact
+- Spellhearts can either be selected as complete predefined PF2e items or generated from validated custom Spellheart profiles with coherent armor/weapon benefits, spell progressions, prices, and themes
 - Magic themes for fire, cold, electricity, healing, illusion, mental, vitality, void, arcane, divine, occult, primal, and summoning
 - Composed weapons, armor, and shields with fundamental runes
 - Registry-driven property runes with automatic/random/fixed/none modes and compatibility rules
@@ -128,6 +128,26 @@ await game.pf2eItemForge.generate({
   magic: { staffMode: "existing" }
 });
 ```
+
+Generate one custom Spellheart from a coherent effect profile:
+
+```js
+await game.pf2eItemForge.generate({
+  mode: "magic",
+  category: "magic.spellheart",
+  level: 8,
+  levelPolicy: "strict",
+  source: { mode: "system" },
+  magic: {
+    spellheartMode: "generated",
+    spellheartProfile: "core.elemental-conduit",
+    theme: "cold",
+    allowHeightened: true
+  }
+});
+```
+
+Generated Spellhearts use one validated profile as a complete balance unit rather than mixing arbitrary armor and weapon effects. Their selected spells are linked in the description and stored in structured Item Forge flags. Attachment-specific custom benefits are currently emitted as rules text rather than guessed PF2e Rule Elements; predefined Spellhearts continue to preserve their native automation unchanged.
 
 
 Select a predefined spellheart while preserving all published PF2e rules data:

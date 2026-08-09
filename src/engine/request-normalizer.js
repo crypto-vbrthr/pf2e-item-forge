@@ -11,6 +11,7 @@ const SOURCE_MODES = new Set(["all", "system", "selected"]);
 const FUNDAMENTAL_RUNE_MODES = new Set(["automatic", "none"]);
 const PROPERTY_RUNE_MODES = new Set(["automatic", "random", "fixed", "none"]);
 const STAFF_MODES = new Set(["generated", "existing"]);
+const SPELLHEART_MODES = new Set(["generated", "existing"]);
 
 function integer(value, fallback) {
   const parsed = Number.parseInt(value, 10);
@@ -116,7 +117,9 @@ export function normalizeRequest(request = {}, options = {}) {
       theme: typeof request.magic?.theme === "string" && request.magic.theme ? request.magic.theme : "automatic",
       allowHeightened: boolean(request.magic?.allowHeightened, true),
       staffMode: STAFF_MODES.has(request.magic?.staffMode) ? request.magic.staffMode : "generated",
-      staffProfile: typeof request.magic?.staffProfile === "string" && request.magic.staffProfile ? request.magic.staffProfile : "automatic"
+      staffProfile: typeof request.magic?.staffProfile === "string" && request.magic.staffProfile ? request.magic.staffProfile : "automatic",
+      spellheartMode: SPELLHEART_MODES.has(request.magic?.spellheartMode) ? request.magic.spellheartMode : "existing",
+      spellheartProfile: typeof request.magic?.spellheartProfile === "string" && request.magic.spellheartProfile ? request.magic.spellheartProfile : "automatic"
     },
     seed: String(request.seed ?? createSeed()),
     filters: request.filters && typeof request.filters === "object" ? request.filters : {},

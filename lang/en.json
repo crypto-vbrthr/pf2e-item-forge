@@ -48,7 +48,9 @@
       "MagicTheme": "Magical theme",
       "AllowHeightenedSpells": "Use eligible heightened spells",
       "StaffMode": "Staff generation",
-      "StaffProfile": "Family profile"
+      "StaffProfile": "Family profile",
+      "SpellheartMode": "Spellheart generation",
+      "SpellheartProfile": "Spellheart profile"
     },
     "LevelMode": {
       "Single": "Single level",
@@ -90,7 +92,9 @@
       "AllowHeightenedSpells": "Only spells with actual heightening data may reappear at higher ranks in generated wands or staves.",
       "StaffMode": "Predefined copies an existing PF2e staff unchanged from the selected compendia. Generated creates a new thematic staff family using rules-style level profiles.",
       "StaffProfile": "The profile defines the levels of the base, greater, and major variants and which new spell ranks each variant adds. Earlier variants are inherited in full.",
-      "SpellheartMode": "Published spellhearts have bespoke armor and weapon benefits plus their own activations. The Item Forge therefore selects a complete predefined spellheart from the chosen compendia and preserves its PF2e rules data unchanged."
+      "SpellheartMode": "Predefined copies a complete PF2e spellheart from the selected compendia. Generated creates a new spellheart from one coherent, rules-style effect profile.",
+      "SpellheartProfile": "A profile defines levels, prices, armor and weapon benefits, and spell structure as one balance unit. Effects from unrelated profiles are not freely mixed.",
+      "SpellheartTheme": "The theme defines the spell pool and thematic damage or protection type. A fixed profile only offers compatible themes."
     },
     "Preview": {
       "Empty": "Nothing forged yet. Choose parameters and press Generate.",
@@ -123,7 +127,14 @@
       "StaffMode": "Staff generation",
       "StaffProfile": "Family profile",
       "StaffVariant": "Variant",
-      "Price": "Price"
+      "Price": "Price",
+      "SpellheartMode": "Spellheart generation",
+      "SpellheartProfile": "Spellheart profile",
+      "SpellheartVariant": "Variant",
+      "SpellDC": "Spell DC",
+      "SpellAttack": "Spell attack",
+      "ArmorEffect": "Armor benefit",
+      "WeaponEffect": "Weapon benefit"
     },
     "Notifications": {
       "GenerationFailed": "No item could be generated for these parameters.",
@@ -206,7 +217,10 @@
       "NoStaffBaseItem": "The PF2e base weapon required for a staff could not be found.",
       "NoPredefinedStaffCandidate": "No predefined staff matching the requested level was found in the selected compendia.",
       "UnknownStaffProfile": "The selected staff family profile is not registered.",
-      "NoPredefinedSpellheartCandidate": "No predefined spellheart matches the selected level, rarity, and source filters."
+      "NoPredefinedSpellheartCandidate": "No predefined spellheart matches the selected level, rarity, and source filters.",
+      "NoSpellheartTemplate": "No PF2e spellheart was found to use as a structural template.",
+      "NoSpellheartSpellCandidate": "The selected spellheart profile, theme, and sources do not provide enough suitable spells.",
+      "UnknownSpellheartProfile": "The selected spellheart profile is not registered."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatic level-appropriate",
@@ -274,7 +288,9 @@
       "Divine": "Divine",
       "Occult": "Occult",
       "Primal": "Primal",
-      "Summoning": "Summoning"
+      "Summoning": "Summoning",
+      "Acid": "Acid",
+      "Sonic": "Sonic"
     },
     "StaffMode": {
       "Generated": "Generate thematic staff family",
@@ -296,6 +312,58 @@
       "GP": "gp",
       "SP": "sp",
       "CP": "cp"
+    },
+    "SpellheartMode": {
+      "Generated": "Generated",
+      "Existing": "Predefined"
+    },
+    "SpellheartProfiles": {
+      "Automatic": "Automatic for requested level",
+      "ElementalConduit": "Elemental Resonance Core",
+      "SonicResonator": "Sonic Resonance Core",
+      "VoidFang": "Void Fang",
+      "VitalityFeather": "Vitality Feather"
+    },
+    "SpellheartVariants": {
+      "Base": "Base",
+      "Greater": "Greater",
+      "Major": "Major"
+    },
+    "SpellheartText": {
+      "ElementalName": "Elemental Core — {theme} ({variant})",
+      "ElementalDescription": "A compact resonance core binds elemental magic to armor or weapon and channels the same energy through its spells.",
+      "ElementalArmor": "You gain resistance {resistance} to {damage}.",
+      "ElementalWeapon": "After you cast a matching spell by activating this spellheart, Strikes with the affixed weapon deal an additional {weaponDamage} {damage} until the end of your next turn.",
+      "SonicName": "Resonance Core — {theme} ({variant})",
+      "SonicDescription": "This vibrating resonator stores sonic magic and releases it as a protective counter-frequency or disruptive weapon pulse.",
+      "SonicArmor": "You gain resistance {resistance} to sonic damage and a +{saveBonus} item bonus to saves against auditory or sonic effects.",
+      "SonicWeapon": "After you cast a sonic spell by activating this spellheart, the affixed weapon stores resonance. Your next hit deafens the target for {weaponCondition}.",
+      "VoidName": "Void Fang — {theme} ({variant})",
+      "VoidDescription": "A dark shard gathers void energy and channels its weakening echo through its bearer or the affixed weapon.",
+      "VoidArmor": "You gain resistance {resistance} to persistent bleed damage and a +{saveBonus} item bonus to saves against effects with the void trait.",
+      "VoidWeapon": "After you cast a spell by activating this spellheart, Strikes with the affixed weapon deal an additional {weaponDamage} persistent bleed damage until the end of your next turn.",
+      "VitalityName": "Vitality Feather — {theme} ({variant})",
+      "VitalityDescription": "This shimmering feather gathers life energy, bolstering its bearer against life-draining magic or lending vitalizing force to a weapon.",
+      "VitalityArmor": "You gain a +{saveBonus} item bonus to saves against death and void effects.",
+      "VitalityWeapon": "While the spellheart is affixed, the weapon gains the effect of the {rune} rune.",
+      "StandardActivation": "Activate — Cast a Spell",
+      "SpellStatistics": "Spells cast by activating this item use spell attack {spellAttack} and spell DC {spellDC}.",
+      "Armor": "Armor",
+      "Weapon": "Weapon",
+      "OncePerDay": "once per day",
+      "AutomationNote": "Attachment-specific armor and weapon benefits are stored as rules text. Item Forge deliberately does not copy Rule Elements from an unrelated published spellheart.",
+      "DeafenedShort": "1 round (3 rounds on a critical hit)",
+      "DeafenedMedium": "3 rounds (1 minute on a critical hit)",
+      "DeafenedLong": "1 minute (1 hour on a critical hit)",
+      "VitalizingRune": "vitalizing"
+    },
+    "Damage": {
+      "Fire": "fire damage",
+      "Cold": "cold damage",
+      "Electricity": "electricity damage",
+      "Acid": "acid damage",
+      "Sonic": "sonic damage",
+      "Bleed": "bleed damage"
     }
   }
 }

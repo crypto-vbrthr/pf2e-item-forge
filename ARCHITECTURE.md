@@ -28,6 +28,7 @@ ItemForgeEngine (canonical normalization, validation, generation)
         +-- ItemLevelResolver
         +-- PropertyRuneRegistry
         +-- StaffProfileRegistry
+        +-- SpellheartProfileRegistry
         +-- ValueSolver
         +-- TreasureRegistry
               +-- types
@@ -48,7 +49,7 @@ ItemForgeEngine (canonical normalization, validation, generation)
 - Other modules should use the public engine API and may embed `ItemForgeEditor` without the standalone Item Forge window.
 - Future Loot Forge integration should distribute budgets/counts/themes and issue individual Item Forge requests.
 - Built-in and external treasure content use the same validated registries.
-- Spell documents are support data, not directly generatable physical items. `ScrollGenerator` and `WandGenerator` may select eligible spells and embed them into physical item results; `StaffGenerator` either copies a predefined PF2e staff unchanged or uses the spell index to build a structured staff-family manifest. `SpellheartGenerator` deliberately copies complete predefined spellheart items because each published spellheart has bespoke armor/weapon benefits and activation rules.
+- Spell documents are support data, not directly generatable physical items. `ScrollGenerator` and `WandGenerator` may select eligible spells and embed them into physical item results; `StaffGenerator` either copies a predefined PF2e staff unchanged or uses the spell index to build a structured staff-family manifest. `SpellheartGenerator` has separate predefined and generated paths. Predefined spellhearts preserve their complete native item data; generated spellhearts use validated whole-effect profiles so armor/weapon benefits, level progression, price, theme, and spell slots remain a coherent unit.
 
 ## Generator resolution
 
@@ -71,7 +72,7 @@ Registered generation modes are exposed through the public capabilities API and 
 
 ## Spell-bound permanent magic items
 
-`mode: "magic"` currently owns `magic.wand`, `magic.staff`, and `magic.spellheart`. Wands and generated staves reuse the spell-support index and meaningful-heightening helpers. Spellhearts are handled as complete predefined items because their attachment benefits and activations are item-specific rather than a generic spell-container schema.
+`mode: "magic"` currently owns `magic.wand`, `magic.staff`, and `magic.spellheart`. Wands, generated staves, and generated spellhearts reuse the spell-support index and meaningful-heightening helpers. Predefined spellhearts preserve complete native PF2e documents, while generated spellhearts compose from validated profile families rather than arbitrary effect fragments.
 
 ### Wands
 
@@ -90,9 +91,14 @@ Generated staff spell lists are stored as enriched `@UUID` links in the descript
 
 ### Spellhearts
 
-`SpellheartGenerator` resolves `mode: "magic"` + `category: "magic.spellheart"`. The compendium index classifies physical `equipment` items carrying the `spellheart` trait into the dedicated magic category. Generation then applies the normal source, rarity, seed, and level/level-policy constraints and clones one matching spellheart document.
+`SpellheartGenerator` resolves `mode: "magic"` + `category: "magic.spellheart"` and has two explicit paths. `magic.spellheartMode: "existing"` selects a published spellheart from the configured compendia and clones the complete PF2e item unchanged, preserving native armor/weapon benefits, activations, Rule Elements, price, and other system data.
 
-The generator intentionally does **not** synthesize arbitrary new spellhearts yet. Published spellhearts can grant different benefits when affixed to armor versus a weapon and often carry bespoke activated spells and rule elements. Preserving the complete source document avoids producing attractive-looking but mechanically incomplete homebrew items. A future generated-spellheart composer should therefore be built from validated effect/activation templates rather than by mixing text fragments.
+`magic.spellheartMode: "generated"` composes a new homebrew spellheart from `SpellheartProfileRegistry`. A profile is a complete balance unit: it defines allowed themes, a strictly increasing family of item variants, prices, spell statistics, armor/weapon effect templates, and the daily spell ranks added at each variant. Core profiles currently cover elemental conduit, sonic resonator, void fang, and vitality/healing feather patterns. External modules can register additional validated profiles through `game.pf2eItemForge.spellheartProfiles`.
+
+Generated spellhearts always select a themed cantrip plus the daily spells required by the chosen profile variant. Heightening is permitted only when the indexed spell actually exposes a meaningful fixed/interval heightened rank. A higher-rank spell is never down-ranked to fill a lower slot. Source-pack, rarity, seed, exact/range level, and level-policy constraints all remain part of the same canonical request.
+
+A real indexed spellheart is used only as a structural PF2e `equipment` template. Its published description, slug, and Rule Elements are removed before the generated profile is applied, so unrelated automation can never leak into the custom result. The generated attachment benefits are rendered as explicit rules text and stored with the complete profile/spell manifest in `flags.pf2e-item-forge.spellheart`. This is deliberate: Item Forge does not invent unverified PF2e Rule Element predicates for arbitrary attachment-specific homebrew effects. Predefined spellhearts remain the path for native published automation.
+
 
 ## Treasure generation
 

@@ -98,3 +98,20 @@ test("validation accepts spellheart as a supported magic category", async () => 
   assert.equal(result.valid, true);
   assert.equal(result.request.category, "magic.spellheart");
 });
+
+test("normalizeRequest hydrates custom spellheart settings", () => {
+  const defaults = normalizeRequest({ mode: "magic", category: "magic.spellheart", seed: "x" });
+  assert.equal(defaults.magic.spellheartMode, "existing");
+  assert.equal(defaults.magic.spellheartProfile, "automatic");
+
+  const explicit = normalizeRequest({
+    mode: "magic",
+    category: "magic.spellheart",
+    magic: { spellheartMode: "generated", spellheartProfile: "core.elemental-conduit", theme: "fire", allowHeightened: false },
+    seed: "x"
+  });
+  assert.equal(explicit.magic.spellheartMode, "generated");
+  assert.equal(explicit.magic.spellheartProfile, "core.elemental-conduit");
+  assert.equal(explicit.magic.theme, "fire");
+  assert.equal(explicit.magic.allowHeightened, false);
+});

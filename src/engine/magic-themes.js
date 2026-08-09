@@ -3,6 +3,8 @@ export const MAGIC_THEME_DEFINITIONS = [
   { id: "fire", label: "PF2E_ITEM_FORGE.MagicThemes.Fire", traits: ["fire"] },
   { id: "cold", label: "PF2E_ITEM_FORGE.MagicThemes.Cold", traits: ["cold"] },
   { id: "electricity", label: "PF2E_ITEM_FORGE.MagicThemes.Electricity", traits: ["electricity"] },
+  { id: "acid", label: "PF2E_ITEM_FORGE.MagicThemes.Acid", traits: ["acid"] },
+  { id: "sonic", label: "PF2E_ITEM_FORGE.MagicThemes.Sonic", traits: ["sonic"] },
   { id: "healing", label: "PF2E_ITEM_FORGE.MagicThemes.Healing", traitsAny: ["healing", "vitality"] },
   { id: "illusion", label: "PF2E_ITEM_FORGE.MagicThemes.Illusion", traits: ["illusion"] },
   { id: "mental", label: "PF2E_ITEM_FORGE.MagicThemes.Mental", traits: ["mental"] },

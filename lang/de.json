@@ -48,7 +48,9 @@
       "MagicTheme": "Magisches Thema",
       "AllowHeightenedSpells": "Passende Zauber erhöht verwenden",
       "StaffMode": "Zauberstecken-Erzeugung",
-      "StaffProfile": "Familienprofil"
+      "StaffProfile": "Familienprofil",
+      "SpellheartMode": "Zauberherz-Erzeugung",
+      "SpellheartProfile": "Zauberherz-Profil"
     },
     "LevelMode": {
       "Single": "Einzelne Stufe",
@@ -90,7 +92,9 @@
       "AllowHeightenedSpells": "Nur Zauber mit einer echten Erhöhungsdefinition dürfen auf höheren Graden erneut in Zauberstäben oder Zauberstecken auftauchen.",
       "StaffMode": "Vordefiniert kopiert einen vorhandenen PF2e-Zauberstecken unverändert aus den ausgewählten Kompendien. Generiert erstellt eine neue thematische Zaubersteckenfamilie nach regelwerksnahen Stufenprofilen.",
       "StaffProfile": "Das Profil bestimmt die Stufen der Grund-, starken und mächtigen Variante und welche neuen Zaubergrade jede Variante hinzufügt. Frühere Varianten werden vollständig geerbt.",
-      "SpellheartMode": "Zauberherzen besitzen im Regelwerk jeweils eigene Effekte für Rüstungen und Waffen sowie eigene Aktivierungen. Die Item Forge wählt deshalb hier einen vollständigen vordefinierten Zauberherz-Gegenstand aus den gewählten Kompendien und erhält dessen PF2e-Regeldaten unverändert."
+      "SpellheartMode": "Vordefiniert kopiert ein vollständiges PF2e-Zauberherz aus den gewählten Kompendien. Generiert erstellt ein neues Zauberherz aus einem regelwerksnahen, zusammenhängenden Effektprofil.",
+      "SpellheartProfile": "Ein Profil legt Stufen, Preise, Rüstungs- und Waffeneffekte sowie die Struktur der enthaltenen Zauber gemeinsam fest. Effekte verschiedener Profile werden nicht frei vermischt.",
+      "SpellheartTheme": "Das Thema bestimmt den Zauberpool und die thematische Schadens- oder Schutzart. Bei einem festen Profil werden nur dazu passende Themen angeboten."
     },
     "Preview": {
       "Empty": "Noch nichts geschmiedet. Parameter wählen und Generieren drücken.",
@@ -123,7 +127,14 @@
       "StaffMode": "Zauberstecken-Erzeugung",
       "StaffProfile": "Familienprofil",
       "StaffVariant": "Variante",
-      "Price": "Preis"
+      "Price": "Preis",
+      "SpellheartMode": "Zauberherz-Erzeugung",
+      "SpellheartProfile": "Zauberherz-Profil",
+      "SpellheartVariant": "Variante",
+      "SpellDC": "Zauber-SG",
+      "SpellAttack": "Zauberangriff",
+      "ArmorEffect": "Rüstungseffekt",
+      "WeaponEffect": "Waffeneffekt"
     },
     "Notifications": {
       "GenerationFailed": "Für diese Parameter konnte kein Gegenstand erzeugt werden.",
@@ -206,7 +217,10 @@
       "NoStaffBaseItem": "Die PF2e-Basiswaffe für einen Zauberstecken konnte nicht gefunden werden.",
       "NoPredefinedStaffCandidate": "In den gewählten Kompendien wurde kein vordefinierter Zauberstecken für die Stufenvorgabe gefunden.",
       "UnknownStaffProfile": "Das gewählte Zauberstecken-Familienprofil ist nicht registriert.",
-      "NoPredefinedSpellheartCandidate": "Kein vordefiniertes Zauberherz entspricht den gewählten Stufen-, Seltenheits- und Quellenfiltern."
+      "NoPredefinedSpellheartCandidate": "Kein vordefiniertes Zauberherz entspricht den gewählten Stufen-, Seltenheits- und Quellenfiltern.",
+      "NoSpellheartTemplate": "Es wurde kein PF2e-Zauberherz als strukturelle Vorlage gefunden.",
+      "NoSpellheartSpellCandidate": "Für das gewählte Zauberherz-Profil, Thema und die gewählten Quellen stehen nicht genügend passende Zauber zur Verfügung.",
+      "UnknownSpellheartProfile": "Das gewählte Zauberherz-Profil ist nicht registriert."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatisch stufengerecht",
@@ -274,7 +288,9 @@
       "Divine": "Göttlich",
       "Occult": "Okkult",
       "Primal": "Naturmagie",
-      "Summoning": "Beschwörung"
+      "Summoning": "Beschwörung",
+      "Acid": "Säure",
+      "Sonic": "Schall"
     },
     "StaffMode": {
       "Generated": "Thematische Zaubersteckenfamilie generieren",
@@ -296,6 +312,58 @@
       "GP": "GM",
       "SP": "SM",
       "CP": "KM"
+    },
+    "SpellheartMode": {
+      "Generated": "Generiert",
+      "Existing": "Vordefiniert"
+    },
+    "SpellheartProfiles": {
+      "Automatic": "Automatisch passend zur Stufe",
+      "ElementalConduit": "Elementarer Resonanzkern",
+      "SonicResonator": "Resonanzkern des Schalls",
+      "VoidFang": "Leerenfang",
+      "VitalityFeather": "Lebensfeder"
+    },
+    "SpellheartVariants": {
+      "Base": "Grundform",
+      "Greater": "Stark",
+      "Major": "Mächtig"
+    },
+    "SpellheartText": {
+      "ElementalName": "Elementarkern – {theme} ({variant})",
+      "ElementalDescription": "Ein kompakter Resonanzkern bindet elementare Magie an Rüstung oder Waffe und leitet dieselbe Energie durch seine Zauber.",
+      "ElementalArmor": "Du erhältst Resistenz {resistance} gegen {damage}.",
+      "ElementalWeapon": "Nachdem du einen passenden Zauber durch Aktivierung dieses Zauberherzens gewirkt hast, verursachen Angriffe mit der verbundenen Waffe bis zum Ende deines nächsten Zuges zusätzlich {weaponDamage} {damage}.",
+      "SonicName": "Resonanzkern – {theme} ({variant})",
+      "SonicDescription": "Dieser vibrierende Resonanzkörper speichert Schallmagie und gibt sie als schützende Gegenschwingung oder als störenden Waffenimpuls ab.",
+      "SonicArmor": "Du erhältst Resistenz {resistance} gegen Schallschaden und einen Gegenstandsbonus von +{saveBonus} auf Rettungswürfe gegen Effekte mit der Kategorie Hörbar oder Schall.",
+      "SonicWeapon": "Nachdem du einen Schallzauber durch Aktivierung dieses Zauberherzens gewirkt hast, lädt sich die Waffe mit Resonanz auf. Dein nächster Treffer verursacht den Zustand Taub entsprechend {weaponCondition}.",
+      "VoidName": "Leerenfang – {theme} ({variant})",
+      "VoidDescription": "Ein dunkler Splitter sammelt Leerenenergie und lässt sie als schwächenden Nachhall durch seinen Träger oder dessen Waffe fließen.",
+      "VoidArmor": "Du erhältst Resistenz {resistance} gegen anhaltenden Blutungsschaden und einen Gegenstandsbonus von +{saveBonus} auf Rettungswürfe gegen Effekte der Kategorie Leere.",
+      "VoidWeapon": "Nachdem du einen Zauber durch Aktivierung dieses Zauberherzens gewirkt hast, verursachen Angriffe mit der verbundenen Waffe bis zum Ende deines nächsten Zuges zusätzlich {weaponDamage} anhaltenden Blutungsschaden.",
+      "VitalityName": "Lebensfeder – {theme} ({variant})",
+      "VitalityDescription": "Diese schimmernde Feder bündelt Lebensenergie und stärkt den Widerstand gegen lebensfeindliche Magie oder verleiht einer Waffe vitalisierende Kraft.",
+      "VitalityArmor": "Du erhältst einen Gegenstandsbonus von +{saveBonus} auf Rettungswürfe gegen Todes- und Leereeffekte.",
+      "VitalityWeapon": "Solange das Zauberherz verbunden ist, erhält die Waffe den Effekt der Rune {rune}.",
+      "StandardActivation": "Aktivierung – Zauber wirken",
+      "SpellStatistics": "Zauber, die durch Aktivierung dieses Gegenstandes gewirkt werden, verwenden Zauberangriff {spellAttack} und Zauber-SG {spellDC}.",
+      "Armor": "Rüstung",
+      "Weapon": "Waffe",
+      "OncePerDay": "einmal pro Tag",
+      "AutomationNote": "Die anbringungsabhängigen Rüstungs- und Waffeneffekte werden als Regeltext gespeichert. Die Item Forge kopiert bewusst keine Rule Elements eines unpassenden veröffentlichten Zauberherzens.",
+      "DeafenedShort": "1 Runde (3 Runden bei einem kritischen Treffer)",
+      "DeafenedMedium": "3 Runden (1 Minute bei einem kritischen Treffer)",
+      "DeafenedLong": "1 Minute (1 Stunde bei einem kritischen Treffer)",
+      "VitalizingRune": "Vitalisierend"
+    },
+    "Damage": {
+      "Fire": "Feuerschaden",
+      "Cold": "Kälteschaden",
+      "Electricity": "Elektrizitätsschaden",
+      "Acid": "Säureschaden",
+      "Sonic": "Schallschaden",
+      "Bleed": "Blutungsschaden"
     }
   }
 }
