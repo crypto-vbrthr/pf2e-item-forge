@@ -147,17 +147,42 @@ test("worn subcategory restricts automatic generated profiles to the requested u
   assert.equal(result.itemSource.system.usage.value, "worn mask");
 });
 
-test("generated worn items obey strict item levels and reject unknown profiles", async () => {
+test("explicit worn profiles remain strict even though automatic generation has broader level coverage", async () => {
   const shoes = entry("boots-template", { slot: "footwear", usage: "worn shoes" });
   const g = makeGenerator([shoes]);
   await assert.rejects(
-    () => g.generate(request({ level: { min: 6, max: 6, target: 6 } })),
+    () => g.generate(request({ level: { min: 6, max: 6, target: 6 }, magic: { wornMode: "generated", wornProfile: "core.wayfarer-footwear" } })),
     (error) => error?.code === "NO_WORN_ITEM_PROFILE_CANDIDATE"
   );
   await assert.rejects(
     () => g.generate(request({ magic: { wornMode: "generated", wornProfile: "missing.profile" } })),
     (error) => error?.code === "UNKNOWN_WORN_ITEM_PROFILE"
   );
+});
+
+test("automatic generated worn items have a strict core candidate at every level from 4 through 20", async () => {
+  const templates = [
+    entry("boots-template", { slot: "footwear", usage: "worn shoes" }),
+    entry("eyepiece-template", { slot: "eyepiece", usage: "worn eyepiece" }),
+    entry("belt-template", { slot: "belt", usage: "worn belt" }),
+    entry("cloak-template", { slot: "cloak", usage: "worn cloak" }),
+    entry("mask-template", { slot: "mask", usage: "worn mask" }),
+    entry("circlet-template", { slot: "circlet", usage: "worn circlet" }),
+    entry("gloves-template", { slot: "gloves", usage: "worn gloves" }),
+    entry("bracers-template", { slot: "bracers", usage: "worn bracers" }),
+    entry("garment-template", { slot: "garment", usage: "worn garment" }),
+    entry("jewelry-template", { slot: "unrestricted", usage: "worn" }),
+    entry("headwear-template", { slot: "headwear", usage: "worn headwear" })
+  ];
+  const g = makeGenerator(templates);
+  for (let level = 4; level <= 20; level += 1) {
+    const result = await g.generate(request({
+      level: { min: level, max: level, target: level },
+      magic: { wornMode: "generated", wornProfile: "automatic" },
+      seed: `worn-level-${level}`
+    }));
+    assert.equal(result.metadata.level, level);
+  }
 });
 
 test("generated worn items are deterministic for the same seed", async () => {

@@ -166,5 +166,78 @@ export function registerCoreWornMagicProfiles(registry = new WornMagicProfileReg
     ]
   });
 
+
+  registry.register({
+    id: "core.surehand-gloves",
+    balance,
+    slot: "gloves",
+    label: "PF2E_ITEM_FORGE.WornProfiles.SurehandGloves",
+    nameTemplate: "PF2E_ITEM_FORGE.WornText.SurehandGlovesName",
+    description: "PF2E_ITEM_FORGE.WornText.SurehandGlovesDescription",
+    effectText: "PF2E_ITEM_FORGE.WornText.SurehandGlovesEffect",
+    variants: [
+      { id: "base", label: "PF2E_ITEM_FORGE.SpecificItemVariants.Base", level: 6, price: 220, values: { bonus: 1, frequency: "PF2E_ITEM_FORGE.WornText.OncePerDay" } },
+      { id: "greater", label: "PF2E_ITEM_FORGE.SpecificItemVariants.Greater", level: 12, price: 1800, values: { bonus: 2, frequency: "PF2E_ITEM_FORGE.WornText.OncePerHour" } },
+      { id: "major", label: "PF2E_ITEM_FORGE.SpecificItemVariants.Major", level: 19, price: 40000, values: { bonus: 3, frequency: "PF2E_ITEM_FORGE.WornText.OncePerTenMinutes" } }
+    ]
+  });
+
+  registry.register({
+    id: "core.artificer-bracers",
+    balance,
+    slot: "bracers",
+    label: "PF2E_ITEM_FORGE.WornProfiles.ArtificerBracers",
+    nameTemplate: "PF2E_ITEM_FORGE.WornText.ArtificerBracersName",
+    description: "PF2E_ITEM_FORGE.WornText.ArtificerBracersDescription",
+    effectText: "PF2E_ITEM_FORGE.WornText.ArtificerBracersEffect",
+    variants: [
+      { id: "base", label: "PF2E_ITEM_FORGE.SpecificItemVariants.Base", level: 7, price: 330, values: { bonus: 1, frequency: "PF2E_ITEM_FORGE.WornText.OncePerDay" } },
+      { id: "greater", label: "PF2E_ITEM_FORGE.SpecificItemVariants.Greater", level: 13, price: 2700, values: { bonus: 2, frequency: "PF2E_ITEM_FORGE.WornText.OncePerHour" } },
+      { id: "major", label: "PF2E_ITEM_FORGE.SpecificItemVariants.Major", level: 20, price: 70000, values: { bonus: 3, frequency: "PF2E_ITEM_FORGE.WornText.OncePerTenMinutes" } }
+    ]
+  });
+
+  registry.register({
+    id: "core.mistweave-garment",
+    balance,
+    slot: "garment",
+    label: "PF2E_ITEM_FORGE.WornProfiles.MistweaveGarment",
+    nameTemplate: "PF2E_ITEM_FORGE.WornText.MistweaveGarmentName",
+    description: "PF2E_ITEM_FORGE.WornText.MistweaveGarmentDescription",
+    effectText: "PF2E_ITEM_FORGE.WornText.MistweaveGarmentEffect",
+    variants: [
+      { id: "base", label: "PF2E_ITEM_FORGE.SpecificItemVariants.Base", level: 8, price: 450, values: { bonus: 1, frequency: "PF2E_ITEM_FORGE.WornText.OncePerDay" } },
+      { id: "greater", label: "PF2E_ITEM_FORGE.SpecificItemVariants.Greater", level: 14, price: 4000, values: { bonus: 2, frequency: "PF2E_ITEM_FORGE.WornText.OncePerHour" } }
+    ]
+  });
+
+  registry.register({
+    id: "core.resolute-brooch",
+    balance,
+    slot: "unrestricted",
+    label: "PF2E_ITEM_FORGE.WornProfiles.ResoluteBrooch",
+    nameTemplate: "PF2E_ITEM_FORGE.WornText.ResoluteBroochName",
+    description: "PF2E_ITEM_FORGE.WornText.ResoluteBroochDescription",
+    effectText: "PF2E_ITEM_FORGE.WornText.ResoluteBroochEffect",
+    variants: [
+      { id: "base", label: "PF2E_ITEM_FORGE.SpecificItemVariants.Base", level: 9, price: 650, values: { bonus: 1, frequency: "PF2E_ITEM_FORGE.WornText.OncePerDay", reduction: 1 } },
+      { id: "greater", label: "PF2E_ITEM_FORGE.SpecificItemVariants.Greater", level: 15, price: 6000, values: { bonus: 2, frequency: "PF2E_ITEM_FORGE.WornText.OncePerHour", reduction: 2 } }
+    ]
+  });
+
+  registry.register({
+    id: "core.horizon-helm",
+    balance,
+    slot: "headwear",
+    label: "PF2E_ITEM_FORGE.WornProfiles.HorizonHelm",
+    nameTemplate: "PF2E_ITEM_FORGE.WornText.HorizonHelmName",
+    description: "PF2E_ITEM_FORGE.WornText.HorizonHelmDescription",
+    effectText: "PF2E_ITEM_FORGE.WornText.HorizonHelmEffect",
+    variants: [
+      { id: "base", label: "PF2E_ITEM_FORGE.SpecificItemVariants.Base", level: 10, price: 900, values: { bonus: 2, frequency: "PF2E_ITEM_FORGE.WornText.OncePerDay" } },
+      { id: "greater", label: "PF2E_ITEM_FORGE.SpecificItemVariants.Greater", level: 16, price: 9000, values: { bonus: 3, frequency: "PF2E_ITEM_FORGE.WornText.OncePerHour" } }
+    ]
+  });
+
   return registry;
 }

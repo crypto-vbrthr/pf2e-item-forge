@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.0.24
+
+- Expands the core generated worn-item library from six to eleven reviewed profile families.
+- Adds Surehand Gloves (levels 6/12/19), Artificer Bracers (7/13/20), Mistweave Garment (8/14), Resolute Brooch (9/15), and Horizon Helm (10/16).
+- Interleaves core worn-item variants so automatic strict-mode generation has at least one candidate at every item level from 4 through 20.
+- Keeps explicitly selected profile families strict to their own variant progression; choosing a Wayfarer Footwear profile at level 6 still correctly yields no strict candidate.
+- Uses worn usages with verified published structural examples for the new generated families, including gloves, bracers, garments, unrestricted worn jewelry, and headwear.
+- Adds a regression test that exercises automatic generated worn items at every level from 4 through 20.
+- Moves the live generated-worn diagnostic to exact level 6 so Foundry now probes one of the previously uncovered levels against the real PF2e runtime and implementation-template index.
+- Updates German and English localization for all new profile families and the 10-minute frequency label.
+- Test suite: 190 passing tests.
+
 ## 0.0.23
 
 - Adds `magic.worn` plus usage-aware subcategories for unrestricted worn items, backpacks, belts, cloaks, eyepieces, garments, gloves, bracers/armbands, headwear, circlets, masks, footwear, collars, and other worn usages.

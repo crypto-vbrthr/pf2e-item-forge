@@ -5,12 +5,23 @@ import { WornMagicProfileRegistry, registerCoreWornMagicProfiles } from "../../s
 test("core worn magic profiles cover multiple PF2e worn usage families with ordered variants", () => {
   const registry = registerCoreWornMagicProfiles(new WornMagicProfileRegistry());
   const profiles = registry.getAll();
-  assert.equal(profiles.length, 6);
-  assert.deepEqual(new Set(profiles.map((profile) => profile.slot)), new Set(["footwear", "eyepiece", "belt", "cloak", "mask", "circlet"]));
+  assert.equal(profiles.length, 11);
+  assert.deepEqual(
+    new Set(profiles.map((profile) => profile.slot)),
+    new Set(["footwear", "eyepiece", "belt", "cloak", "mask", "circlet", "gloves", "bracers", "garment", "unrestricted", "headwear"])
+  );
   for (const profile of profiles) {
     assert.equal(profile.automation, "rules-text");
     assert.equal(profile.balance.reviewed, true);
     assert.ok(profile.variants.every((variant, index) => index === 0 || variant.level > profile.variants[index - 1].level));
+  }
+});
+
+test("automatic core worn-item generation has at least one strict candidate at every level from 4 through 20", () => {
+  const registry = registerCoreWornMagicProfiles(new WornMagicProfileRegistry());
+  const levels = new Set(registry.getAll().flatMap((profile) => profile.variants.map((variant) => variant.level)));
+  for (let level = 4; level <= 20; level += 1) {
+    assert.ok(levels.has(level), `expected at least one core worn-item variant at level ${level}`);
   }
 });
 

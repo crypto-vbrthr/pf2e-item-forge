@@ -550,7 +550,12 @@
       "SteadfastBelt": "Standhafter Gürtel",
       "GuardianCloak": "Wächtermantel",
       "MercifulMask": "Maske der Fürsorge",
-      "ScholarCirclet": "Gelehrtenreif"
+      "ScholarCirclet": "Gelehrtenreif",
+      "SurehandGloves": "Handschuhe der sicheren Hand",
+      "ArtificerBracers": "Handwerker-Armschienen",
+      "MistweaveGarment": "Nebelgewebe-Gewand",
+      "HorizonHelm": "Horizonthelm",
+      "ResoluteBrooch": "Brosche der Entschlossenheit"
     },
     "WornText": {
       "WayfarerFootwearName": "Wegfinder-Schuhe",
@@ -574,7 +579,23 @@
       "SpecialAbility": "Besondere Fähigkeit:",
       "InvestmentNote": "Dieser generierte Gegenstand besitzt das Merkmal Investiert und verwendet die angegebene Nutzungsart. Seine besondere Fähigkeit wird als Regeltext und strukturiertes Item-Forge-Manifest gespeichert.",
       "OncePerDay": "einmal pro Tag",
-      "OncePerHour": "einmal pro Stunde"
+      "OncePerHour": "einmal pro Stunde",
+      "SurehandGlovesName": "Handschuhe der sicheren Hand",
+      "SurehandGlovesDescription": "Feine Silberfäden in diesen Handschuhen straffen sich bei präzisen Handgriffen und führen die Finger ihres Trägers.",
+      "SurehandGlovesEffect": "Du erhältst einen Gegenstandsbonus von +{bonus} auf Diebeskunst. Aktivieren [free-action] (konzentrieren, Glück); Häufigkeit {frequency}; Auslöser Du scheiterst bei einem Wurf auf Diebeskunst zum Mechanismus ausschalten oder Schloss knacken; Effekt Wiederhole den auslösenden Wurf und verwende das neue Ergebnis.",
+      "ArtificerBracersName": "Handwerker-Armschienen",
+      "ArtificerBracersDescription": "In die Armschienen eingelassene Maßlinien und winzige Runen reagieren auf Spannung, Materialfehler und mechanische Unregelmäßigkeiten.",
+      "ArtificerBracersEffect": "Du erhältst einen Gegenstandsbonus von +{bonus} auf Handwerkskunst. Aktivieren [free-action] (konzentrieren, Glück); Häufigkeit {frequency}; Auslöser Du scheiterst bei einem Wurf auf Handwerkskunst zum Reparieren eines Gegenstands; Effekt Wiederhole den auslösenden Wurf und verwende das neue Ergebnis.",
+      "MistweaveGarmentName": "Nebelgewebe-Gewand",
+      "MistweaveGarmentDescription": "Der Stoff dieses Gewands nimmt Licht und Schatten auf und gibt beides als dünnen, flirrenden Schleier wieder ab.",
+      "MistweaveGarmentEffect": "Du erhältst einen Gegenstandsbonus von +{bonus} auf Heimlichkeit. Aktivieren [one-action] (konzentrieren); Häufigkeit {frequency}; Effekt Bis zum Beginn deines nächsten Zuges bist du verborgen. Dieser Effekt endet, sobald du eine feindselige Handlung ausführst.",
+      "HorizonHelmName": "Horizonthelm",
+      "HorizonHelmDescription": "Feine Linien auf der Innenseite dieses Helms verschieben sich mit Wind, Gelände und Himmelsrichtung.",
+      "HorizonHelmEffect": "Du erhältst einen Gegenstandsbonus von +{bonus} auf Überlebenskunst. Aktivieren [one-action] (konzentrieren); Häufigkeit {frequency}; Effekt Für 1 Stunde kennst du stets die Himmelsrichtungen und ignorierst Umstandsmali auf Orientieren und Spuren folgen, die ausschließlich durch gewöhnliches Wetter entstehen.",
+      "OncePerTenMinutes": "einmal pro 10 Minuten",
+      "ResoluteBroochName": "Brosche der Entschlossenheit",
+      "ResoluteBroochDescription": "Die schwere Metallbrosche wird warm, wenn Furcht oder fremde Gefühle versuchen, den Willen ihres Trägers zu überwältigen.",
+      "ResoluteBroochEffect": "Du erhältst einen Gegenstandsbonus von +{bonus} auf Rettungswürfe gegen Furcht- und Gefühlseffekte. Aktivieren [reaction] (konzentrieren); Häufigkeit {frequency}; Auslöser Du erhältst den Zustand Verängstigt oder erhöhst seinen Wert; Effekt Senke deinen Verängstigt-Wert um {reduction}."
     }
   }
 }

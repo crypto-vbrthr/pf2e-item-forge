@@ -85,7 +85,7 @@ export class MagicItemDiagnostics {
       { id: "specific-shield-existing", request: { mode: "magic", category: "magic.shield", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { specificMode: "existing" }, seed: "diagnostic-specific-shield-existing" } },
       { id: "specific-shield-generated", request: { mode: "magic", category: "magic.shield", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { specificMode: "generated", specificProfile: "automatic", theme: "automatic" }, seed: "diagnostic-specific-shield-generated" } },
       { id: "worn-existing", request: { mode: "magic", category: "magic.worn", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { wornMode: "existing", wornProfile: "automatic" }, seed: "diagnostic-worn-existing" } },
-      { id: "worn-generated", request: { mode: "magic", category: "magic.worn", level: { min: 4, max: 18 }, levelPolicy: "strict", source: { mode: "system" }, magic: { wornMode: "generated", wornProfile: "automatic" }, seed: "diagnostic-worn-generated" } },
+      { id: "worn-generated", request: { mode: "magic", category: "magic.worn", level: { min: 6, max: 6, target: 6 }, levelPolicy: "strict", source: { mode: "system" }, magic: { wornMode: "generated", wornProfile: "automatic" }, seed: "diagnostic-worn-generated" } },
       { id: "equipment-composed-price", priceAudit: true, request: { mode: "equipment", category: "weapon", level: { min: 4, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, equipment: { fundamentalRunes: "automatic", propertyRunes: { mode: "none", selected: [] } }, seed: "diagnostic-equipment-price" } }
     ];
 

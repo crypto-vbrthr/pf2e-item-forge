@@ -550,7 +550,12 @@
       "SteadfastBelt": "Steadfast Belt",
       "GuardianCloak": "Guardian Cloak",
       "MercifulMask": "Merciful Mask",
-      "ScholarCirclet": "Scholar Circlet"
+      "ScholarCirclet": "Scholar Circlet",
+      "SurehandGloves": "Surehand Gloves",
+      "ArtificerBracers": "Artificer's Bracers",
+      "MistweaveGarment": "Mistweave Garment",
+      "HorizonHelm": "Horizon Helm",
+      "ResoluteBrooch": "Resolute Brooch"
     },
     "WornText": {
       "WayfarerFootwearName": "Wayfarer Shoes",
@@ -574,7 +579,23 @@
       "SpecialAbility": "Special Ability:",
       "InvestmentNote": "This generated item has the invested trait and uses the listed worn usage. Its special ability is stored as rules text plus a structured Item Forge manifest.",
       "OncePerDay": "once per day",
-      "OncePerHour": "once per hour"
+      "OncePerHour": "once per hour",
+      "SurehandGlovesName": "Surehand Gloves",
+      "SurehandGlovesDescription": "Fine silver threads in these gloves tighten during precise work and guide the wearer’s fingers.",
+      "SurehandGlovesEffect": "You gain a +{bonus} item bonus to Thievery. Activate [free-action] (concentrate, fortune); Frequency {frequency}; Trigger You fail a Thievery check to Disable a Device or Pick a Lock; Effect Reroll the triggering check and use the new result.",
+      "ArtificerBracersName": "Artificer's Bracers",
+      "ArtificerBracersDescription": "Measuring lines and tiny runes set into these bracers react to stress, material flaws, and mechanical irregularities.",
+      "ArtificerBracersEffect": "You gain a +{bonus} item bonus to Crafting. Activate [free-action] (concentrate, fortune); Frequency {frequency}; Trigger You fail a Crafting check to Repair an item; Effect Reroll the triggering check and use the new result.",
+      "MistweaveGarmentName": "Mistweave Garment",
+      "MistweaveGarmentDescription": "The fabric of this garment drinks in light and shadow, releasing both as a thin shimmering veil.",
+      "MistweaveGarmentEffect": "You gain a +{bonus} item bonus to Stealth. Activate [one-action] (concentrate); Frequency {frequency}; Effect Until the start of your next turn, you are concealed. This effect ends as soon as you use a hostile action.",
+      "HorizonHelmName": "Horizon Helm",
+      "HorizonHelmDescription": "Fine lines on the inside of this helm shift with wind, terrain, and direction.",
+      "HorizonHelmEffect": "You gain a +{bonus} item bonus to Survival. Activate [one-action] (concentrate); Frequency {frequency}; Effect For 1 hour, you always know the cardinal directions and ignore circumstance penalties to Sense Direction and Track that are caused solely by ordinary weather.",
+      "OncePerTenMinutes": "once per 10 minutes",
+      "ResoluteBroochName": "Resolute Brooch",
+      "ResoluteBroochDescription": "This weighty metal brooch grows warm when fear or alien emotion tries to overwhelm its wearer’s resolve.",
+      "ResoluteBroochEffect": "You gain a +{bonus} item bonus to saving throws against fear and emotion effects. Activate [reaction] (concentrate); Frequency {frequency}; Trigger You gain the frightened condition or increase its value; Effect Reduce your frightened value by {reduction}."
     }
   }
 }

@@ -2,9 +2,9 @@
 
 Reusable Item Forge architecture for Foundry VTT v14 and Pathfinder 2e.
 
-## v0.0.23 scope
+## v0.0.24 scope
 
-This release adds worn magic items as a first-class Magic generation family. Published PF2e worn items can be selected intact, while generated homebrew worn items use validated usage-aware profiles, structural PF2e templates, and the same hardened metadata/automation contracts as the rest of the Magic subsystem.
+This release expands generated worn magic items into a continuous core level band. Published PF2e worn items can still be selected intact, while generated homebrew worn items now have at least one automatic strict-mode core candidate at every item level from 4 through 20.
 
 Implemented:
 
@@ -24,8 +24,8 @@ Implemented:
 - Spellhearts can either be selected as complete predefined PF2e items or generated from validated custom Spellheart profiles with coherent armor/weapon benefits, spell progressions, prices, and themes
 - Specific magic weapons and armor can either be copied exactly from selected compendia or generated from validated profiles that own level, price, runes, theme, and special ability as one unit
 - Specific magic shields have their own predefined/generated paths plus a dedicated `specificShieldProfiles` registry and explicit Hardness/HP/Broken Threshold contracts
-- Worn magic items have predefined/generated paths, usage-aware categories such as cloak/eyepiece/footwear/belt/mask, and a public `wornMagicProfiles` registry
-- Published worn items preserve native PF2e usage, Rule Elements, activations, price, traits, and automation; generated worn items use whole-effect profiles plus rules-text manifests
+- Worn magic items have predefined/generated paths, usage-aware categories, a public `wornMagicProfiles` registry, and continuous automatic core coverage from item level 4 through 20
+- Published worn items preserve native PF2e usage, Rule Elements, activations, price, traits, and automation; generated worn items use whole-effect profiles plus rules-text manifests. Eleven core families now cover footwear, eyepieces, belts, cloaks, masks, circlets, gloves, bracers, garments, unrestricted jewelry, and headwear
 - Public `specificItemProfiles`, `specificShieldProfiles`, and `wornMagicProfiles` registries for extension modules and campaign content
 - Magic themes for fire, cold, electricity, healing, illusion, mental, vitality, void, arcane, divine, occult, primal, and summoning
 - Composed weapons, armor, and shields with fundamental runes
@@ -48,7 +48,7 @@ Implemented:
 - German and English localization
 - Shared generation-result contract for `contentSources`, `templateSource`, and automation level
 - Live Magic diagnostics for predefined and generated magic paths including worn items, strict source-shape checks, pack-index failures, and composed-equipment price preparation
-- 188 automated unit/integration/statistical/contract tests
+- 190 automated unit/integration/statistical/contract tests
 
 Not yet implemented:
 
