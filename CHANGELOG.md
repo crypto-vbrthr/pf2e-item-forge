@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.0.37-rc.1
+
+- First release candidate built from the fully tested v0.0.36 Final Contract & RC Hardening baseline.
+- Freezes the public API v1, generator/category extension contracts, canonical source-policy persistence, source-aware capabilities, creation-ready generation-result contract, Embedded Editor workflow, diagnostics, and DE/EN localization for final validation.
+- No generator-family redesign and no new gameplay/content feature work compared with v0.0.36.
+- Updates release metadata and package version/download target for the RC.
+- Foundry compatibility remains declared for v14. PF2e remains a required system relationship but its version range is intentionally unpinned until the exact tested PF2e system version is recorded rather than inferred.
+- Baseline automated suite: 294 passing tests; total line coverage 94.26%, branch coverage 74.74%, function coverage 89.14%.
+
 ## 0.0.36
 
 - Final Contract & RC Hardening pass after the full v0.0.35 review; no generator-family redesign.

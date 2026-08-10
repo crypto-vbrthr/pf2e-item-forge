@@ -2,10 +2,10 @@
 
 Reusable Item Forge architecture for Foundry VTT v14 and Pathfinder 2e.
 
-## v0.0.36 scope
+## v0.0.37-rc.1 scope
 
-This release is the Final Contract & RC Hardening pass. It closes the remaining source-policy, capability, extension, application-reuse, result-contract, localization, and package-hygiene gaps found by the full v0.0.35 review without changing the overall Item Forge architecture.
-> Foundry compatibility is declared for v14. The PF2e system relationship intentionally remains unpinned in `module.json` until a concrete tested PF2e system version is recorded for the RC; this release does not guess a system-version range.
+This is the first release candidate built from the fully hardened v0.0.36 baseline. It contains no generator-family redesign or new feature work; the RC freezes the reviewed contracts, source-policy behavior, editor/API integration, diagnostics, localization, and release packaging for final Foundry validation.
+> Foundry compatibility is declared for v14. The PF2e system relationship remains intentionally unpinned because the exact tested PF2e system version has not been recorded in the project metadata; the RC does not guess a system-version range.
 
 
 Implemented:
@@ -100,7 +100,7 @@ source: {
 }
 ```
 
-Foundry module settings expose a dedicated **Source Compendiums** submenu. It owns the complete world-default policy in one place: `all`, `system`, or `selected`, plus the canonical `includePacks` and `excludePacks` arrays used by the public API. v0.0.36 persists that full policy together in one hidden world setting and keeps the older hidden mode/include settings synchronized only for migration/backward compatibility. When `selected` is active, the stable union of indexed physical-item and spell-bearing Item compendiums appears directly beneath the mode. Temporarily unavailable saved pack IDs are retained across ordinary checkbox edits and are surfaced as missing; an explicit **Select none** is the action that clears the complete allow-list. The Item Forge itself displays the active world policy compactly and offers **Override the world default for this request**; only then are the local mode and pack checklist shown. Turning the override off immediately returns the request to the current world default. New API requests that omit source fields inherit the stored policy; explicit `source` requests still win. `game.pf2eItemForge.getDefaultSourcePolicy()` and `setDefaultSourcePolicy(source)` expose the same workflow to integrations.
+Foundry module settings expose a dedicated **Source Compendiums** submenu. It owns the complete world-default policy in one place: `all`, `system`, or `selected`, plus the canonical `includePacks` and `excludePacks` arrays used by the public API. Since v0.0.36, Item Forge persists that full policy together in one hidden world setting and keeps the older hidden mode/include settings synchronized only for migration/backward compatibility. When `selected` is active, the stable union of indexed physical-item and spell-bearing Item compendiums appears directly beneath the mode. Temporarily unavailable saved pack IDs are retained across ordinary checkbox edits and are surfaced as missing; an explicit **Select none** is the action that clears the complete allow-list. The Item Forge itself displays the active world policy compactly and offers **Override the world default for this request**; only then are the local mode and pack checklist shown. Turning the override off immediately returns the request to the current world default. New API requests that omit source fields inherit the stored policy; explicit `source` requests still win. `game.pf2eItemForge.getDefaultSourcePolicy()` and `setDefaultSourcePolicy(source)` expose the same workflow to integrations.
 
 Source selection governs actual content: published items, mundane base equipment, spell pools, and source-backed Accessory Runes. Structural implementation templates used to construct generated items are intentionally resolved outside that policy and are reported separately as `metadata.templateSource`. Individual generators may require PF2e-system templates or prefer them according to their hardened template contract.
 
