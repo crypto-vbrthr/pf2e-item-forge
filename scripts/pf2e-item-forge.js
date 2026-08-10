@@ -33,6 +33,7 @@ import { PropertyRuneRegistry, registerCorePropertyRunes } from "../src/engine/r
 import { ItemForgeEngine } from "../src/engine/item-forge-engine.js";
 import { ItemForgeApi } from "../src/api/item-forge-api.js";
 import { ItemForgeApplication } from "../src/app/item-forge-application.js";
+import { SourceCompendiumSettings } from "../src/app/source-compendium-settings.js";
 import { MagicItemTemplateResolver } from "../src/engine/magic-item-template-resolver.js";
 import { MagicItemDiagnostics } from "../src/engine/magic-item-diagnostics.js";
 
@@ -57,19 +58,58 @@ function registerSettings() {
     range: { min: 1, max: 1000, step: 1 }
   });
 
+  // The complete source policy is edited in one dedicated settings window.
+  // The backing values stay hidden so the generic Foundry settings form never
+  // exposes a mode selector without the pack list it controls.
   game.settings.register(MODULE_ID, "defaultSourceMode", {
-    name: t("PF2E_ITEM_FORGE.Settings.DefaultSourceMode.Name"),
-    hint: t("PF2E_ITEM_FORGE.Settings.DefaultSourceMode.Hint"),
     scope: "world",
-    config: true,
+    config: false,
     type: String,
-    choices: {
-      all: t("PF2E_ITEM_FORGE.SourceMode.All"),
-      system: t("PF2E_ITEM_FORGE.SourceMode.System"),
-      selected: t("PF2E_ITEM_FORGE.SourceMode.Selected")
-    },
     default: "all"
   });
+
+  // The selected pack list is edited through the dedicated source-settings menu.
+  // Keeping the backing JSON hidden avoids exposing a brittle raw field in
+  // Foundry's generic settings UI.
+  game.settings.register(MODULE_ID, "defaultSourcePacks", {
+    scope: "world",
+    config: false,
+    type: String,
+    default: "[]"
+  });
+
+  game.settings.registerMenu(MODULE_ID, "sourceCompendiums", {
+    name: t("PF2E_ITEM_FORGE.Settings.SourceCompendiums.Name"),
+    label: t("PF2E_ITEM_FORGE.Settings.SourceCompendiums.Label"),
+    hint: t("PF2E_ITEM_FORGE.Settings.SourceCompendiums.MenuHint"),
+    icon: "fa-solid fa-books",
+    type: SourceCompendiumSettings,
+    restricted: true
+  });
+}
+
+function parseStoredPackIds(value) {
+  try {
+    const parsed = JSON.parse(String(value ?? "[]"));
+    return [...new Set(Array.isArray(parsed) ? parsed.filter((id) => typeof id === "string" && id) : [])];
+  } catch (_error) {
+    return [];
+  }
+}
+
+function getStoredSourcePolicy() {
+  return {
+    mode: game.settings.get(MODULE_ID, "defaultSourceMode") ?? "all",
+    includePacks: parseStoredPackIds(game.settings.get(MODULE_ID, "defaultSourcePacks")),
+    excludePacks: []
+  };
+}
+
+async function setStoredSourcePolicy(source = {}) {
+  const mode = ["all", "system", "selected"].includes(source.mode) ? source.mode : "all";
+  const includePacks = [...new Set(Array.isArray(source.includePacks) ? source.includePacks.filter((id) => typeof id === "string" && id) : [])];
+  await game.settings.set(MODULE_ID, "defaultSourcePacks", JSON.stringify(includePacks));
+  await game.settings.set(MODULE_ID, "defaultSourceMode", mode);
 }
 
 function createApi() {
@@ -109,7 +149,8 @@ function createApi() {
     generators,
     compendiumIndex,
     defaultOptions: () => ({
-      defaultSourceMode: game.settings.get(MODULE_ID, "defaultSourceMode"),
+      defaultSourceMode: getStoredSourcePolicy().mode,
+      defaultSourcePacks: getStoredSourcePolicy().includePacks,
       defaultSolverAttempts: game.settings.get(MODULE_ID, "defaultSolverAttempts")
     })
   });
@@ -120,7 +161,14 @@ function createApi() {
     return application;
   };
 
-  const itemForgeApi = new ItemForgeApi({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes: getSelectableMagicThemes(), wandProfiles, staffProfiles, spellheartProfiles, specificItemProfiles, specificShieldProfiles, wornMagicProfiles, accessoryRunes, heldMagicProfiles, grimoireProfiles, apexProfiles, openApplication });
+  const itemForgeApi = new ItemForgeApi({
+    engine, categories, generators, compendiumIndex, treasure, propertyRunes,
+    magicThemes: getSelectableMagicThemes(), wandProfiles, staffProfiles, spellheartProfiles,
+    specificItemProfiles, specificShieldProfiles, wornMagicProfiles, accessoryRunes,
+    heldMagicProfiles, grimoireProfiles, apexProfiles,
+    sourcePolicyStore: { get: getStoredSourcePolicy, set: setStoredSourcePolicy },
+    openApplication
+  });
   itemForgeApi.diagnostics = new MagicItemDiagnostics({ api: itemForgeApi });
   return itemForgeApi;
 }

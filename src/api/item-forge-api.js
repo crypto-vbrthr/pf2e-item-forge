@@ -5,7 +5,7 @@ import { getApexCapabilities } from "../engine/apex-item-utils.js";
 import { API_VERSION } from "../constants.js";
 
 export class ItemForgeApi {
-  constructor({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes = [], wandProfiles = null, staffProfiles = null, spellheartProfiles = null, specificItemProfiles = null, specificShieldProfiles = null, wornMagicProfiles = null, accessoryRunes = null, heldMagicProfiles = null, grimoireProfiles = null, apexProfiles = null, diagnostics = null, openApplication }) {
+  constructor({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes = [], wandProfiles = null, staffProfiles = null, spellheartProfiles = null, specificItemProfiles = null, specificShieldProfiles = null, wornMagicProfiles = null, accessoryRunes = null, heldMagicProfiles = null, grimoireProfiles = null, apexProfiles = null, diagnostics = null, sourcePolicyStore = null, openApplication }) {
     this.apiVersion = API_VERSION;
     this.engine = engine;
     this.categories = categories;
@@ -25,6 +25,7 @@ export class ItemForgeApi {
     this.grimoireProfiles = grimoireProfiles;
     this.apexProfiles = apexProfiles;
     this.diagnostics = diagnostics;
+    this.sourcePolicyStore = sourcePolicyStore;
     this.openApplication = openApplication;
   }
 
@@ -55,6 +56,40 @@ export class ItemForgeApi {
 
   getAvailableItemPacks(options = {}) {
     return this.compendiumIndex.getAvailablePacks(options);
+  }
+
+
+  getDefaultSourcePolicy() {
+    const stored = this.sourcePolicyStore?.get?.();
+    if (stored) {
+      return {
+        mode: stored.mode ?? "all",
+        includePacks: [...new Set(Array.isArray(stored.includePacks) ? stored.includePacks.filter((id) => typeof id === "string" && id) : [])],
+        excludePacks: [...new Set(Array.isArray(stored.excludePacks) ? stored.excludePacks.filter((id) => typeof id === "string" && id) : [])]
+      };
+    }
+    const defaults = this.engine.getDefaultOptions?.() ?? {};
+    return {
+      mode: defaults.defaultSourceMode ?? "all",
+      includePacks: [...new Set(Array.isArray(defaults.defaultSourcePacks) ? defaults.defaultSourcePacks : [])],
+      excludePacks: [...new Set(Array.isArray(defaults.defaultExcludedPacks) ? defaults.defaultExcludedPacks : [])]
+    };
+  }
+
+  async setDefaultSourcePolicy(source = {}) {
+    if (!this.sourcePolicyStore?.set) throw new Error("Default source policy storage is unavailable");
+    const normalized = {
+      mode: ["all", "system", "selected"].includes(source.mode) ? source.mode : "all",
+      includePacks: [...new Set(Array.isArray(source.includePacks) ? source.includePacks.filter((id) => typeof id === "string" && id) : [])],
+      excludePacks: [...new Set(Array.isArray(source.excludePacks) ? source.excludePacks.filter((id) => typeof id === "string" && id) : [])]
+    };
+    if (normalized.mode === "selected" && normalized.includePacks.length === 0) {
+      const error = new Error("Selected source mode requires at least one compendium");
+      error.code = "NO_SOURCE_PACKS";
+      throw error;
+    }
+    await this.sourcePolicyStore.set(normalized);
+    return this.getDefaultSourcePolicy();
   }
 
   getIndexDiagnostics() {
@@ -102,6 +137,7 @@ export class ItemForgeApi {
       generatorMetadata: this.generators.getMetadata(),
       categories: this.categories.getAll().map((category) => category.id),
       sourceModes: ["all", "system", "selected"],
+      defaultSourcePolicy: this.getDefaultSourcePolicy(),
       generationModes: this.generators.getModes(),
       fundamentalRuneModes: ["automatic", "none"],
       propertyRuneModes: ["automatic", "random", "fixed", "none"],

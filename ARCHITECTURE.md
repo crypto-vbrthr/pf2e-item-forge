@@ -69,6 +69,22 @@ ItemForgeEngine (canonical normalization, validation, generation)
 - Built-in and external treasure content use the same validated registries.
 - Spell documents are support data, not directly generatable physical items. `ScrollGenerator` and `WandGenerator` may select eligible spells and embed them into physical item results; `StaffGenerator` either copies a predefined PF2e staff unchanged or uses the spell index to build a structured staff-family manifest. `SpellheartGenerator` has separate predefined and generated paths. `SpecificMagicEquipmentGenerator` does not require spell sources and either preserves a complete published specific weapon/armor or composes one validated profile onto a mundane base item. Predefined magic items preserve native PF2e automation; generated custom abilities remain explicit rules text plus structured flags unless a verified system contract exists. Worn magic items follow the same split: published worn items are cloned whole, while generated worn items select a validated usage-specific profile and use an indexed PF2e worn item only as a structural implementation template. Grimoires also use a dedicated split: published books remain native, while generated grimoires use a system-only grimoire document as schema/physical scaffolding and place their custom ability in localized rules text plus a structured grimoire contract.
 
+## Source policy and world defaults
+
+The canonical request source contract remains:
+
+```text
+source.mode          all | system | selected
+source.includePacks  explicit allow-list for selected mode
+source.excludePacks  optional deny-list
+```
+
+`normalizeRequest()` hydrates omitted `includePacks` from the engine's `defaultSourcePacks`, while an explicitly supplied array, including an explicit empty array, is never overwritten. In Foundry the defaults are backed by hidden world settings (`defaultSourceMode` plus JSON-serialized `defaultSourcePacks`) and edited together through the dedicated `SourceCompendiumSettings` menu. The public API exposes `getDefaultSourcePolicy()` and `setDefaultSourcePolicy()` so other Forge modules can share the same policy without scraping settings.
+
+The settings application always enumerates a stable union of indexed physical-item and spell-bearing Item compendiums, so a world allow-list can safely contain both physical and spell-only sources. Missing saved pack IDs are retained and surfaced as unavailable rather than silently erased. The Embedded Editor treats the world policy as authoritative by default and only exposes its own mode/checklist after the user enables a per-request override. Disabling the override reloads the current world policy. An explicit source policy supplied by an embedding integration remains a request-level override unless it is semantically identical to the current world default.
+
+Content sources and implementation templates are intentionally separate concerns. `CompendiumIndex.query()` / `querySpells()` enforce `request.source` for published items, base equipment, spells, and source-backed composition inputs. `MagicItemTemplateResolver` may resolve implementation templates outside the allow-list when the document is merely schema/physical scaffolding; individual generators may require PF2e-system templates or prefer them according to their template contract. Those templates are recorded as `metadata.templateSource`, while real contributing content is recorded in `metadata.contentSources`.
+
 ## Generator resolution
 
 Generators are registered with a declared generation mode and priority. Resolution is deterministic: the highest-priority generator whose `supports(request)` returns true wins. This lets specialist and extension generators override broad core strategies without depending on registration order.

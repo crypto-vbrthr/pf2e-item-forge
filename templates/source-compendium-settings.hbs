@@ -1,0 +1,40 @@
+<section class="source-settings-body">
+  <p class="hint">{{localize "PF2E_ITEM_FORGE.Settings.SourceCompendiums.Hint"}}</p>
+
+  <div class="form-group">
+    <label>{{localize "PF2E_ITEM_FORGE.Fields.Sources"}}</label>
+    <select name="source.mode">
+      {{#each sourceModes}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+    </select>
+  </div>
+
+  {{#if selectedSources}}
+    <div class="source-selection-summary">
+      <span>{{localize "PF2E_ITEM_FORGE.Sources.SelectedCount" selected=selectedCount total=packCount}}</span>
+      <div class="source-selection-actions">
+        <button type="button" class="compact" data-action="selectAllSources"><i class="fa-solid fa-check-double"></i> {{localize "PF2E_ITEM_FORGE.Button.SelectAllSources"}}</button>
+        <button type="button" class="compact" data-action="clearSources"><i class="fa-solid fa-xmark"></i> {{localize "PF2E_ITEM_FORGE.Button.ClearSources"}}</button>
+      </div>
+    </div>
+    {{#if missingSelectedPacks.length}}
+      <p class="hint source-warning"><i class="fa-solid fa-triangle-exclamation"></i> {{localize "PF2E_ITEM_FORGE.Hints.MissingSelectedPacks" count=missingSelectedPacks.length}}</p>
+    {{/if}}
+    <div class="pack-list source-settings-pack-list">
+      {{#each packs}}
+        <label class="checkbox pack-list__entry">
+          <input type="checkbox" name="sourcePack" value="{{id}}" {{#if checked}}checked{{/if}}>
+          <span>{{label}}</span>
+          <small>{{packageSummary}} · {{id}}{{#if contentSummary}} · {{contentSummary}}{{/if}}</small>
+        </label>
+      {{else}}
+        <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.NoItemPacks"}}</p>
+      {{/each}}
+    </div>
+  {{/if}}
+
+  {{#if error}}<p class="source-settings-error"><i class="fa-solid fa-triangle-exclamation"></i> {{error}}</p>{{/if}}
+
+  <footer class="source-settings-footer">
+    <button type="button" data-action="save"><i class="fa-solid fa-floppy-disk"></i> {{localize "PF2E_ITEM_FORGE.Button.Save"}}</button>
+  </footer>
+</section>

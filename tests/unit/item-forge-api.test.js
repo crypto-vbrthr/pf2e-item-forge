@@ -165,3 +165,34 @@ test("ItemForgeApi exposes apex capabilities for external callers", () => {
   assert.deepEqual(capabilities.existingAttributes, ["wis"]);
   assert.deepEqual(capabilities.generatedAttributes, ["str"]);
 });
+
+test("ItemForgeApi persists and exposes a canonical world-default source policy", async () => {
+  let stored = { mode: "system", includePacks: ["pf2e.items"], excludePacks: [] };
+  const base = apiFixture();
+  base.sourcePolicyStore = {
+    get: () => stored,
+    set: async (next) => { stored = next; }
+  };
+
+  assert.deepEqual(base.getDefaultSourcePolicy(), stored);
+  const saved = await base.setDefaultSourcePolicy({
+    mode: "selected",
+    includePacks: ["module.loot", "module.loot", "pf2e.spells"],
+    excludePacks: ["module.disabled", "module.disabled"]
+  });
+  assert.deepEqual(saved, {
+    mode: "selected",
+    includePacks: ["module.loot", "pf2e.spells"],
+    excludePacks: ["module.disabled"]
+  });
+  assert.deepEqual(base.getCapabilities().defaultSourcePolicy, saved);
+});
+
+test("ItemForgeApi rejects an empty selected world-default source policy", async () => {
+  const api = apiFixture();
+  api.sourcePolicyStore = { get: () => ({ mode: "all", includePacks: [], excludePacks: [] }), set: async () => {} };
+  await assert.rejects(
+    () => api.setDefaultSourcePolicy({ mode: "selected", includePacks: [] }),
+    (error) => error.code === "NO_SOURCE_PACKS"
+  );
+});

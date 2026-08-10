@@ -6,7 +6,13 @@
       "Subtitle": "One item, many knobs to turn."
     },
     "Button": {
-      "Open": "Item Forge"
+      "Open": "Item Forge",
+      "SelectAllSources": "Select all",
+      "ClearSources": "Select none",
+      "SaveSourceDefaults": "Save as world default",
+      "LoadSourceDefaults": "Load world default",
+      "Save": "Save",
+      "UseWorldSources": "Use world default"
     },
     "Actions": {
       "Generate": "Generate",
@@ -65,7 +71,8 @@
       "GrimoireProfile": "Grimoire Profile",
       "ApexMode": "Apex generation",
       "ApexProfile": "Apex profile",
-      "ApexAttribute": "Apex attribute"
+      "ApexAttribute": "Apex attribute",
+      "OverrideWorldSources": "Override the world default for this request"
     },
     "LevelMode": {
       "Single": "Single level",
@@ -127,7 +134,11 @@
       "GeneratedGrimoireSources": "Generated grimoires use only a suitable PF2e system grimoire as a technical schema template. Spell sources are not required.",
       "ApexMode": "Predefined copies a published PF2e apex item unchanged. Generated creates a new level 17–20 apex item with a native PF2e apex attribute benefit and conservative rules-text secondary abilities.",
       "ApexProfile": "Automatic selects a profile compatible with the chosen attribute. A fixed profile is a hard constraint.",
-      "ApexAttribute": "Optionally restrict the apex item to Strength, Dexterity, Constitution, Intelligence, Wisdom, or Charisma."
+      "ApexAttribute": "Optionally restrict the apex item to Strength, Dexterity, Constitution, Intelligence, Wisdom, or Charisma.",
+      "SourceSelectionPersistence": "The compendium selection is preserved when switching item types. Spell compendiums are used only by generators that actually require spells.",
+      "MissingSelectedPacks": "{count} saved compendiums are currently unavailable. They are ignored until they return or the selection is saved again.",
+      "SourceOverride": "By default, Item Forge uses the source compendiums configured in module settings. Enable this only when this individual request should differ.",
+      "WorldSourcesActive": "This request is using the world default."
     },
     "Preview": {
       "Empty": "Nothing forged yet. Choose parameters and press Generate.",
@@ -215,7 +226,11 @@
       "NoPreview": "Generate a preview first.",
       "ItemCreated": "{name} was created in the Item Directory.",
       "SourcesRefreshed": "Compendium index refreshed.",
-      "MagicDiagnosticsComplete": "Magic diagnostics complete: {passed} passed, {failed} failed, {warnings} warnings, {skipped} skipped."
+      "MagicDiagnosticsComplete": "Magic diagnostics complete: {passed} passed, {failed} failed, {warnings} warnings, {skipped} skipped.",
+      "SourceDefaultsSaved": "Source compendiums saved as the world default.",
+      "SourceDefaultsLoaded": "Loaded the saved world default for source compendiums.",
+      "SourceDefaultsNeedPack": "Selected-compendiums mode requires at least one compendium.",
+      "SourceDefaultsSaveFailed": "The world default for source compendiums could not be saved."
     },
     "Settings": {
       "DefaultSolverAttempts": {
@@ -224,7 +239,14 @@
       },
       "DefaultSourceMode": {
         "Name": "Item Forge: default source mode",
-        "Hint": "Which item compendiums new requests use by default."
+        "Hint": "The source mode is managed together with the compendium list through “Configure source compendiums”."
+      },
+      "SourceCompendiums": {
+        "Name": "Item Forge: Source compendiums",
+        "Label": "Configure source compendiums",
+        "MenuHint": "Configure in one place whether all, PF2e system-only, or selected compendiums are used by default and which compendiums belong to the selection.",
+        "Title": "Item Forge – Source Compendiums",
+        "Hint": "This selection is the world default for new Item Forge requests. In “Selected compendiums” mode, the complete compendium list is managed directly here."
       }
     },
     "Categories": {
@@ -391,7 +413,13 @@
     },
     "Sources": {
       "Items": "items",
-      "Spells": "spells"
+      "Spells": "spells",
+      "SelectedCount": "{selected} of {total} selected",
+      "System": "System",
+      "Module": "Module",
+      "Other": "Other source",
+      "WorldDefault": "World default:",
+      "SelectedShort": "{selected}/{total} selected"
     },
     "Treasure": {
       "Any": "Any",

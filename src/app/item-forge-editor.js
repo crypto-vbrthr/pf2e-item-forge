@@ -14,6 +14,35 @@ function localizeMaybe(key) {
   return localized === key ? key : localized;
 }
 
+function normalizeSourcePolicy(source = {}) {
+  return {
+    mode: ["all", "system", "selected"].includes(source?.mode) ? source.mode : "all",
+    includePacks: [...new Set(Array.isArray(source?.includePacks) ? source.includePacks.filter((id) => typeof id === "string" && id) : [])],
+    excludePacks: [...new Set(Array.isArray(source?.excludePacks) ? source.excludePacks.filter((id) => typeof id === "string" && id) : [])]
+  };
+}
+
+function sourcePoliciesEqual(left = {}, right = {}) {
+  const a = normalizeSourcePolicy(left);
+  const b = normalizeSourcePolicy(right);
+  if (a.mode !== b.mode) return false;
+  const sameExcludes = JSON.stringify([...a.excludePacks].sort()) === JSON.stringify([...b.excludePacks].sort());
+  if (!sameExcludes) return false;
+  // includePacks is semantically relevant only in selected mode. The world
+  // setting deliberately remembers its prior allow-list while all/system is
+  // active so a later switch back to selected can restore the checklist.
+  if (a.mode !== "selected") return true;
+  return JSON.stringify([...a.includePacks].sort()) === JSON.stringify([...b.includePacks].sort());
+}
+
+function hasExplicitSourcePolicy(request = {}) {
+  return Boolean(request?.source && (
+    Object.hasOwn(request.source, "mode")
+    || Object.hasOwn(request.source, "includePacks")
+    || Object.hasOwn(request.source, "excludePacks")
+  ));
+}
+
 /** Prepare an in-memory PF2e document so derived values such as rune-adjusted price can be previewed. */
 export function prepareRuntimePreviewItem(itemSource) {
   if (!itemSource) return null;
@@ -78,7 +107,12 @@ export class ItemForgeEditor extends HandlebarsApplication {
     id: `${MODULE_ID}-editor-{id}`,
     classes: [MODULE_ID, "item-forge-editor"],
     window: { frame: false },
-    position: { width: "auto", height: "auto" }
+    position: { width: "auto", height: "auto" },
+    actions: {
+      selectAllSources: ItemForgeEditor.#onSelectAllSources,
+      clearSources: ItemForgeEditor.#onClearSources,
+      useWorldSources: ItemForgeEditor.#onUseWorldSources
+    }
   };
 
   static PARTS = {
@@ -89,7 +123,10 @@ export class ItemForgeEditor extends HandlebarsApplication {
     const uniqueId = globalThis.foundry?.utils?.randomID?.(8) ?? Math.random().toString(36).slice(2, 10);
     super({ id: `${MODULE_ID}-editor-${uniqueId}`, ...options });
     this.api = api;
+    const worldSource = this.api?.getDefaultSourcePolicy?.() ?? null;
+    this.sourceOverride = hasExplicitSourcePolicy(request) && (!worldSource || !sourcePoliciesEqual(request.source, worldSource));
     this.request = this.#hydrateRequest(request);
+    if (!this.sourceOverride && worldSource) this.request.source = normalizeSourcePolicy(worldSource);
     this.#ensureModeCategory();
     this.previewResult = null;
     this.error = null;
@@ -100,12 +137,19 @@ export class ItemForgeEditor extends HandlebarsApplication {
 
   getRequest() {
     const request = clone(this.request);
+    if (!this.sourceOverride) {
+      const worldSource = this.api?.getDefaultSourcePolicy?.();
+      if (worldSource) request.source = normalizeSourcePolicy(worldSource);
+    }
     delete request.levelMode;
     return request;
   }
 
   setRequest(request) {
+    const worldSource = this.api?.getDefaultSourcePolicy?.() ?? null;
+    this.sourceOverride = hasExplicitSourcePolicy(request) && (!worldSource || !sourcePoliciesEqual(request.source, worldSource));
     this.request = this.#hydrateRequest(request);
+    if (!this.sourceOverride && worldSource) this.request.source = normalizeSourcePolicy(worldSource);
     this.#ensureModeCategory();
     this.previewResult = null;
     this.error = null;
@@ -120,6 +164,55 @@ export class ItemForgeEditor extends HandlebarsApplication {
     this.previewResult = null;
     this.error = null;
     return this.render();
+  }
+
+  async selectAllSourcePacks() {
+    this.#syncFromDom();
+    const packs = this.api.getAvailableItemPacks?.({ includeSpellPacks: true }) ?? [];
+    this.sourceOverride = true;
+    this.request.source.mode = "selected";
+    this.request.source.includePacks = [...new Set(packs.map((pack) => pack.id).filter(Boolean))];
+    this.previewResult = null;
+    this.error = null;
+    this.onChange?.(this.getRequest(), this);
+    await this.#renderPreservingView();
+    return this.request.source.includePacks;
+  }
+
+  async clearSourcePacks() {
+    this.#syncFromDom();
+    this.sourceOverride = true;
+    this.request.source.mode = "selected";
+    this.request.source.includePacks = [];
+    this.previewResult = null;
+    this.error = null;
+    this.onChange?.(this.getRequest(), this);
+    await this.#renderPreservingView();
+    return this.request.source.includePacks;
+  }
+
+  async useWorldSourcePolicy() {
+    const source = this.api.getDefaultSourcePolicy?.();
+    if (!source) return false;
+    this.sourceOverride = false;
+    this.request.source = normalizeSourcePolicy(source);
+    this.previewResult = null;
+    this.error = null;
+    this.onChange?.(this.getRequest(), this);
+    await this.#renderPreservingView();
+    return true;
+  }
+
+  static async #onSelectAllSources() {
+    await this.selectAllSourcePacks();
+  }
+
+  static async #onClearSources() {
+    await this.clearSourcePacks();
+  }
+
+  static async #onUseWorldSources() {
+    await this.useWorldSourcePolicy();
   }
 
   async generatePreview() {
@@ -218,6 +311,8 @@ export class ItemForgeEditor extends HandlebarsApplication {
 
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
+    const worldSource = normalizeSourcePolicy(this.api.getDefaultSourcePolicy?.() ?? this.request.source);
+    if (!this.sourceOverride) this.request.source = clone(worldSource);
     const selectedPacks = new Set(this.request.source.includePacks ?? []);
     const rarity = new Set(this.request.rarity ?? []);
     this.#ensureModeCategory();
@@ -318,14 +413,27 @@ export class ItemForgeEditor extends HandlebarsApplication {
     const generatedGrimoire = isGrimoireCategory && this.request.magic?.grimoireMode === "generated";
     const generatedApex = isApexCategory && this.request.magic?.apexMode === "generated";
     const usesSpellSources = isScrollCategory || isWandCategory || generatedStaff || generatedSpellheart;
-    const packs = this.api.getAvailableItemPacks({ includeSpellPacks: usesSpellSources }).map((pack) => ({
+    // Always show the complete stable set of eligible Item compendiums. This
+    // prevents spell-only selections from disappearing when the user switches
+    // temporarily to a generator that does not consume spells.
+    const packs = this.api.getAvailableItemPacks({ includeSpellPacks: true }).map((pack) => ({
       ...pack,
       checked: selectedPacks.has(pack.id),
       contentSummary: [
         pack.physicalCount ? `${pack.physicalCount} ${localizeMaybe("PF2E_ITEM_FORGE.Sources.Items")}` : null,
         pack.spellCount ? `${pack.spellCount} ${localizeMaybe("PF2E_ITEM_FORGE.Sources.Spells")}` : null
-      ].filter(Boolean).join(" · ")
+      ].filter(Boolean).join(" · "),
+      packageSummary: pack.packageType === "system"
+        ? localizeMaybe("PF2E_ITEM_FORGE.Sources.System")
+        : pack.packageType === "module"
+          ? localizeMaybe("PF2E_ITEM_FORGE.Sources.Module")
+          : localizeMaybe("PF2E_ITEM_FORGE.Sources.Other")
     }));
+    const availablePackIds = new Set(packs.map((pack) => pack.id));
+    const missingSelectedPacks = [...selectedPacks].filter((id) => !availablePackIds.has(id));
+    const worldSelectedPacks = new Set(worldSource.includePacks ?? []);
+    const worldSourceModeLabel = localizeMaybe(`PF2E_ITEM_FORGE.SourceMode.${{ all: "All", system: "System", selected: "Selected" }[worldSource.mode] ?? "All"}`);
+    const worldSourceSelectionCount = packs.filter((pack) => worldSelectedPacks.has(pack.id)).length;
 
     const levelPolicies = ["strict", "nearest", "notAbove", "notBelow"].map((id) => ({
       id,
@@ -874,7 +982,14 @@ export class ItemForgeEditor extends HandlebarsApplication {
       levelPolicies,
       sourceModes,
       isRange: this.request.levelMode === "range",
-      selectedSources: this.request.source.mode === "selected",
+      sourceOverride: this.sourceOverride,
+      selectedSources: this.sourceOverride && this.request.source.mode === "selected",
+      sourceSelectionCount: packs.filter((pack) => pack.checked).length,
+      sourcePackCount: packs.length,
+      missingSelectedPacks,
+      worldSourceModeLabel,
+      worldSourceSelected: worldSource.mode === "selected",
+      worldSourceSelectionCount,
       isScrollCategory,
       usesSpellSources,
       rarity: {
@@ -899,7 +1014,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
         this.previewResult = null;
         this.error = null;
         this.onChange?.(this.getRequest(), this);
-        if (["mode", "category", "levelMode", "source.mode", "equipment.propertyRunes.mode", "value.mode", "treasure.type", "magic.wandMode", "magic.wandProfile", "magic.staffMode", "magic.staffProfile", "magic.spellheartMode", "magic.spellheartProfile", "magic.specificMode", "magic.specificProfile", "magic.wornMode", "magic.wornProfile", "magic.heldMode", "magic.heldProfile", "magic.grimoireMode", "magic.grimoireProfile", "magic.apexMode", "magic.apexProfile", "magic.apexAttribute", "magic.accessoryRune"].includes(input.name)) {
+        if (["mode", "category", "levelMode", "sourceOverride", "source.mode", "sourcePack", "equipment.propertyRunes.mode", "value.mode", "treasure.type", "magic.wandMode", "magic.wandProfile", "magic.staffMode", "magic.staffProfile", "magic.spellheartMode", "magic.spellheartProfile", "magic.specificMode", "magic.specificProfile", "magic.wornMode", "magic.wornProfile", "magic.heldMode", "magic.heldProfile", "magic.grimoireMode", "magic.grimoireProfile", "magic.apexMode", "magic.apexProfile", "magic.apexAttribute", "magic.accessoryRune"].includes(input.name)) {
           await this.#renderPreservingView();
         }
       });
@@ -1024,7 +1139,19 @@ export class ItemForgeEditor extends HandlebarsApplication {
       ? this.request.level.min
       : number("level.max", this.request.level.max);
     this.request.level.target = this.request.levelMode === "single" ? this.request.level.min : null;
-    this.request.source.mode = value("source.mode", this.request.source.mode);
+    const overrideInput = root.querySelector('[name="sourceOverride"]');
+    const wasSourceOverride = this.sourceOverride;
+    if (overrideInput) this.sourceOverride = Boolean(overrideInput.checked);
+    if (!this.sourceOverride) {
+      const worldSource = this.api.getDefaultSourcePolicy?.();
+      if (worldSource) this.request.source = normalizeSourcePolicy(worldSource);
+    } else {
+      if (!wasSourceOverride) {
+        const worldSource = this.api.getDefaultSourcePolicy?.();
+        if (worldSource) this.request.source = normalizeSourcePolicy(worldSource);
+      }
+      this.request.source.mode = value("source.mode", this.request.source.mode);
+    }
     this.request.solver.maxAttempts = number("solver.maxAttempts", this.request.solver.maxAttempts);
     this.request.equipment ??= {};
     this.request.equipment.fundamentalRunes = value("equipment.fundamentalRunes", this.request.equipment.fundamentalRunes ?? "automatic");
@@ -1068,6 +1195,9 @@ export class ItemForgeEditor extends HandlebarsApplication {
     if (heightenedInput) this.request.magic.allowHeightened = Boolean(heightenedInput.checked);
 
     this.request.rarity = [...root.querySelectorAll('[name="rarity"]:checked')].map((input) => input.value);
-    this.request.source.includePacks = [...root.querySelectorAll('[name="sourcePack"]:checked')].map((input) => input.value);
+    const sourcePackInputs = [...root.querySelectorAll('[name="sourcePack"]')];
+    if (this.sourceOverride && sourcePackInputs.length) {
+      this.request.source.includePacks = sourcePackInputs.filter((input) => input.checked).map((input) => input.value);
+    }
   }
 }

@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.0.35
+
+- Reworks compendium-source UX so the world default mode and its selected pack list are configured together in a dedicated Foundry module-settings submenu instead of being split between generic settings and the Item Forge window.
+- Hides the old standalone `defaultSourceMode` field from Foundry's generic settings form while retaining the same hidden world-setting storage and public API contract for backward compatibility.
+- Makes the Item Forge use the current world source policy by default and displays that policy as a compact summary rather than exposing world-default editing controls in the generator window.
+- Adds an explicit per-request **Override world default** toggle. Local source mode and pack selection only appear while the override is active; **Use world default** returns immediately to the current persisted policy.
+- Preserves the canonical `source.mode` / `includePacks` / `excludePacks` engine contract and all existing API behavior. Explicit integration requests continue to override the world policy, while ordinary Item Forge requests follow later world-setting changes without reopening the window.
+- Keeps the stable item-plus-spell compendium list, package/content summaries, missing-pack warnings, and Select all / Select none controls in the new settings UI and in request overrides where applicable.
+- Adds DE/EN localization and regression coverage for the dedicated settings application and world-default/per-request override behavior.
+- Test suite: 281 passing tests; total line coverage 94.19%.
+
+## 0.0.34
+
+- Promotes compendium source selection into a persistent world-level workflow instead of a transient per-editor choice.
+- Keeps the existing canonical `source.mode` / `includePacks` / `excludePacks` request contract and adds world-default hydration for omitted `includePacks`, preserving explicit API overrides.
+- Adds a hidden world setting for the selected compendium IDs plus public `getDefaultSourcePolicy()` / `setDefaultSourcePolicy()` API helpers. Saving from the Item Forge persists both the current source mode and selected pack list; only GMs are offered the save action.
+- Expands the Embedded Editor source section with a stable item-plus-spell compendium list, package/content summaries, selected-count feedback, Select all / Select none controls, and Save/Load world-default actions.
+- Preserves selected pack IDs when switching away from selected-source mode or between item types, including spell-only packs that are temporarily irrelevant to the current generator.
+- Reports saved pack IDs that are currently unavailable instead of silently discarding them.
+- Keeps implementation templates separate from content-source policy: validated implementation templates for generated scrolls/wands/worn/held/grimoires/apex items and other schema scaffolding remain implementation details, while published content, base equipment, spells, and source-backed runes continue to obey `request.source`.
+- Extends DE/EN localization and regression coverage for default-source hydration, API persistence, editor bulk selection, save/load behavior, and hidden-list preservation.
+- Test suite: 278 passing tests; total line coverage 94.13%.
+
 ## 0.0.33
 
 - Adds `magic.apex` as a dedicated cross-cutting Apex Item family with explicit existing/native and generated/hybrid paths. Published apex weapons, armor, and worn items keep their complete PF2e document data.

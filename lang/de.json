@@ -6,7 +6,13 @@
       "Subtitle": "Ein Gegenstand, viele Stellschrauben."
     },
     "Button": {
-      "Open": "Item Forge"
+      "Open": "Item Forge",
+      "SelectAllSources": "Alle auswählen",
+      "ClearSources": "Keine auswählen",
+      "SaveSourceDefaults": "Als Weltstandard speichern",
+      "LoadSourceDefaults": "Weltstandard laden",
+      "Save": "Speichern",
+      "UseWorldSources": "Weltstandard verwenden"
     },
     "Actions": {
       "Generate": "Generieren",
@@ -65,7 +71,8 @@
       "GrimoireProfile": "Grimoire-Profil",
       "ApexMode": "Apex-Generierung",
       "ApexProfile": "Apex-Profil",
-      "ApexAttribute": "Apex-Attribut"
+      "ApexAttribute": "Apex-Attribut",
+      "OverrideWorldSources": "Weltstandard für diesen Vorgang überschreiben"
     },
     "LevelMode": {
       "Single": "Einzelne Stufe",
@@ -127,7 +134,11 @@
       "GeneratedGrimoireSources": "Generierte Grimoires verwenden nur ein geeignetes PF2e-System-Grimoire als technisches Schema-Template. Zauberquellen werden dafür nicht benötigt.",
       "ApexMode": "Vordefiniert übernimmt einen veröffentlichten PF2e-Apex-Gegenstand unverändert. Generiert erzeugt einen neuen Apex-Gegenstand der Stufen 17–20 mit nativem PF2e-Apex-Attributsvorteil und bewusst konservativen, regeltextbasierten Zusatzfähigkeiten.",
       "ApexProfile": "Automatisch wählt ein Profil, das zum gewählten Attribut passt. Ein festes Profil ist eine harte Vorgabe.",
-      "ApexAttribute": "Beschränkt den Apex-Gegenstand optional auf Stärke, Geschicklichkeit, Konstitution, Intelligenz, Weisheit oder Charisma."
+      "ApexAttribute": "Beschränkt den Apex-Gegenstand optional auf Stärke, Geschicklichkeit, Konstitution, Intelligenz, Weisheit oder Charisma.",
+      "SourceSelectionPersistence": "Die Kompendienauswahl bleibt beim Wechsel der Gegenstandsart erhalten. Zauber-Kompendien werden nur von Generatoren verwendet, die tatsächlich Zauber benötigen.",
+      "MissingSelectedPacks": "{count} gespeicherte Kompendien sind derzeit nicht verfügbar. Sie werden ignoriert, bis sie wieder vorhanden sind oder die Auswahl neu gespeichert wird.",
+      "SourceOverride": "Standardmäßig verwendet die Item Forge die in den Moduleinstellungen festgelegten Quellkompendien. Aktiviere dies nur, wenn dieser einzelne Vorgang davon abweichen soll.",
+      "WorldSourcesActive": "Für diesen Vorgang wird der Weltstandard verwendet."
     },
     "Preview": {
       "Empty": "Noch nichts geschmiedet. Parameter wählen und Generieren drücken.",
@@ -215,7 +226,11 @@
       "NoPreview": "Erzeuge zuerst eine Vorschau.",
       "ItemCreated": "{name} wurde im Gegenstandsverzeichnis erstellt.",
       "SourcesRefreshed": "Kompendienindex aktualisiert.",
-      "MagicDiagnosticsComplete": "Magie-Diagnose abgeschlossen: {passed} bestanden, {failed} fehlgeschlagen, {warnings} Warnungen, {skipped} übersprungen."
+      "MagicDiagnosticsComplete": "Magie-Diagnose abgeschlossen: {passed} bestanden, {failed} fehlgeschlagen, {warnings} Warnungen, {skipped} übersprungen.",
+      "SourceDefaultsSaved": "Quellkompendien als Weltstandard gespeichert.",
+      "SourceDefaultsLoaded": "Gespeicherten Weltstandard für Quellkompendien geladen.",
+      "SourceDefaultsNeedPack": "Für „Ausgewählte Kompendien“ muss mindestens ein Kompendium ausgewählt sein.",
+      "SourceDefaultsSaveFailed": "Der Weltstandard für Quellkompendien konnte nicht gespeichert werden."
     },
     "Settings": {
       "DefaultSolverAttempts": {
@@ -224,7 +239,14 @@
       },
       "DefaultSourceMode": {
         "Name": "Item Forge: Standard-Quellenmodus",
-        "Hint": "Welche Item-Kompendien neue Anfragen standardmäßig verwenden."
+        "Hint": "Der Quellenmodus wird zusammen mit der Kompendienliste über „Quellkompendien konfigurieren“ verwaltet."
+      },
+      "SourceCompendiums": {
+        "Name": "Item Forge: Quellkompendien",
+        "Label": "Quellkompendien konfigurieren",
+        "MenuHint": "Legt gemeinsam fest, ob alle, nur PF2e-System- oder ausgewählte Kompendien standardmäßig verwendet werden und welche Kompendien zur Auswahl gehören.",
+        "Title": "Item Forge – Quellkompendien",
+        "Hint": "Diese Auswahl ist der Weltstandard für neue Item-Forge-Vorgänge. Bei „Ausgewählte Kompendien“ wird die vollständige Kompendienliste direkt hier verwaltet."
       }
     },
     "Categories": {
@@ -391,7 +413,13 @@
     },
     "Sources": {
       "Items": "Gegenstände",
-      "Spells": "Zauber"
+      "Spells": "Zauber",
+      "SelectedCount": "{selected} von {total} ausgewählt",
+      "System": "System",
+      "Module": "Modul",
+      "Other": "Andere Quelle",
+      "WorldDefault": "Weltstandard:",
+      "SelectedShort": "{selected}/{total} ausgewählt"
     },
     "Treasure": {
       "Any": "Beliebig",

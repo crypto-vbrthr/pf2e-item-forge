@@ -2,9 +2,9 @@
 
 Reusable Item Forge architecture for Foundry VTT v14 and Pathfinder 2e.
 
-## v0.0.33 scope
+## v0.0.35 scope
 
-This release completes the current permanent-equipment pass with a dedicated Apex Item family. Published apex items remain intact across worn, armor, and weapon document shapes, while generated apex items use the verified PF2e native apex attribute field for the core benefit and conservative Item Forge rules-text profiles for secondary abilities. v0.0.32 also added Assistive Items as an existing-only cross-cutting category so their bespoke published PF2e rules are preserved instead of synthesized.
+This release finishes the compendium-source UX introduced in v0.0.34. The world default is now configured in one dedicated Foundry settings window where mode and pack list live together, while the Item Forge itself uses that default unless a single request explicitly opts into a local override. Published content and spell/base-item pools still obey the canonical request source policy, while validated implementation templates remain separate technical scaffolding.
 
 Implemented:
 
@@ -13,7 +13,7 @@ Implemented:
 - Reusable `ItemForgeEngine`
 - Priority-based, extensible `GeneratorRegistry` with dynamically registered generation modes
 - Registry-based hierarchical item categories
-- Configurable compendium source selection and physical-item/spell-support indexes
+- Configurable compendium source selection and physical-item/spell-support indexes, with a dedicated GM world-default settings window, per-request editor overrides, Select all/none controls, and public source-policy API helpers
 - Exact level or level range with strict/nearest/not-above/not-below policies
 - Deterministic seeded generation
 - Existing physical compendium items, excluding feats/spells/rule documents
@@ -64,7 +64,7 @@ Implemented:
 - German and English localization
 - Shared generation-result contract for `contentSources`, `templateSource`, and automation level
 - Live Magic diagnostics for predefined and generated magic paths including representative worn contracts, low/high one-/two-handed held contracts, predefined/generated Grimoire contracts, and predefined plus level-17/20 Apex contracts, with exact-level checks, native apex schema verification, system-template provenance, structured activation/physical/daily-preparation contracts, pack-index failures, and composed-equipment price preparation
-- 272 automated unit/integration/statistical/contract tests
+- 278 automated unit/integration/statistical/contract tests
 
 Not yet implemented:
 
@@ -79,6 +79,22 @@ Not yet implemented:
 - Actor/folder output targets
 - Full property-rune catalog coverage from every optional PF2e source
 - Loot Forge integration itself (the API contract is prepared for it)
+
+## Compendium source policy
+
+Every non-treasure request carries the same canonical source object:
+
+```js
+source: {
+  mode: "all" | "system" | "selected",
+  includePacks: ["pf2e.equipment-srd", "pf2e.spells-srd"],
+  excludePacks: []
+}
+```
+
+Foundry module settings now expose a dedicated **Source Compendiums** submenu. It owns the complete world-default policy in one place: `all`, `system`, or `selected`, and when `selected` is active the stable union of indexed physical-item and spell-bearing Item compendiums appears directly beneath the mode. The Item Forge no longer edits that world default. Instead it displays the active world policy compactly and offers **Override the world default for this request**; only then are the local mode and pack checklist shown. Turning the override off immediately returns the request to the current world default. New API requests that omit source fields inherit the stored policy; explicit `source` requests still win. `game.pf2eItemForge.getDefaultSourcePolicy()` and `setDefaultSourcePolicy(source)` expose the same workflow to integrations.
+
+Source selection governs actual content: published items, mundane base equipment, spell pools, and source-backed Accessory Runes. Structural implementation templates used to construct generated items are intentionally resolved outside that policy and are reported separately as `metadata.templateSource`. Individual generators may require PF2e-system templates or prefer them according to their hardened template contract.
 
 ## API examples
 

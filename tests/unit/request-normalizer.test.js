@@ -252,3 +252,26 @@ test("normalizeRequest hydrates apex settings and validation accepts the apex ca
   const validation = validateRequest(normalized, { categories, generationModes: new Set(["magic"]) });
   assert.equal(validation.valid, true);
 });
+
+test("normalizeRequest hydrates the world-default selected compendium list only when the request omits it", () => {
+  const defaults = { defaultSourceMode: "selected", defaultSourcePacks: ["pf2e.equipment-srd", "module.custom-items", "module.custom-items"] };
+  const inherited = normalizeRequest({ mode: "existing", category: "item", seed: "x" }, defaults);
+  assert.equal(inherited.source.mode, "selected");
+  assert.deepEqual(inherited.source.includePacks, ["pf2e.equipment-srd", "module.custom-items"]);
+
+  const explicit = normalizeRequest({
+    mode: "existing",
+    category: "item",
+    source: { mode: "selected", includePacks: ["pf2e.spells-srd"] },
+    seed: "x"
+  }, defaults);
+  assert.deepEqual(explicit.source.includePacks, ["pf2e.spells-srd"]);
+
+  const explicitlyEmpty = normalizeRequest({
+    mode: "existing",
+    category: "item",
+    source: { mode: "selected", includePacks: [] },
+    seed: "x"
+  }, defaults);
+  assert.deepEqual(explicitlyEmpty.source.includePacks, []);
+});

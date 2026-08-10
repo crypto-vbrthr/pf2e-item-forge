@@ -292,3 +292,65 @@ test("ItemForgeEditor preserves Apex mode, attribute, and generated profile cont
   assert.deepEqual(context.apexAttributes.map((entry) => entry.id), ["automatic", "str", "dex"]);
   assert.deepEqual(context.apexProfiles.map((entry) => entry.id), ["automatic", "core.apex-might"]);
 });
+
+test("ItemForgeEditor can select all and clear a stable item-plus-spell compendium list", async () => {
+  const api = apiFixture();
+  api.getAvailableItemPacks = ({ includeSpellPacks }) => {
+    assert.equal(includeSpellPacks, true);
+    return [{ id: "pf2e.items" }, { id: "pf2e.spells" }, { id: "module.custom" }];
+  };
+  const editor = new ItemForgeEditor({ api, request: { source: { mode: "all" }, seed: "source-actions" } });
+  editor.render = async () => editor;
+
+  await editor.selectAllSourcePacks();
+  assert.equal(editor.getRequest().source.mode, "selected");
+  assert.deepEqual(editor.getRequest().source.includePacks, ["pf2e.items", "pf2e.spells", "module.custom"]);
+
+  await editor.clearSourcePacks();
+  assert.deepEqual(editor.getRequest().source.includePacks, []);
+});
+
+test("ItemForgeEditor uses the world source policy by default and can return from a per-request override", async () => {
+  const api = apiFixture();
+  let stored = { mode: "system", includePacks: ["pf2e.items"], excludePacks: [] };
+  api.getDefaultSourcePolicy = () => structuredClone(stored);
+
+  const editor = new ItemForgeEditor({ api, request: { seed: "source-defaults" } });
+  editor.render = async () => editor;
+  assert.equal(editor.sourceOverride, false);
+  assert.deepEqual(editor.getRequest().source, stored);
+
+  stored = { mode: "selected", includePacks: ["pf2e.spells", "module.loot"], excludePacks: [] };
+  assert.deepEqual(editor.getRequest().source, stored);
+
+  editor.sourceOverride = true;
+  editor.request.source = { mode: "selected", includePacks: ["module.custom"], excludePacks: [] };
+  assert.deepEqual(editor.getRequest().source.includePacks, ["module.custom"]);
+
+  assert.equal(await editor.useWorldSourcePolicy(), true);
+  assert.equal(editor.sourceOverride, false);
+  assert.deepEqual(editor.getRequest().source, stored);
+});
+
+test("ItemForgeEditor preserves selected source packs when the pack checklist is temporarily hidden", () => {
+  const editor = new ItemForgeEditor({
+    api: apiFixture(),
+    request: { source: { mode: "selected", includePacks: ["pf2e.items", "module.custom"] }, seed: "hidden-source-list" }
+  });
+  editor.rendered = true;
+  editor.element = {
+    querySelector: () => null,
+    querySelectorAll: () => []
+  };
+
+  editor.validate();
+  assert.deepEqual(editor.getRequest().source.includePacks, ["pf2e.items", "module.custom"]);
+});
+
+test("ItemForgeEditor treats remembered selected-pack lists as irrelevant when world and request both use system mode", () => {
+  const api = apiFixture();
+  api.getDefaultSourcePolicy = () => ({ mode: "system", includePacks: ["module.remembered"], excludePacks: [] });
+  const editor = new ItemForgeEditor({ api, request: { source: { mode: "system" }, seed: "semantic-source-equality" } });
+  assert.equal(editor.sourceOverride, false);
+  assert.equal(editor.getRequest().source.mode, "system");
+});

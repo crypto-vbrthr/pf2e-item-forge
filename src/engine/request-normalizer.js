@@ -82,6 +82,12 @@ export function normalizeRequest(request = {}, options = {}) {
   const value = normalizeValue(request.value);
   const source = request.source ?? {};
   const sourceMode = SOURCE_MODES.has(source.mode) ? source.mode : options.defaultSourceMode ?? "all";
+  const includePacks = Array.isArray(source.includePacks)
+    ? uniqueStrings(source.includePacks)
+    : uniqueStrings(options.defaultSourcePacks);
+  const excludePacks = Array.isArray(source.excludePacks)
+    ? uniqueStrings(source.excludePacks)
+    : uniqueStrings(options.defaultExcludedPacks);
   const policy = LEVEL_POLICIES.has(request.levelPolicy) ? request.levelPolicy : "strict";
   const configuredAttempts = integer(request.solver?.maxAttempts, options.defaultSolverAttempts ?? DEFAULT_SOLVER_ATTEMPTS);
   const rawMode = typeof request.mode === "string" && request.mode.trim() ? request.mode.trim() : "existing";
@@ -95,8 +101,8 @@ export function normalizeRequest(request = {}, options = {}) {
     rarity: uniqueStrings(request.rarity),
     source: {
       mode: sourceMode,
-      includePacks: uniqueStrings(source.includePacks),
-      excludePacks: uniqueStrings(source.excludePacks)
+      includePacks,
+      excludePacks
     },
     solver: {
       maxAttempts: Math.max(1, Math.min(ABSOLUTE_SOLVER_ATTEMPTS, configuredAttempts))
