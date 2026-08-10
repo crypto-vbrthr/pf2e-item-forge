@@ -89,6 +89,7 @@ export class MagicItemDiagnostics {
       { id: "worn-generated-eyepiece", expectedWornSlot: "eyepiece", request: { mode: "magic", category: "magic.worn.eyepiece", level: { min: 5, max: 5, target: 5 }, levelPolicy: "strict", source: { mode: "system" }, magic: { wornMode: "generated", wornProfile: "automatic" }, seed: "diagnostic-worn-eyepiece" } },
       { id: "worn-generated-headwear", expectedWornSlot: "headwear", request: { mode: "magic", category: "magic.worn.headwear", level: { min: 10, max: 10, target: 10 }, levelPolicy: "strict", source: { mode: "system" }, magic: { wornMode: "generated", wornProfile: "automatic" }, seed: "diagnostic-worn-headwear" } },
       { id: "worn-generated-footwear", expectedWornSlot: "footwear", request: { mode: "magic", category: "magic.worn.footwear", level: { min: 4, max: 4, target: 4 }, levelPolicy: "strict", source: { mode: "system" }, magic: { wornMode: "generated", wornProfile: "automatic" }, seed: "diagnostic-worn-footwear" } },
+      { id: "accessory-rune-trackless", request: { mode: "magic", category: "magic.accessory-rune", level: { min: 6, max: 6, target: 6 }, levelPolicy: "strict", source: { mode: "system" }, magic: { accessoryRune: "trackless" }, seed: "diagnostic-accessory-trackless" } },
       { id: "equipment-composed-price", priceAudit: true, request: { mode: "equipment", category: "weapon", level: { min: 4, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, equipment: { fundamentalRunes: "automatic", propertyRunes: { mode: "none", selected: [] } }, seed: "diagnostic-equipment-price" } }
     ];
 
@@ -142,6 +143,16 @@ export class MagicItemDiagnostics {
         if (!parsedUsage.worn) issues.push("worn item lacks a recognized worn usage");
         if (expectedWornSlot && parsedUsage.slot !== expectedWornSlot) issues.push(`worn usage parsed as ${parsedUsage.slot ?? "none"}, expected ${expectedWornSlot}`);
       }
+      if (id === "accessory-rune-trackless") {
+        const traits = source.system?.traits?.value ?? [];
+        if (!traits.includes("invested")) issues.push("Accessory Rune host lacks invested trait");
+        if (!traits.includes("magical")) issues.push("Accessory Rune host lacks magical trait");
+        if (!source.flags?.["pf2e-item-forge"]?.accessoryRune) issues.push("Accessory Rune host lacks Item Forge manifest");
+        if (result.metadata?.automation?.level !== "rules-text") issues.push("Accessory Rune host is not marked rules-text automation");
+        const baseLevel = Number(result.metadata?.accessoryRune?.baseItem?.level ?? 0);
+        const runeLevel = Number(result.metadata?.accessoryRune?.runeLevel ?? 0);
+        if (Number(source.system?.level?.value) !== Math.max(baseLevel, runeLevel)) issues.push("Accessory Rune host level is not max(base, rune)");
+      }
       if (id.startsWith("worn-generated-")) {
         const traits = source.system?.traits?.value ?? [];
         const expectedInvested = result.metadata?.wornItem?.invested !== false;
@@ -176,7 +187,7 @@ export class MagicItemDiagnostics {
         "NO_PREDEFINED_SPELLHEART_CANDIDATE", "NO_SPELLHEART_SPELL_CANDIDATE", "NO_SPELLHEART_TEMPLATE",
         "NO_PREDEFINED_SPECIFIC_ITEM_CANDIDATE", "NO_SPECIFIC_BASE_ITEM", "NO_SPECIFIC_PROFILE_CANDIDATE",
         "NO_PREDEFINED_SPECIFIC_SHIELD_CANDIDATE", "NO_SPECIFIC_SHIELD_BASE_ITEM", "NO_SPECIFIC_SHIELD_PROFILE_CANDIDATE",
-        "NO_PREDEFINED_WORN_ITEM_CANDIDATE", "NO_WORN_ITEM_PROFILE_CANDIDATE", "NO_WORN_ITEM_TEMPLATE"
+        "NO_PREDEFINED_WORN_ITEM_CANDIDATE", "NO_WORN_ITEM_PROFILE_CANDIDATE", "NO_WORN_ITEM_TEMPLATE", "NO_ACCESSORY_RUNE_CANDIDATE"
       ].includes(error?.code);
       return { id, status: skippable ? "skipped" : "failed", code: error?.code ?? null, message: error?.message ?? String(error) };
     }

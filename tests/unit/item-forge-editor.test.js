@@ -54,6 +54,7 @@ function apiFixture() {
     specificItemProfiles: { getAll: () => [], getForItemType: () => [], get: () => null },
     specificShieldProfiles: { getAll: () => [], get: () => null },
     wornMagicProfiles: { getAll: () => [], getForSlot: () => [], get: () => null },
+    accessoryRunes: { getAll: () => [], get: () => null },
     magicThemes: [],
     treasure: {
       types: { getAll: () => [], get: () => null },
@@ -224,4 +225,15 @@ test("generated worn mode disables non-generatable worn subcategories and resets
   assert.equal(editor.getRequest().category, "magic.worn");
   assert.equal(context.categories.find((entry) => entry.id === "magic.worn.backpack").disabled, true);
   assert.equal(context.categories.find((entry) => entry.id === "magic.worn.footwear").disabled, false);
+});
+
+
+test("ItemForgeEditor preserves accessory rune requests and their selected family", () => {
+  const editor = new ItemForgeEditor({
+    api: apiFixture(),
+    request: { mode: "magic", category: "magic.accessory-rune", level: 6, magic: { accessoryRune: "trackless" }, seed: "accessory" }
+  });
+  const request = editor.getRequest();
+  assert.equal(request.category, "magic.accessory-rune");
+  assert.equal(request.magic.accessoryRune, "trackless");
 });

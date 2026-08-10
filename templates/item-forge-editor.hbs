@@ -134,6 +134,15 @@
             <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.SpecificItemRunes"}}</p>
           {{/if}}
         {{/if}}
+        {{#if isAccessoryRuneCategory}}
+          <div class="form-group">
+            <label>{{localize "PF2E_ITEM_FORGE.Fields.AccessoryRune"}}</label>
+            <select name="magic.accessoryRune">
+              {{#each accessoryRunes}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}{{#if usage}} · {{usage}}{{/if}}{{#if levels}} · {{levels}}{{/if}}</option>{{/each}}
+            </select>
+            <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.AccessoryRune"}}</p>
+          </div>
+        {{/if}}
         {{#if isWornMagicCategory}}
           <div class="form-group">
             <label>{{localize "PF2E_ITEM_FORGE.Fields.WornItemMode"}}</label>
@@ -411,6 +420,7 @@
               {{#if preview.magic.specificProfileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.SpecificItemProfile"}}</dt><dd>{{preview.magic.specificProfileLabel}}</dd>{{/if}}
               {{#if preview.magic.wornModeLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.WornItemMode"}}</dt><dd>{{preview.magic.wornModeLabel}}</dd>{{/if}}
               {{#if preview.magic.wornProfileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.WornItemProfile"}}</dt><dd>{{preview.magic.wornProfileLabel}}</dd>{{/if}}
+              {{#if preview.magic.accessoryRuneLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.AccessoryRune"}}</dt><dd>{{preview.magic.accessoryRuneLabel}}</dd>{{/if}}
               {{#if preview.magic.profileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.StaffProfile"}}</dt><dd>{{preview.magic.profileLabel}}</dd>{{/if}}
               {{#if preview.magic.variantLabelLocalized}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.StaffVariant"}}</dt><dd>{{preview.magic.variantLabelLocalized}}</dd>{{/if}}
               {{#if preview.magic.maxRank}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.HighestSpellRank"}}</dt><dd>{{preview.magic.maxRank}}</dd>{{/if}}
@@ -433,6 +443,15 @@
               {{/if}}
               {{#if preview.specificItem.effect}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.SpecialAbility"}}</dt><dd>{{preview.specificItem.effect}}</dd>{{/if}}
               {{#if preview.specificItem.automationLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.Automation"}}</dt><dd>{{preview.specificItem.automationLabel}}</dd>{{/if}}
+            {{/if}}
+            {{#if preview.accessoryRune}}
+              <dt>{{localize "PF2E_ITEM_FORGE.Preview.AccessoryRuneVariant"}}</dt><dd>{{preview.accessoryRune.variantLabel}}</dd>
+              <dt>{{localize "PF2E_ITEM_FORGE.Preview.AccessoryRuneUsage"}}</dt><dd>{{preview.accessoryRune.usageLabel}}</dd>
+              <dt>{{localize "PF2E_ITEM_FORGE.Preview.BaseItem"}}</dt><dd>{{preview.accessoryRune.baseItem.name}} ({{localize "PF2E_ITEM_FORGE.Preview.Level"}} {{preview.accessoryRune.baseItem.level}})</dd>
+              <dt>{{localize "PF2E_ITEM_FORGE.Preview.RuneLevel"}}</dt><dd>{{preview.accessoryRune.runeLevel}}</dd>
+              <dt>{{localize "PF2E_ITEM_FORGE.Preview.RunePrice"}}</dt><dd>{{preview.accessoryRune.runePriceGp}} {{localize "PF2E_ITEM_FORGE.Currency.GP"}}</dd>
+              <dt>{{localize "PF2E_ITEM_FORGE.Preview.SpecialAbility"}}</dt><dd>{{preview.accessoryRune.effect}}</dd>
+              <dt>{{localize "PF2E_ITEM_FORGE.Preview.Automation"}}</dt><dd>{{preview.accessoryRune.automationLabel}}</dd>
             {{/if}}
             {{#if preview.wornItem}}
               {{#if preview.wornItem.slotLabelLocalized}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.WornSlot"}}</dt><dd>{{preview.wornItem.slotLabelLocalized}}</dd>{{/if}}

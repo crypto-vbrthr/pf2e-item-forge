@@ -48,6 +48,11 @@ export function applyGenerationContract(result) {
     metadata.automation = { level: expected };
   }
 
+  if (metadata.accessoryRune && typeof metadata.accessoryRune === "object") {
+    metadata.accessoryRune.automation = "rules-text";
+    metadata.automation = { level: "rules-text" };
+  }
+
   return result;
 }
 

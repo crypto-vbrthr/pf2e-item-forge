@@ -2,7 +2,7 @@
   "id": "pf2e-item-forge",
   "title": "PF2E Item Forge",
   "description": "A reusable PF2E item generation engine with an embedded editor for Foundry VTT.",
-  "version": "0.0.25",
+  "version": "0.0.26",
   "authors": [
     {
       "name": "PF2E Item Forge"

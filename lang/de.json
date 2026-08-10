@@ -57,7 +57,8 @@
       "SpecificItemMode": "Spezifische Erzeugung",
       "SpecificItemProfile": "Spezifisches Gegenstandsprofil",
       "WornItemMode": "Erzeugungsart",
-      "WornItemProfile": "Profil für getragenen Gegenstand"
+      "WornItemProfile": "Profil für getragenen Gegenstand",
+      "AccessoryRune": "Accessory-Rune"
     },
     "LevelMode": {
       "Single": "Einzelne Stufe",
@@ -109,7 +110,8 @@
       "SpecificItemTheme": "Ein festes Thema beschränkt die Auswahl auf Profile und Varianten, die dieses Thema ausdrücklich unterstützen.",
       "SpecificItemRunes": "Bei generierten spezifischen Gegenständen stammen Eigenschaftsrunen ausschließlich aus dem Profil. Basisrunen bleiben normal verbesserbar; zusätzliche Eigenschaftsrunen können nicht frei hinzugefügt werden.",
       "WornItemMode": "Vordefiniert übernimmt einen vollständigen PF2e-Gegenstand aus den gewählten Kompendien. Generiert erschafft einen neuen investierten Gegenstand aus einem geprüften Item-Forge-Profil.",
-      "WornItemProfile": "Das Profil legt Nutzungsart, Stufenprogression, Preis und besondere Wirkung als zusammenhängendes Paket fest."
+      "WornItemProfile": "Das Profil legt Nutzungsart, Stufenprogression, Preis und besondere Wirkung als zusammenhängendes Paket fest.",
+      "AccessoryRune": "Wählt eine Accessory-Rune aus Treasure Vault und graviert sie auf einen kompatiblen Basisgegenstand. Automatisch berücksichtigt die jeweilige Nutzungsart der Rune."
     },
     "Preview": {
       "Empty": "Noch nichts geschmiedet. Parameter wählen und Generieren drücken.",
@@ -168,7 +170,12 @@
       "WornItemVariant": "Variante",
       "WornSlot": "Trageplatz / Nutzungsart",
       "WornUsage": "PF2e-Nutzung",
-      "WornEffect": "Besondere Wirkung"
+      "WornEffect": "Besondere Wirkung",
+      "AccessoryRune": "Accessory-Rune",
+      "AccessoryRuneVariant": "Runenvariante",
+      "AccessoryRuneUsage": "Runen-Nutzung",
+      "RuneLevel": "Runenstufe",
+      "RunePrice": "Runenpreis"
     },
     "Notifications": {
       "GenerationFailed": "Für diese Parameter konnte kein Gegenstand erzeugt werden.",
@@ -240,7 +247,8 @@
       "MagicWornMask": "Magische Maske",
       "MagicWornFootwear": "Magisches Schuhwerk",
       "MagicWornCollar": "Magischer Kragen",
-      "MagicWornOther": "Sonstiger getragener magischer Gegenstand"
+      "MagicWornOther": "Sonstiger getragener magischer Gegenstand",
+      "MagicAccessoryRune": "Accessory-Runen-Gegenstand"
     },
     "GenerationMode": {
       "Existing": "Vordefinierten Gegenstand auswählen",
@@ -289,7 +297,12 @@
       "NoWornItemTemplate": "Für diese Tragekategorie wurde keine geeignete PF2e-Strukturvorlage gefunden.",
       "UnknownWornItemProfile": "Das gewählte Profil für getragene magische Gegenstände ist nicht registriert.",
       "InvalidWornItemTemplateType": "Die technische Vorlage für den getragenen Gegenstand besitzt keinen sicheren PF2e-Ausrüstungstyp.",
-      "WornItemTemplateUsageMismatch": "Die Nutzungsart der technischen Vorlage passt nicht zur ausgewählten Tragekategorie."
+      "WornItemTemplateUsageMismatch": "Die Nutzungsart der technischen Vorlage passt nicht zur ausgewählten Tragekategorie.",
+      "NoAccessoryRuneCandidate": "Keine kompatible Kombination aus Accessory-Rune und Basisgegenstand entspricht den gewählten Stufen-, Seltenheits- und Quellenfiltern.",
+      "UnknownAccessoryRune": "Die ausgewählte Accessory-Rune ist nicht registriert.",
+      "AccessoryRuneBaseInvested": "Ein Gegenstand mit dem Merkmal Investiert kann keine Accessory-Rune erhalten.",
+      "AccessoryRuneAlreadyPresent": "Ein Gegenstand kann höchstens eine Accessory-Rune tragen.",
+      "AccessoryRuneUsageMismatch": "Der geladene Basisgegenstand entspricht nicht mehr der Nutzungsart der ausgewählten Accessory-Rune."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatisch stufengerecht",
@@ -616,6 +629,34 @@
       "PredefinedOnly": "(nur vordefiniert)",
       "GeneratedOnly": "(nur generierbar)",
       "Unavailable": "(nicht verfügbar)"
+    },
+    "AccessoryRunes": {
+      "Automatic": "Automatisch",
+      "Menacing": "Bedrohlich",
+      "Pontoon": "Ponton",
+      "Preserving": "Bewahrend",
+      "Trackless": "Spurenlos"
+    },
+    "AccessoryRuneVariants": {
+      "Base": "Grundform",
+      "Greater": "Mächtig"
+    },
+    "AccessoryRuneUsage": {
+      "Clothing": "sichtbares Kleidungsstück",
+      "Footwear": "Schuhwerk",
+      "Container": "Korb, Tasche oder anderer Behälter"
+    },
+    "AccessoryRuneText": {
+      "AppliedName": "{baseName} ({runeName})",
+      "Heading": "Accessory-Rune: {runeName}",
+      "RuleNote": "Die Gegenstandsstufe ist das Maximum aus der Stufe des Basisgegenstands und der Rune. Eine durch die Rune erhöhte Stufe erhöht die übrigen Fähigkeiten des Basisgegenstands nicht.",
+      "MenacingBase": "Du erhältst einen Gegenstandsbonus von +1 auf Einschüchtern-Würfe zum Zwingen.",
+      "MenacingGreater": "Du erhältst einen Gegenstandsbonus von +2 auf Einschüchtern-Würfe zum Zwingen. Einmal pro Tag kannst du die Rune mit 2 Aktionen aktivieren, um Furcht auf Zaubergrad 3 mit SG 25 zu wirken.",
+      "Pontoon": "Du kannst über die Oberfläche von Wasser und anderen Flüssigkeiten gehen, ohne einzusinken. Dies schützt nicht vor Schaden durch die Flüssigkeit. Tauchst du unter, musst du Schwimmen.",
+      "PreservingBase": "Nichtmagische Nahrung und Getränke im Behälter benötigen zehnmal so lange, um zu verderben. Die Dauer alchemistischer Gegenstände wird nicht verlängert.",
+      "PreservingGreater": "Nichtmagische Nahrung und Getränke im Behälter verderben nicht. Einmal pro Tag kannst du mit 2 Aktionen den gesamten Inhalt mit Cleanse Cuisine reinigen.",
+      "TracklessBase": "Solange du das Schuhwerk trägst, stehst du fortwährend unter dem Effekt von Vanishing Tracks.",
+      "TracklessGreater": "Solange du das Schuhwerk trägst, stehst du fortwährend unter dem Effekt von Vanishing Tracks. Einmal pro Tag kannst du den Effekt mit 2 Aktionen für 8 Stunden auf eine 6-m-Ausstrahlung erweitern und bis zu 10 ausgewählte Kreaturen darin einbeziehen; du kannst den Effekt beenden."
     }
   }
 }

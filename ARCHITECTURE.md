@@ -19,6 +19,7 @@ ItemForgeEngine (canonical normalization, validation, generation)
         |     +-- SpecificMagicShieldGenerator
         |     +-- SpecificMagicEquipmentGenerator
         |     +-- WornMagicItemGenerator
+        |     +-- AccessoryRuneGenerator
         |     +-- SpellheartGenerator
         |     +-- StaffGenerator
         |     +-- TreasureGenerator
@@ -40,6 +41,7 @@ ItemForgeEngine (canonical normalization, validation, generation)
         +-- SpecificItemProfileRegistry
         +-- SpecificShieldProfileRegistry
         +-- WornMagicProfileRegistry
+        +-- AccessoryRuneRegistry
         +-- ValueSolver
         +-- TreasureRegistry
               +-- types
@@ -60,7 +62,7 @@ ItemForgeEngine (canonical normalization, validation, generation)
 - Other modules should use the public engine API and may embed `ItemForgeEditor` without the standalone Item Forge window.
 - Future Loot Forge integration should distribute budgets/counts/themes and issue individual Item Forge requests.
 - Built-in and external treasure content use the same validated registries.
-- Spell documents are support data, not directly generatable physical items. `ScrollGenerator` and `WandGenerator` may select eligible spells and embed them into physical item results; `StaffGenerator` either copies a predefined PF2e staff unchanged or uses the spell index to build a structured staff-family manifest. `SpellheartGenerator` has separate predefined and generated paths. `SpecificMagicEquipmentGenerator` does not require spell sources and either preserves a complete published specific weapon/armor or composes one validated profile onto a mundane base item. Predefined magic items preserve native PF2e automation; generated custom abilities remain explicit rules text plus structured flags unless a verified system contract exists. Worn magic items follow the same split: published worn items are cloned whole, while generated worn items select a validated usage-specific profile and use an indexed PF2e worn item only as a structural implementation template.
+- Spell documents are support data, not directly generatable physical items. `ScrollGenerator` and `WandGenerator` may select eligible spells and embed them into physical item results; `StaffGenerator` either copies a predefined PF2e staff unchanged or uses the spell index to build a structured staff-family manifest. `SpellheartGenerator` has separate predefined and generated paths. `SpecificMagicEquipmentGenerator` does not require spell sources and either preserves a complete published specific weapon/armor or composes one validated profile onto a mundane base item. Predefined magic items preserve native PF2e automation; generated custom abilities remain explicit rules text plus structured flags unless a verified system contract exists. Worn magic items follow the same split: published worn items are cloned whole, while generated worn items select a validated usage-specific profile and use an indexed PF2e worn item only as a structural implementation template. Accessory Runes are a separate composition concern: `AccessoryRuneGenerator` selects a compatible host from configured content sources and applies a validated published-rune contract without turning the generic Worn generator into a rune system.
 
 ## Generator resolution
 
@@ -73,6 +75,7 @@ WandGenerator                    220  mode magic
 SpecificMagicShieldGenerator     219  mode magic
 SpecificMagicEquipmentGenerator  218  mode magic
 WornMagicItemGenerator           217  mode magic
+AccessoryRuneGenerator           216  mode magic
 SpellheartGenerator              215  mode magic
 StaffGenerator                   210  mode magic
 TreasureGenerator     200  mode treasure
@@ -86,7 +89,7 @@ Registered generation modes are exposed through the public capabilities API and 
 
 ## Spell-bound permanent magic items
 
-`mode: "magic"` owns `magic.wand`, `magic.staff`, `magic.spellheart`, `magic.weapon`, `magic.armor`, `magic.shield`, and `magic.worn` with worn-usage subcategories. Wands, generated staves, and generated spellhearts reuse the spell-support index and meaningful-heightening helpers. Specific weapons/armor, shields, and worn items instead use the physical-item index and dedicated profile registries. Predefined items preserve complete native PF2e documents, while generated custom items compose from validated whole-effect profiles rather than arbitrary effect fragments.
+`mode: "magic"` owns `magic.wand`, `magic.staff`, `magic.spellheart`, `magic.weapon`, `magic.armor`, `magic.shield`, `magic.worn` with worn-usage subcategories, and `magic.accessory-rune`. Wands, generated staves, and generated spellhearts reuse the spell-support index and meaningful-heightening helpers. Specific weapons/armor, shields, worn items, and Accessory Rune hosts use the physical-item index plus their dedicated registries/contracts. Predefined items preserve complete native PF2e documents, while generated custom items compose from validated whole-effect profiles rather than arbitrary effect fragments.
 
 ### Wands
 
@@ -143,6 +146,15 @@ The public API exposes worn availability through `getWornSlotCapabilities()` and
 
 Live Magic diagnostics exercise predefined worn items plus representative generated contracts for unrestricted worn items, eyepieces, headwear, and footwear. They verify normalized usage/slot agreement, `equipment` document type, profile-driven investment state, a valid magic marker trait, absence of inherited Rule Elements/subitems/apex data/foreign flag scopes, and the `rules-text` automation contract.
 
+
+
+### Accessory Runes
+
+`AccessoryRuneGenerator` resolves `mode: "magic"` + `category: "magic.accessory-rune"`. Accessory Runes are intentionally separate from `WornMagicItemGenerator`: the host is an existing physical item, while the rune is a second rules component applied to that host. The public `AccessoryRuneRegistry` is exposed as `game.pf2eItemForge.accessoryRunes`. Its core library models the Treasure Vault Remaster Menacing, Pontoon, Preserving, and Trackless families with their published level/price progressions and Usage categories.
+
+The configured source request applies to the host item. A candidate is legal only when the host matches the rune family's Usage contract and does not already carry the `invested` trait. Container runes accept safe container hosts such as PF2e `backpack` documents; a published rune document whose own Usage says `etched onto ...` is explicitly rejected as a host so a Preserving Rune cannot accidentally be composed onto another Preserving Rune. The composed item gains `invested` and `magical`, keeps the higher rarity, adds the rune's exact price to the host price, and receives an effective item level of `max(baseLevel, runeLevel)`.
+
+Raising the item level through the Accessory Rune does not mutate or rescale the host's existing Rule Elements, activations, counteract values, or other ability data. The original host description is retained and a localized rune section is appended. Until a verified PF2e-v14 native Accessory Rune carrier/storage contract is available, the composition deliberately uses `automation.level: "rules-text"` plus `flags.pf2e-item-forge.accessoryRune` rather than fabricated Rule Elements or guessed system fields. The live Magic diagnostics exercise a strict Trackless composition and verify invested/magical traits, the structured manifest, effective-level semantics, and rules-text automation.
 
 ## Equipment/Magic result contracts
 

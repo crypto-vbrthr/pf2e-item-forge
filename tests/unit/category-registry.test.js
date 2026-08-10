@@ -27,4 +27,6 @@ test("core categories expose wand, staff, and spellheart as magic items", async 
   assert.equal(registry.isDescendant("magic.staff", "item"), true);
   assert.equal(registry.isDescendant("magic.spellheart", "magic"), true);
   assert.equal(registry.isDescendant("magic.spellheart", "item"), true);
+  assert.equal(registry.isDescendant("magic.accessory-rune", "magic"), true);
+  assert.equal(registry.isDescendant("magic.accessory-rune", "item"), true);
 });

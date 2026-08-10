@@ -2,9 +2,9 @@
 
 Reusable Item Forge architecture for Foundry VTT v14 and Pathfinder 2e.
 
-## v0.0.25 scope
+## v0.0.26 scope
 
-This release hardens the generated worn-magic-item contract. Published PF2e worn items can still be selected intact, while generated homebrew worn items now use safe equipment-only structural templates, mode-aware worn-slot capabilities, stricter profile validation, and continuous automatic strict-mode core coverage from item level 1 through 20.
+This release adds Treasure Vault Remaster Accessory Runes as a dedicated composition path. Item Forge can select a compatible host item from configured sources, apply one published Accessory Rune family, enforce the invested/Usage restrictions, and preserve the base item's own ability scaling while raising the composed item to the higher base-or-rune level.
 
 Implemented:
 
@@ -18,7 +18,7 @@ Implemented:
 - Deterministic seeded generation
 - Existing physical compendium items, excluding feats/spells/rule documents
 - Spell-bearing scroll generation with meaningful legal heightening
-- Special magic-item mode for wands, staves, spellhearts, specific magic weapons, specific magic armor, specific magic shields, and worn magic items
+- Special magic-item mode for wands, staves, spellhearts, specific magic weapons, specific magic armor, specific magic shields, worn magic items, and Accessory Rune compositions
 - Wands use the PF2e generic wand templates and embed one real spell at a legal base or meaningful heightened rank
 - Staves can either be copied exactly from selected compendia or generated as rulebook-style variant families with inherited lower variants
 - Spellhearts can either be selected as complete predefined PF2e items or generated from validated custom Spellheart profiles with coherent armor/weapon benefits, spell progressions, prices, and themes
@@ -28,7 +28,10 @@ Implemented:
 - Published worn items preserve native PF2e usage, Rule Elements, activations, price, traits, and automation; generated worn items use whole-effect profiles plus rules-text manifests. Fourteen core families cover item levels 1 through 20 across footwear, eyepieces, belts, cloaks, masks, circlets, gloves, bracers, garments, unrestricted jewelry, and headwear
 - Generated worn profiles use `equipment` documents only as generic structural templates; backpack/container schemas are not borrowed by the generic worn generator
 - Worn profiles support an explicit `invested` contract (default `true`), normalize canonical rarity/variant IDs, and treat arcane/divine/occult/primal as sufficient magic markers without redundantly forcing the `magical` trait
-- Public `specificItemProfiles`, `specificShieldProfiles`, and `wornMagicProfiles` registries for extension modules and campaign content; `getWornSlotCapabilities()` and `getCapabilities().wornSlots` expose actual predefined/generated slot availability
+- Accessory Runes are a separate `magic.accessory-rune` composition family with a public `accessoryRunes` registry. Core Treasure Vault Remaster families are Menacing, Pontoon, Preserving, and Trackless with their published level/price progressions and Usage restrictions
+- Accessory Rune composition rejects invested hosts, adds `invested` and `magical`, uses `max(base level, rune level)`, adds the rune price to the host price, and never scales the host item's pre-existing ability/counteract data merely because the rune raises its item level
+- Generated Accessory Rune hosts use `rules-text` automation plus `flags.pf2e-item-forge.accessoryRune`; no unverified PF2e native rune-carrier schema or fabricated Rule Elements are written
+- Public `specificItemProfiles`, `specificShieldProfiles`, `wornMagicProfiles`, and `accessoryRunes` registries for extension modules and campaign content; `getWornSlotCapabilities()` and `getCapabilities().wornSlots` expose actual predefined/generated slot availability
 - Magic themes for fire, cold, electricity, healing, illusion, mental, vitality, void, arcane, divine, occult, primal, and summoning
 - Composed weapons, armor, and shields with fundamental runes
 - Registry-driven property runes with automatic/random/fixed/none modes and compatibility rules
@@ -49,8 +52,8 @@ Implemented:
 - Standalone `ItemForgeApplication` container owning Foundry document creation and preserving `createdByForge` versus `generated` provenance
 - German and English localization
 - Shared generation-result contract for `contentSources`, `templateSource`, and automation level
-- Live Magic diagnostics for predefined and generated magic paths including representative unrestricted, eyepiece, headwear, and footwear worn contracts, strict source-shape checks, pack-index failures, and composed-equipment price preparation
-- 196 automated unit/integration/statistical/contract tests
+- Live Magic diagnostics for predefined and generated magic paths including representative worn contracts, Accessory Rune composition, strict source-shape checks, pack-index failures, and composed-equipment price preparation
+- 210 automated unit/integration/statistical/contract tests
 
 Not yet implemented:
 
@@ -80,6 +83,21 @@ await game.pf2eItemForge.generate({
   }
 });
 ```
+
+Apply a Treasure Vault Remaster Accessory Rune to one compatible host item from the selected sources:
+
+```js
+await game.pf2eItemForge.generate({
+  mode: "magic",
+  category: "magic.accessory-rune",
+  level: 6,
+  levelPolicy: "strict",
+  source: { mode: "system" },
+  magic: { accessoryRune: "trackless" }
+});
+```
+
+The host must satisfy the rune family's Usage and may not already have the `invested` trait. The resulting item level is the higher of host and rune level; a rune-raised level does not rescale the host item's other abilities. The published rune effect is represented as rules text plus a structured Item Forge manifest until a verified PF2e-native carrier contract is available.
 
 Select a predefined item:
 

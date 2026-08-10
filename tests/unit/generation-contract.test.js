@@ -45,3 +45,15 @@ test("applyGenerationContract normalizes predefined/generated worn automation", 
   assert.equal(generated.metadata.automation.level, "rules-text");
   assert.equal(generated.metadata.wornItem.automation, "rules-text");
 });
+
+
+test("applyGenerationContract always marks composed accessory runes as rules-text automation", () => {
+  const result = applyGenerationContract({
+    metadata: {
+      automation: { level: "native" },
+      accessoryRune: { family: "trackless", automation: "native" }
+    }
+  });
+  assert.equal(result.metadata.automation.level, "rules-text");
+  assert.equal(result.metadata.accessoryRune.automation, "rules-text");
+});

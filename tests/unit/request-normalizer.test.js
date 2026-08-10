@@ -177,3 +177,31 @@ test("validation accepts worn magic root and worn usage subcategories", async ()
     assert.equal(result.valid, true, category);
   }
 });
+
+
+test("normalizeRequest hydrates accessory rune settings", () => {
+  const defaults = normalizeRequest({ mode: "magic", category: "magic.accessory-rune", seed: "x" });
+  assert.equal(defaults.magic.accessoryRune, "automatic");
+
+  const explicit = normalizeRequest({
+    mode: "magic",
+    category: "magic.accessory-rune",
+    magic: { accessoryRune: "trackless" },
+    seed: "x"
+  });
+  assert.equal(explicit.magic.accessoryRune, "trackless");
+  assert.equal(explicit.category, "magic.accessory-rune");
+});
+
+test("validation accepts the accessory rune magic category", async () => {
+  const { validateRequest } = await import("../../src/engine/request-normalizer.js");
+  const { CategoryRegistry, registerCoreCategories } = await import("../../src/engine/category-registry.js");
+  const categories = registerCoreCategories(new CategoryRegistry());
+  const result = validateRequest(
+    { mode: "magic", category: "magic.accessory-rune", level: 6, source: { mode: "system" }, magic: { accessoryRune: "trackless" }, seed: "x" },
+    { categories, generationModes: ["magic"] }
+  );
+  assert.equal(result.valid, true);
+  assert.equal(result.request.category, "magic.accessory-rune");
+  assert.equal(result.request.magic.accessoryRune, "trackless");
+});

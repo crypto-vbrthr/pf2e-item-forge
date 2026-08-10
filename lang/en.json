@@ -57,7 +57,8 @@
       "SpecificItemMode": "Specific generation",
       "SpecificItemProfile": "Specific item profile",
       "WornItemMode": "Generation Type",
-      "WornItemProfile": "Worn Item Profile"
+      "WornItemProfile": "Worn Item Profile",
+      "AccessoryRune": "Accessory Rune"
     },
     "LevelMode": {
       "Single": "Single level",
@@ -109,7 +110,8 @@
       "SpecificItemTheme": "A fixed theme restricts selection to profiles and variants that explicitly support that theme.",
       "SpecificItemRunes": "For generated specific items, property runes come only from the profile. Fundamental runes remain normally upgradeable; additional property runes cannot be freely added.",
       "WornItemMode": "Predefined copies a complete PF2e item from the selected compendia. Generated creates a new invested item from a validated Item Forge profile.",
-      "WornItemProfile": "The profile defines worn usage, level progression, price, and special ability as one coherent package."
+      "WornItemProfile": "The profile defines worn usage, level progression, price, and special ability as one coherent package.",
+      "AccessoryRune": "Selects an Accessory Rune from Treasure Vault and applies it to a compatible base item. Automatic respects each rune’s Usage requirement."
     },
     "Preview": {
       "Empty": "Nothing forged yet. Choose parameters and press Generate.",
@@ -168,7 +170,12 @@
       "WornItemVariant": "Variant",
       "WornSlot": "Worn Usage Type",
       "WornUsage": "PF2e Usage",
-      "WornEffect": "Special Effect"
+      "WornEffect": "Special Effect",
+      "AccessoryRune": "Accessory Rune",
+      "AccessoryRuneVariant": "Rune Variant",
+      "AccessoryRuneUsage": "Rune Usage",
+      "RuneLevel": "Rune Level",
+      "RunePrice": "Rune Price"
     },
     "Notifications": {
       "GenerationFailed": "No item could be generated for these parameters.",
@@ -240,7 +247,8 @@
       "MagicWornMask": "Magic Mask",
       "MagicWornFootwear": "Magic Footwear",
       "MagicWornCollar": "Magic Collar",
-      "MagicWornOther": "Other Worn Magic Item"
+      "MagicWornOther": "Other Worn Magic Item",
+      "MagicAccessoryRune": "Accessory Rune Item"
     },
     "GenerationMode": {
       "Existing": "Select a predefined item",
@@ -289,7 +297,12 @@
       "NoWornItemTemplate": "No suitable PF2e structural template is available for this worn category.",
       "UnknownWornItemProfile": "The selected worn magic item profile is not registered.",
       "InvalidWornItemTemplateType": "The structural worn-item template does not use a safe PF2e equipment document type.",
-      "WornItemTemplateUsageMismatch": "The structural template usage does not match the selected worn usage category."
+      "WornItemTemplateUsageMismatch": "The structural template usage does not match the selected worn usage category.",
+      "NoAccessoryRuneCandidate": "No compatible Accessory Rune and base item match the selected level, rarity, and source filters.",
+      "UnknownAccessoryRune": "The selected Accessory Rune is not registered.",
+      "AccessoryRuneBaseInvested": "An item with the invested trait cannot receive an Accessory Rune.",
+      "AccessoryRuneAlreadyPresent": "An item can never have more than one Accessory Rune.",
+      "AccessoryRuneUsageMismatch": "The loaded base item no longer matches the selected Accessory Rune’s Usage requirement."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatic level-appropriate",
@@ -616,6 +629,34 @@
       "PredefinedOnly": "(predefined only)",
       "GeneratedOnly": "(generated only)",
       "Unavailable": "(unavailable)"
+    },
+    "AccessoryRunes": {
+      "Automatic": "Automatic",
+      "Menacing": "Menacing",
+      "Pontoon": "Pontoon",
+      "Preserving": "Preserving",
+      "Trackless": "Trackless"
+    },
+    "AccessoryRuneVariants": {
+      "Base": "Base",
+      "Greater": "Greater"
+    },
+    "AccessoryRuneUsage": {
+      "Clothing": "visible article of clothing",
+      "Footwear": "footwear",
+      "Container": "basket, bag, or other container"
+    },
+    "AccessoryRuneText": {
+      "AppliedName": "{baseName} ({runeName})",
+      "Heading": "Accessory Rune: {runeName}",
+      "RuleNote": "The item level is the higher of the base item level and rune level. If the rune raises the item level, it does not increase the base item’s other abilities.",
+      "MenacingBase": "You gain a +1 item bonus to Intimidation checks to Coerce.",
+      "MenacingGreater": "You gain a +2 item bonus to Intimidation checks to Coerce. Once per day, you can activate the rune with 2 actions to cast a 3rd-rank fear spell (DC 25).",
+      "Pontoon": "You can walk on the surface of water and other liquids without falling through. This does not protect you from damage caused by the liquid. If you go beneath the surface, you must Swim.",
+      "PreservingBase": "Non-magical food and drink in the container take ten times as long to spoil. This does not extend the duration of alchemical items.",
+      "PreservingGreater": "Non-magical food and drink in the container never spoil. Once per day, you can use 2 actions to cast cleanse cuisine on all food and drink inside.",
+      "TracklessBase": "While wearing the footwear, you are continuously affected by vanishing tracks.",
+      "TracklessGreater": "While wearing the footwear, you are continuously affected by vanishing tracks. Once per day, you can use 2 actions to extend the effect to a 20-foot emanation for 8 hours, affecting up to 10 chosen creatures in the area; you can Dismiss the effect."
     }
   }
 }

@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.0.26
+
+- Adds `magic.accessory-rune` as a dedicated Treasure Vault Remaster composition path rather than folding Accessory Runes into generic worn-item generation.
+- Adds public `AccessoryRuneRegistry` exposed as `game.pf2eItemForge.accessoryRunes`, with the four published Treasure Vault Remaster families: Menacing (3/10), Pontoon (9), Preserving (3/8), and Trackless (6/10).
+- Adds `AccessoryRuneGenerator`, which selects a compatible host item from the configured content sources, rejects invested hosts, respects each rune family's Usage contract, and applies at most one Item-Forge Accessory Rune manifest.
+- Computes the composed item's level as `max(base level, rune level)` while deliberately leaving the base item's existing ability data, Rule Elements, and counteract values unchanged when the rune raises item level.
+- Adds the exact rune price to the host item's coin price, preserves the higher rarity, and adds the `invested` and `magical` traits required by the Accessory Rune contract.
+- Uses rules-text automation plus structured `flags.pf2e-item-forge.accessoryRune` metadata rather than inventing an unverified PF2e-v14 native Accessory Rune carrier schema.
+- Adds Embedded Editor controls and preview metadata for rune family, variant, Usage, host item, rune level/price, effective level, effect, and automation status.
+- Extends the public capabilities API, request normalization/validation, generation-result contract, German/English localization, and live Magic diagnostics with Accessory Rune support.
+- Prevents published Accessory Rune documents whose own Usage says `etched onto ...` from being misidentified as compatible host containers.
+- Test suite: 210 passing tests.
+
 ## 0.0.25
 
 - Hardens generated worn-item structural templates: the generic worn generator now accepts only slot-matched `equipment` documents and will not silently inherit backpack/container/kit schemas.

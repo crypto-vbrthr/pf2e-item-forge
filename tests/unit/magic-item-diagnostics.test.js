@@ -25,6 +25,11 @@ function sourceFor(request) {
     source.system.hardness = 8;
     source.system.hp = { value: 40, max: 40, brokenThreshold: 20 };
   }
+  if (request.category === "magic.accessory-rune") {
+    source.system.level.value = 6;
+    source.system.traits.value = ["invested", "magical"];
+    source.flags = { "pf2e-item-forge": { accessoryRune: { family: "trackless" } } };
+  }
   if (request.category === "magic.worn" || request.category.startsWith("magic.worn.")) {
     const slot = request.category.startsWith("magic.worn.") ? request.category.slice("magic.worn.".length) : "cloak";
     const usage = {
@@ -45,10 +50,12 @@ function sourceFor(request) {
 
 function metadataFor(request) {
   const slot = request.category.startsWith("magic.worn.") ? request.category.slice("magic.worn.".length) : null;
+  const accessory = request.category === "magic.accessory-rune";
   return {
     generator: "test",
-    automation: { level: request.magic?.wornMode === "generated" ? "rules-text" : "native" },
-    ...(request.magic?.wornMode === "generated" ? { wornItem: { slot, invested: true } } : {})
+    automation: { level: request.magic?.wornMode === "generated" || accessory ? "rules-text" : "native" },
+    ...(request.magic?.wornMode === "generated" ? { wornItem: { slot, invested: true } } : {}),
+    ...(accessory ? { accessoryRune: { baseItem: { level: 0 }, runeLevel: 6 } } : {})
   };
 }
 
@@ -69,12 +76,13 @@ test("MagicItemDiagnostics validates generated sources without persisting world 
   const result = await diagnostics.run();
   assert.equal(result.failed, 0);
   assert.equal(result.warnings, 1, "price audit warns when the runtime document does not derive a different price");
-  assert.equal(constructed, 18);
+  assert.equal(constructed, 19);
   assert.ok(result.checks.some((check) => check.id === "pf2e-specific-schema" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "specific-weapon-generated" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "specific-armor-generated" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "specific-shield-generated" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "worn-existing" && check.status === "passed"));
+  assert.ok(result.checks.some((check) => check.id === "accessory-rune-trackless" && check.status === "passed"));
   for (const id of ["worn-generated-unrestricted", "worn-generated-eyepiece", "worn-generated-headwear", "worn-generated-footwear"]) {
     assert.ok(result.checks.some((check) => check.id === id && check.status === "passed"), `expected ${id} to pass`);
   }
