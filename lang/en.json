@@ -111,7 +111,7 @@
       "SpecificItemRunes": "For generated specific items, property runes come only from the profile. Fundamental runes remain normally upgradeable; additional property runes cannot be freely added.",
       "WornItemMode": "Predefined copies a complete PF2e item from the selected compendia. Generated creates a new invested item from a validated Item Forge profile.",
       "WornItemProfile": "The profile defines worn usage, level progression, price, and special ability as one coherent package.",
-      "AccessoryRune": "Selects an Accessory Rune from Treasure Vault and applies it to a compatible base item. Automatic respects each rune’s Usage requirement."
+      "AccessoryRune": "Selects a source-backed Accessory Rune and applies it to a compatible host item. Both the host and the published rune must exist in the selected sources; Automatic also respects each rune’s Usage and host-magic policy."
     },
     "Preview": {
       "Empty": "Nothing forged yet. Choose parameters and press Generate.",
@@ -175,7 +175,9 @@
       "AccessoryRuneVariant": "Rune Variant",
       "AccessoryRuneUsage": "Rune Usage",
       "RuneLevel": "Rune Level",
-      "RunePrice": "Rune Price"
+      "RunePrice": "Rune Price",
+      "RuneSource": "Rune source",
+      "Activation": "Activation"
     },
     "Notifications": {
       "GenerationFailed": "No item could be generated for these parameters.",
@@ -302,7 +304,8 @@
       "UnknownAccessoryRune": "The selected Accessory Rune is not registered.",
       "AccessoryRuneBaseInvested": "An item with the invested trait cannot receive an Accessory Rune.",
       "AccessoryRuneAlreadyPresent": "An item can never have more than one Accessory Rune.",
-      "AccessoryRuneUsageMismatch": "The loaded base item no longer matches the selected Accessory Rune’s Usage requirement."
+      "AccessoryRuneUsageMismatch": "The loaded base item no longer matches the selected Accessory Rune’s Usage requirement.",
+      "AccessoryRuneBaseMagicNotAllowed": "The selected Accessory Rune can only be applied to a mundane base item unless its Usage explicitly allows a magic host."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatic level-appropriate",
@@ -651,12 +654,25 @@
       "Heading": "Accessory Rune: {runeName}",
       "RuleNote": "The item level is the higher of the base item level and rune level. If the rune raises the item level, it does not increase the base item’s other abilities.",
       "MenacingBase": "You gain a +1 item bonus to Intimidation checks to Coerce.",
-      "MenacingGreater": "You gain a +2 item bonus to Intimidation checks to Coerce. Once per day, you can activate the rune with 2 actions to cast a 3rd-rank fear spell (DC 25).",
+      "MenacingGreater": "You gain a +2 item bonus to Intimidation checks to Coerce.",
       "Pontoon": "You can walk on the surface of water and other liquids without falling through. This does not protect you from damage caused by the liquid. If you go beneath the surface, you must Swim.",
       "PreservingBase": "Non-magical food and drink in the container take ten times as long to spoil. This does not extend the duration of alchemical items.",
-      "PreservingGreater": "Non-magical food and drink in the container never spoil. Once per day, you can use 2 actions to cast cleanse cuisine on all food and drink inside.",
+      "PreservingGreater": "Non-magical food and drink in the container never spoil.",
       "TracklessBase": "While wearing the footwear, you are continuously affected by vanishing tracks.",
-      "TracklessGreater": "While wearing the footwear, you are continuously affected by vanishing tracks. Once per day, you can use 2 actions to extend the effect to a 20-foot emanation for 8 hours, affecting up to 10 chosen creatures in the area; you can Dismiss the effect."
+      "TracklessGreater": "While wearing the footwear, you are continuously affected by vanishing tracks."
+    },
+    "AccessoryRuneActivation": {
+      "Activate": "Activate",
+      "Frequency": "Frequency",
+      "Effect": "Effect",
+      "OncePerDay": "once per day",
+      "MenacingGreater": "The rune casts a 3rd-rank fear spell (DC 25).",
+      "PreservingGreater": "The container casts cleanse cuisine on all the food and drink within.",
+      "TracklessGreater": "You extend the rune’s effect to a 20-foot emanation for 8 hours, affecting up to 10 creatures of your choice within the area. You can Dismiss this effect."
+    },
+    "AccessoryRuneActivationTraits": {
+      "Concentrate": "concentrate",
+      "Manipulate": "manipulate"
     }
   }
 }

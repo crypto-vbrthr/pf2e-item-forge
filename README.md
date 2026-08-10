@@ -2,9 +2,9 @@
 
 Reusable Item Forge architecture for Foundry VTT v14 and Pathfinder 2e.
 
-## v0.0.26 scope
+## v0.0.27 scope
 
-This release adds Treasure Vault Remaster Accessory Runes as a dedicated composition path. Item Forge can select a compatible host item from configured sources, apply one published Accessory Rune family, enforce the invested/Usage restrictions, and preserve the base item's own ability scaling while raising the composed item to the higher base-or-rune level.
+This release hardens the Accessory Rune composition contract. Accessory Runes now obey the same selected-source policy as their host item, use explicit mundane/magic host permissions, preserve source provenance, and carry structured activation metadata while remaining conservative rules-text automation.
 
 Implemented:
 
@@ -18,7 +18,7 @@ Implemented:
 - Deterministic seeded generation
 - Existing physical compendium items, excluding feats/spells/rule documents
 - Spell-bearing scroll generation with meaningful legal heightening
-- Special magic-item mode for wands, staves, spellhearts, specific magic weapons, specific magic armor, specific magic shields, worn magic items, and Accessory Rune compositions
+- Special magic-item mode for wands, staves, spellhearts, specific magic weapons, specific magic armor, specific magic shields, worn magic items, and Accessory Runes
 - Wands use the PF2e generic wand templates and embed one real spell at a legal base or meaningful heightened rank
 - Staves can either be copied exactly from selected compendia or generated as rulebook-style variant families with inherited lower variants
 - Spellhearts can either be selected as complete predefined PF2e items or generated from validated custom Spellheart profiles with coherent armor/weapon benefits, spell progressions, prices, and themes
@@ -28,10 +28,11 @@ Implemented:
 - Published worn items preserve native PF2e usage, Rule Elements, activations, price, traits, and automation; generated worn items use whole-effect profiles plus rules-text manifests. Fourteen core families cover item levels 1 through 20 across footwear, eyepieces, belts, cloaks, masks, circlets, gloves, bracers, garments, unrestricted jewelry, and headwear
 - Generated worn profiles use `equipment` documents only as generic structural templates; backpack/container schemas are not borrowed by the generic worn generator
 - Worn profiles support an explicit `invested` contract (default `true`), normalize canonical rarity/variant IDs, and treat arcane/divine/occult/primal as sufficient magic markers without redundantly forcing the `magical` trait
-- Accessory Runes are a separate `magic.accessory-rune` composition family with a public `accessoryRunes` registry. Core Treasure Vault Remaster families are Menacing, Pontoon, Preserving, and Trackless with their published level/price progressions and Usage restrictions
-- Accessory Rune composition rejects invested hosts, adds `invested` and `magical`, uses `max(base level, rune level)`, adds the rune price to the host price, and never scales the host item's pre-existing ability/counteract data merely because the rune raises its item level
-- Generated Accessory Rune hosts use `rules-text` automation plus `flags.pf2e-item-forge.accessoryRune`; no unverified PF2e native rune-carrier schema or fabricated Rule Elements are written
-- Public `specificItemProfiles`, `specificShieldProfiles`, `wornMagicProfiles`, and `accessoryRunes` registries for extension modules and campaign content; `getWornSlotCapabilities()` and `getCapabilities().wornSlots` expose actual predefined/generated slot availability
+- Accessory Runes are a separate `magic.accessory-rune` composition path with a public `accessoryRunes` registry; the core library contains the Treasure Vault Menacing, Pontoon, Preserving, and Trackless progressions
+- Accessory Rune variants are source-backed by indexed `sourceSlug`, so both host and rune must exist in the selected content sources; result metadata records both content packs and exact rune provenance
+- Accessory Rune host contracts declare document types, worn slots, and magic policy. The four core Treasure Vault families are `mundane-only`, matching the default rule that a magic host is legal only when a rune Usage explicitly permits it
+- Greater Accessory Rune activations are structured as actions/traits/frequency/spell metadata and rendered into localized rules text; custom native Rule Elements are still not guessed
+- Public `specificItemProfiles`, `specificShieldProfiles`, and `wornMagicProfiles` registries for extension modules and campaign content; `getWornSlotCapabilities()` and `getCapabilities().wornSlots` expose actual predefined/generated slot availability
 - Magic themes for fire, cold, electricity, healing, illusion, mental, vitality, void, arcane, divine, occult, primal, and summoning
 - Composed weapons, armor, and shields with fundamental runes
 - Registry-driven property runes with automatic/random/fixed/none modes and compatibility rules
@@ -52,13 +53,14 @@ Implemented:
 - Standalone `ItemForgeApplication` container owning Foundry document creation and preserving `createdByForge` versus `generated` provenance
 - German and English localization
 - Shared generation-result contract for `contentSources`, `templateSource`, and automation level
-- Live Magic diagnostics for predefined and generated magic paths including representative worn contracts, Accessory Rune composition, strict source-shape checks, pack-index failures, and composed-equipment price preparation
-- 210 automated unit/integration/statistical/contract tests
+- Live Magic diagnostics for predefined and generated magic paths including representative unrestricted, eyepiece, headwear, and footwear worn contracts, strict source-shape checks, pack-index failures, and composed-equipment price preparation
+- 219 automated unit/integration/statistical/contract tests
 
 Not yet implemented:
 
 - Native PF2e staff-preparation/casting automation for generated custom staff-family manifests (predefined staves preserve their native PF2e data unchanged)
 - Verified native automation builders for generated custom wands/staves/spellhearts/specific items
+- Verified native PF2e Accessory Rune carrier/activation automation (current compositions retain the host's native data and store the added rune as rules text plus a structured manifest)
 - Non-zero reinforcing runes inside generated specific-shield profiles (blocked until final-durability interaction is verified against PF2e runtime)
 - Precious-material composition for functional weapons/armor
 - Presets
@@ -84,7 +86,7 @@ await game.pf2eItemForge.generate({
 });
 ```
 
-Apply a Treasure Vault Remaster Accessory Rune to one compatible host item from the selected sources:
+Compose a source-backed Accessory Rune onto a compatible mundane host:
 
 ```js
 await game.pf2eItemForge.generate({
@@ -97,7 +99,7 @@ await game.pf2eItemForge.generate({
 });
 ```
 
-The host must satisfy the rune family's Usage and may not already have the `invested` trait. The resulting item level is the higher of host and rune level; a rune-raised level does not rescale the host item's other abilities. The published rune effect is represented as rules text plus a structured Item Forge manifest until a verified PF2e-native carrier contract is available.
+The same source policy is applied to the host and the published rune entry. The result records the exact rune source in `metadata.accessoryRune.runeSource` and both packs in `metadata.contentSources`. Core Treasure Vault Accessory Runes reject magic hosts unless a future profile explicitly declares that its Usage permits one.
 
 Select a predefined item:
 

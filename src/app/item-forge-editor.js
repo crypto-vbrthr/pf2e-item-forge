@@ -170,6 +170,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
         NO_ACCESSORY_RUNE_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoAccessoryRuneCandidate",
         UNKNOWN_ACCESSORY_RUNE: "PF2E_ITEM_FORGE.Errors.UnknownAccessoryRune",
         ACCESSORY_RUNE_BASE_INVESTED: "PF2E_ITEM_FORGE.Errors.AccessoryRuneBaseInvested",
+        ACCESSORY_RUNE_BASE_MAGIC_NOT_ALLOWED: "PF2E_ITEM_FORGE.Errors.AccessoryRuneBaseMagicNotAllowed",
         ACCESSORY_RUNE_ALREADY_PRESENT: "PF2E_ITEM_FORGE.Errors.AccessoryRuneAlreadyPresent",
         ACCESSORY_RUNE_USAGE_MISMATCH: "PF2E_ITEM_FORGE.Errors.AccessoryRuneUsageMismatch",
         UNKNOWN_STAFF_PROFILE: "PF2E_ITEM_FORGE.Errors.UnknownStaffProfile",

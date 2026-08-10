@@ -90,6 +90,7 @@ export class MagicItemDiagnostics {
       { id: "worn-generated-headwear", expectedWornSlot: "headwear", request: { mode: "magic", category: "magic.worn.headwear", level: { min: 10, max: 10, target: 10 }, levelPolicy: "strict", source: { mode: "system" }, magic: { wornMode: "generated", wornProfile: "automatic" }, seed: "diagnostic-worn-headwear" } },
       { id: "worn-generated-footwear", expectedWornSlot: "footwear", request: { mode: "magic", category: "magic.worn.footwear", level: { min: 4, max: 4, target: 4 }, levelPolicy: "strict", source: { mode: "system" }, magic: { wornMode: "generated", wornProfile: "automatic" }, seed: "diagnostic-worn-footwear" } },
       { id: "accessory-rune-trackless", request: { mode: "magic", category: "magic.accessory-rune", level: { min: 6, max: 6, target: 6 }, levelPolicy: "strict", source: { mode: "system" }, magic: { accessoryRune: "trackless" }, seed: "diagnostic-accessory-trackless" } },
+      { id: "accessory-rune-preserving", request: { mode: "magic", category: "magic.accessory-rune", level: { min: 3, max: 3, target: 3 }, levelPolicy: "strict", source: { mode: "system" }, magic: { accessoryRune: "preserving" }, seed: "diagnostic-accessory-preserving" } },
       { id: "equipment-composed-price", priceAudit: true, request: { mode: "equipment", category: "weapon", level: { min: 4, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, equipment: { fundamentalRunes: "automatic", propertyRunes: { mode: "none", selected: [] } }, seed: "diagnostic-equipment-price" } }
     ];
 
@@ -143,15 +144,24 @@ export class MagicItemDiagnostics {
         if (!parsedUsage.worn) issues.push("worn item lacks a recognized worn usage");
         if (expectedWornSlot && parsedUsage.slot !== expectedWornSlot) issues.push(`worn usage parsed as ${parsedUsage.slot ?? "none"}, expected ${expectedWornSlot}`);
       }
-      if (id === "accessory-rune-trackless") {
+      if (id.startsWith("accessory-rune-")) {
         const traits = source.system?.traits?.value ?? [];
         if (!traits.includes("invested")) issues.push("Accessory Rune host lacks invested trait");
-        if (!traits.includes("magical")) issues.push("Accessory Rune host lacks magical trait");
+        if (!hasMagicMarkerTraits(traits)) issues.push("Accessory Rune host lacks a magical marker trait");
         if (!source.flags?.["pf2e-item-forge"]?.accessoryRune) issues.push("Accessory Rune host lacks Item Forge manifest");
         if (result.metadata?.automation?.level !== "rules-text") issues.push("Accessory Rune host is not marked rules-text automation");
         const baseLevel = Number(result.metadata?.accessoryRune?.baseItem?.level ?? 0);
         const runeLevel = Number(result.metadata?.accessoryRune?.runeLevel ?? 0);
         if (Number(source.system?.level?.value) !== Math.max(baseLevel, runeLevel)) issues.push("Accessory Rune host level is not max(base, rune)");
+        const runeSource = result.metadata?.accessoryRune?.runeSource;
+        if (!runeSource?.uuid || !runeSource?.pack || !runeSource?.slug) issues.push("Accessory Rune result lacks source-backed rune provenance");
+        const contentSources = result.metadata?.contentSources ?? [];
+        if (!contentSources.includes(result.metadata?.accessoryRune?.baseItem?.pack)) issues.push("Accessory Rune host pack is missing from contentSources");
+        if (!contentSources.includes(runeSource?.pack)) issues.push("Accessory Rune source pack is missing from contentSources");
+        if (result.metadata?.accessoryRune?.host?.magicPolicy !== "mundane-only") issues.push("Core Accessory Rune diagnostic did not use the expected mundane-only host contract");
+        if (id === "accessory-rune-preserving" && source.type !== "backpack" && !/container|basket|bag/i.test(String(source.system?.usage?.value ?? ""))) {
+          issues.push("Preserving diagnostic did not resolve a container host");
+        }
       }
       if (id.startsWith("worn-generated-")) {
         const traits = source.system?.traits?.value ?? [];
@@ -213,6 +223,16 @@ export class MagicItemDiagnostics {
       id: "pf2e-spell-cast-actions",
       status: actionShapes.size ? "passed" : "skipped",
       message: actionShapes.size ? `Parsed spell action counts: ${[...actionShapes].sort((a, b) => a - b).join(", ")}` : "No numeric spell action counts were parsed"
+    });
+
+    const accessoryFamilies = this.api.accessoryRunes?.getAll?.() ?? [];
+    const activationVariants = accessoryFamilies.flatMap((family) => family.variants ?? []).filter((variant) => variant.activation);
+    checks.push({
+      id: "accessory-rune-activation-contract",
+      status: activationVariants.length && activationVariants.every((variant) => Number.isInteger(variant.activation.actions) && Array.isArray(variant.activation.traits) && variant.activation.effectText) ? "passed" : "failed",
+      message: activationVariants.length
+        ? `Structured Accessory Rune activations: ${activationVariants.length}`
+        : "No structured Accessory Rune activations are registered"
     });
 
     const packErrors = this.api.compendiumIndex?.getPackErrors?.() ?? [];

@@ -1,16 +1,23 @@
 # Changelog
 
+## 0.0.27
+
+- Hardens Accessory Rune hosts with an explicit `host` contract (`documentTypes`, `wornSlots`, `magicPolicy`). Core Treasure Vault runes default to `mundane-only`; non-invested magic hosts are accepted only by profiles that explicitly opt into `magicPolicy: "allowed"`.
+- Applies the request source policy to both halves of the composition. A published Accessory Rune variant is now resolved by its indexed `sourceSlug`, so the rune itself must exist in an allowed compendium instead of being silently supplied by the built-in rules library.
+- Records rune provenance (`runeSource` UUID/pack/slug) and includes both host and rune packs in `metadata.contentSources`.
+- Adds structured activation contracts for greater Menacing, greater Preserving, and greater Trackless, including action count, activation traits, frequency, spell metadata where applicable, and localized rendered rules text.
+- Expands the public Accessory Rune registry contract to support future shield/item/vehicle target families without hard-coding the first four Treasure Vault runes into the generator.
+- Normalizes composed Accessory Rune prices to gp/sp/cp instead of converting large values to platinum.
+- Expands live Magic diagnostics with a Preserving/container scenario, rune-source provenance checks, host-magic policy checks, and a structured activation-contract check.
+- Adds regression coverage for hosts that become invested, magical, already runed, usage-incompatible, or unavailable after indexing, plus source-filter enforcement for the rune itself.
+- Test suite: 219 passing tests.
+
 ## 0.0.26
 
-- Adds `magic.accessory-rune` as a dedicated Treasure Vault Remaster composition path rather than folding Accessory Runes into generic worn-item generation.
-- Adds public `AccessoryRuneRegistry` exposed as `game.pf2eItemForge.accessoryRunes`, with the four published Treasure Vault Remaster families: Menacing (3/10), Pontoon (9), Preserving (3/8), and Trackless (6/10).
-- Adds `AccessoryRuneGenerator`, which selects a compatible host item from the configured content sources, rejects invested hosts, respects each rune family's Usage contract, and applies at most one Item-Forge Accessory Rune manifest.
-- Computes the composed item's level as `max(base level, rune level)` while deliberately leaving the base item's existing ability data, Rule Elements, and counteract values unchanged when the rune raises item level.
-- Adds the exact rune price to the host item's coin price, preserves the higher rarity, and adds the `invested` and `magical` traits required by the Accessory Rune contract.
-- Uses rules-text automation plus structured `flags.pf2e-item-forge.accessoryRune` metadata rather than inventing an unverified PF2e-v14 native Accessory Rune carrier schema.
-- Adds Embedded Editor controls and preview metadata for rune family, variant, Usage, host item, rune level/price, effective level, effect, and automation status.
-- Extends the public capabilities API, request normalization/validation, generation-result contract, German/English localization, and live Magic diagnostics with Accessory Rune support.
-- Prevents published Accessory Rune documents whose own Usage says `etched onto ...` from being misidentified as compatible host containers.
+- Adds `magic.accessory-rune` as a separate composition path rather than mixing Accessory Runes into generated worn-item profiles.
+- Adds `AccessoryRuneRegistry` exposed as `game.pf2eItemForge.accessoryRunes`.
+- Adds the Treasure Vault Remaster Menacing, Pontoon, Preserving, and Trackless families with their published level/price progressions and usage constraints.
+- Accessory Rune composition enforces one-rune/investment rules, compatible host usage, `max(base level, rune level)`, additive rune price, preserved base abilities, seeded selection, rules-text automation, preview metadata, localization, and live diagnostics.
 - Test suite: 210 passing tests.
 
 ## 0.0.25

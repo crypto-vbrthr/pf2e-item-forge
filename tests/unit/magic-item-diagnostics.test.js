@@ -26,9 +26,12 @@ function sourceFor(request) {
     source.system.hp = { value: 40, max: 40, brokenThreshold: 20 };
   }
   if (request.category === "magic.accessory-rune") {
-    source.system.level.value = 6;
+    const preserving = request.magic?.accessoryRune === "preserving";
+    source.type = preserving ? "backpack" : "equipment";
+    source.system.level.value = preserving ? 3 : 6;
     source.system.traits.value = ["invested", "magical"];
-    source.flags = { "pf2e-item-forge": { accessoryRune: { family: "trackless" } } };
+    if (preserving) source.system.usage = { value: "worn backpack" };
+    source.flags = { "pf2e-item-forge": { accessoryRune: { family: request.magic?.accessoryRune } } };
   }
   if (request.category === "magic.worn" || request.category.startsWith("magic.worn.")) {
     const slot = request.category.startsWith("magic.worn.") ? request.category.slice("magic.worn.".length) : "cloak";
@@ -55,7 +58,15 @@ function metadataFor(request) {
     generator: "test",
     automation: { level: request.magic?.wornMode === "generated" || accessory ? "rules-text" : "native" },
     ...(request.magic?.wornMode === "generated" ? { wornItem: { slot, invested: true } } : {}),
-    ...(accessory ? { accessoryRune: { baseItem: { level: 0 }, runeLevel: 6 } } : {})
+    ...(accessory ? {
+      contentSources: ["pf2e.equipment-srd"],
+      accessoryRune: {
+        baseItem: { level: 0, pack: "pf2e.equipment-srd" },
+        runeLevel: request.magic?.accessoryRune === "preserving" ? 3 : 6,
+        runeSource: { uuid: "Compendium.pf2e.equipment-srd.Item.rune", pack: "pf2e.equipment-srd", slug: request.magic?.accessoryRune ?? "trackless" },
+        host: { magicPolicy: "mundane-only" }
+      }
+    } : {})
   };
 }
 
@@ -67,7 +78,8 @@ test("MagicItemDiagnostics validates generated sources without persisting world 
       entries: [{ categories: ["magic.weapon"], specific: { material: {}, runes: {} } }],
       spellEntries: [{ castActions: 1 }, { castActions: 2 }],
       getPackErrors: () => []
-    }
+    },
+    accessoryRunes: { getAll: () => [{ variants: [{ activation: { actions: 2, traits: ["concentrate"], effectText: "effect" } }] }] }
   };
   const diagnostics = new MagicItemDiagnostics({
     api,
@@ -76,13 +88,15 @@ test("MagicItemDiagnostics validates generated sources without persisting world 
   const result = await diagnostics.run();
   assert.equal(result.failed, 0);
   assert.equal(result.warnings, 1, "price audit warns when the runtime document does not derive a different price");
-  assert.equal(constructed, 19);
+  assert.equal(constructed, 20);
   assert.ok(result.checks.some((check) => check.id === "pf2e-specific-schema" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "specific-weapon-generated" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "specific-armor-generated" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "specific-shield-generated" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "worn-existing" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "accessory-rune-trackless" && check.status === "passed"));
+  assert.ok(result.checks.some((check) => check.id === "accessory-rune-preserving" && check.status === "passed"));
+  assert.ok(result.checks.some((check) => check.id === "accessory-rune-activation-contract" && check.status === "passed"));
   for (const id of ["worn-generated-unrestricted", "worn-generated-eyepiece", "worn-generated-headwear", "worn-generated-footwear"]) {
     assert.ok(result.checks.some((check) => check.id === id && check.status === "passed"), `expected ${id} to pass`);
   }
@@ -96,7 +110,8 @@ test("MagicItemDiagnostics exposes compendium indexing failures as a failed cont
       entries: [],
       spellEntries: [],
       getPackErrors: () => [{ pack: "broken.pack", message: "bad index" }]
-    }
+    },
+    accessoryRunes: { getAll: () => [{ variants: [{ activation: { actions: 2, traits: ["concentrate"], effectText: "effect" } }] }] }
   };
   const diagnostics = new MagicItemDiagnostics({ api, documentFactory: (source) => ({ system: structuredClone(source.system) }) });
   const result = await diagnostics.run();

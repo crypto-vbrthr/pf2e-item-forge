@@ -111,7 +111,7 @@
       "SpecificItemRunes": "Bei generierten spezifischen Gegenständen stammen Eigenschaftsrunen ausschließlich aus dem Profil. Basisrunen bleiben normal verbesserbar; zusätzliche Eigenschaftsrunen können nicht frei hinzugefügt werden.",
       "WornItemMode": "Vordefiniert übernimmt einen vollständigen PF2e-Gegenstand aus den gewählten Kompendien. Generiert erschafft einen neuen investierten Gegenstand aus einem geprüften Item-Forge-Profil.",
       "WornItemProfile": "Das Profil legt Nutzungsart, Stufenprogression, Preis und besondere Wirkung als zusammenhängendes Paket fest.",
-      "AccessoryRune": "Wählt eine Accessory-Rune aus Treasure Vault und graviert sie auf einen kompatiblen Basisgegenstand. Automatisch berücksichtigt die jeweilige Nutzungsart der Rune."
+      "AccessoryRune": "Wählt eine quellengebundene Accessory-Rune und graviert sie auf einen kompatiblen Trägergegenstand. Sowohl Basisgegenstand als auch veröffentlichte Rune müssen in den gewählten Quellen vorhanden sein; Automatisch berücksichtigt außerdem Nutzungsart und Magie-Policy der Rune."
     },
     "Preview": {
       "Empty": "Noch nichts geschmiedet. Parameter wählen und Generieren drücken.",
@@ -175,7 +175,9 @@
       "AccessoryRuneVariant": "Runenvariante",
       "AccessoryRuneUsage": "Runen-Nutzung",
       "RuneLevel": "Runenstufe",
-      "RunePrice": "Runenpreis"
+      "RunePrice": "Runenpreis",
+      "RuneSource": "Runenquelle",
+      "Activation": "Aktivierung"
     },
     "Notifications": {
       "GenerationFailed": "Für diese Parameter konnte kein Gegenstand erzeugt werden.",
@@ -302,7 +304,8 @@
       "UnknownAccessoryRune": "Die ausgewählte Accessory-Rune ist nicht registriert.",
       "AccessoryRuneBaseInvested": "Ein Gegenstand mit dem Merkmal Investiert kann keine Accessory-Rune erhalten.",
       "AccessoryRuneAlreadyPresent": "Ein Gegenstand kann höchstens eine Accessory-Rune tragen.",
-      "AccessoryRuneUsageMismatch": "Der geladene Basisgegenstand entspricht nicht mehr der Nutzungsart der ausgewählten Accessory-Rune."
+      "AccessoryRuneUsageMismatch": "Der geladene Basisgegenstand entspricht nicht mehr der Nutzungsart der ausgewählten Accessory-Rune.",
+      "AccessoryRuneBaseMagicNotAllowed": "Die ausgewählte Accessory-Rune kann nur auf einen mundanen Basisgegenstand graviert werden, sofern ihre Nutzungsart einen magischen Träger nicht ausdrücklich erlaubt."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatisch stufengerecht",
@@ -651,12 +654,25 @@
       "Heading": "Accessory-Rune: {runeName}",
       "RuleNote": "Die Gegenstandsstufe ist das Maximum aus der Stufe des Basisgegenstands und der Rune. Eine durch die Rune erhöhte Stufe erhöht die übrigen Fähigkeiten des Basisgegenstands nicht.",
       "MenacingBase": "Du erhältst einen Gegenstandsbonus von +1 auf Einschüchtern-Würfe zum Zwingen.",
-      "MenacingGreater": "Du erhältst einen Gegenstandsbonus von +2 auf Einschüchtern-Würfe zum Zwingen. Einmal pro Tag kannst du die Rune mit 2 Aktionen aktivieren, um Furcht auf Zaubergrad 3 mit SG 25 zu wirken.",
+      "MenacingGreater": "Du erhältst einen Gegenstandsbonus von +2 auf Einschüchtern-Würfe zum Zwingen.",
       "Pontoon": "Du kannst über die Oberfläche von Wasser und anderen Flüssigkeiten gehen, ohne einzusinken. Dies schützt nicht vor Schaden durch die Flüssigkeit. Tauchst du unter, musst du Schwimmen.",
       "PreservingBase": "Nichtmagische Nahrung und Getränke im Behälter benötigen zehnmal so lange, um zu verderben. Die Dauer alchemistischer Gegenstände wird nicht verlängert.",
-      "PreservingGreater": "Nichtmagische Nahrung und Getränke im Behälter verderben nicht. Einmal pro Tag kannst du mit 2 Aktionen den gesamten Inhalt mit Cleanse Cuisine reinigen.",
+      "PreservingGreater": "Nichtmagische Nahrung und Getränke im Behälter verderben nicht.",
       "TracklessBase": "Solange du das Schuhwerk trägst, stehst du fortwährend unter dem Effekt von Vanishing Tracks.",
-      "TracklessGreater": "Solange du das Schuhwerk trägst, stehst du fortwährend unter dem Effekt von Vanishing Tracks. Einmal pro Tag kannst du den Effekt mit 2 Aktionen für 8 Stunden auf eine 6-m-Ausstrahlung erweitern und bis zu 10 ausgewählte Kreaturen darin einbeziehen; du kannst den Effekt beenden."
+      "TracklessGreater": "Solange du das Schuhwerk trägst, stehst du fortwährend unter dem Effekt von Vanishing Tracks."
+    },
+    "AccessoryRuneActivation": {
+      "Activate": "Aktivieren",
+      "Frequency": "Häufigkeit",
+      "Effect": "Effekt",
+      "OncePerDay": "einmal pro Tag",
+      "MenacingGreater": "Die Rune wirkt Furcht auf Zaubergrad 3 (SG 25).",
+      "PreservingGreater": "Der Behälter wirkt Cleanse Cuisine auf alle darin befindlichen Nahrungsmittel und Getränke.",
+      "TracklessGreater": "Du erweiterst den Effekt der Rune für 8 Stunden auf eine 6-m-Ausstrahlung. Er betrifft bis zu 10 Kreaturen deiner Wahl im Bereich. Du kannst diesen Effekt aufheben."
+    },
+    "AccessoryRuneActivationTraits": {
+      "Concentrate": "konzentrieren",
+      "Manipulate": "manipulieren"
     }
   }
 }

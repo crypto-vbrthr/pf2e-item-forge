@@ -450,7 +450,9 @@
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.BaseItem"}}</dt><dd>{{preview.accessoryRune.baseItem.name}} ({{localize "PF2E_ITEM_FORGE.Preview.Level"}} {{preview.accessoryRune.baseItem.level}})</dd>
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.RuneLevel"}}</dt><dd>{{preview.accessoryRune.runeLevel}}</dd>
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.RunePrice"}}</dt><dd>{{preview.accessoryRune.runePriceGp}} {{localize "PF2E_ITEM_FORGE.Currency.GP"}}</dd>
+              {{#if preview.accessoryRune.runeSource.name}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.RuneSource"}}</dt><dd>{{preview.accessoryRune.runeSource.name}} · {{preview.accessoryRune.runeSource.pack}}</dd>{{/if}}
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.SpecialAbility"}}</dt><dd>{{preview.accessoryRune.effect}}</dd>
+              {{#if preview.accessoryRune.activationSummary}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.Activation"}}</dt><dd>{{preview.accessoryRune.activationSummary}}</dd>{{/if}}
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.Automation"}}</dt><dd>{{preview.accessoryRune.automationLabel}}</dd>
             {{/if}}
             {{#if preview.wornItem}}

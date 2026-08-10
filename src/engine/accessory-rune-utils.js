@@ -1,4 +1,4 @@
-import { parseWornUsage } from "./worn-item-utils.js";
+import { hasMagicMarkerTraits, parseWornUsage } from "./worn-item-utils.js";
 
 const RARITY_ORDER = ["common", "uncommon", "rare", "unique"];
 
@@ -10,23 +10,34 @@ export function maxRarity(a = "common", b = "common") {
 
 export function isAccessoryRuneBaseCompatible(entry, family) {
   if (!entry || !family) return false;
-  if (entry.traits?.includes?.("invested")) return false;
+  const traits = Array.isArray(entry.traits) ? entry.traits : [];
+  if (traits.includes("invested")) return false;
+
+  const host = family.host ?? {
+    documentTypes: family.targetKind === "container" ? ["equipment", "backpack"] : ["equipment"],
+    wornSlots: family.allowedSlots ?? [],
+    magicPolicy: family.hostMagicPolicy ?? "mundane-only"
+  };
+  if (!host.documentTypes?.includes?.(entry.type)) return false;
+  if ((host.magicPolicy ?? "mundane-only") === "mundane-only" && hasMagicMarkerTraits(traits)) return false;
 
   if (family.targetKind === "container") {
     if (entry.type === "backpack") return true;
     const usage = String(entry.usage ?? "").toLowerCase();
-    // Never treat a rune document whose own Usage says "etched onto ..." as
-    // the host container. This matters because published Accessory Runes are
-    // physical equipment documents in PF2e compendia too.
+    // Published rune documents are equipment too. Never let "etched onto a
+    // basket..." make the rune document a host for another copy of itself.
     if (/\betched\b/.test(usage)) return false;
     return entry.type === "equipment" && /\b(container|basket|bag)\b/.test(usage);
   }
 
-  if (entry.type !== "equipment") return false;
+  if (family.targetKind === "shield") return entry.type === "shield";
+  if (family.targetKind === "item") return true;
+  if (family.targetKind === "vehicle") return entry.type === "vehicle";
+
   const worn = parseWornUsage(entry.usage);
   if (!worn.worn) return false;
   if (family.targetKind === "footwear") return worn.slot === "footwear";
-  if (family.targetKind === "clothing") return family.allowedSlots.includes(worn.slot);
+  if (family.targetKind === "clothing") return (host.wornSlots ?? family.allowedSlots ?? []).includes(worn.slot);
   return false;
 }
 
@@ -41,18 +52,15 @@ export function coinsToCopper(value) {
   );
 }
 
+/** Keep composed prices in gp/sp/cp for consistency with PF2e item stat blocks. */
 export function copperToCoins(copper) {
   let rest = Math.max(0, Math.round(Number(copper) || 0));
-  const pp = Math.floor(rest / 1000); rest %= 1000;
   const gp = Math.floor(rest / 100); rest %= 100;
   const sp = Math.floor(rest / 10); rest %= 10;
   const cp = rest;
-  const result = {};
-  if (pp) result.pp = pp;
-  if (gp) result.gp = gp;
+  const result = { gp };
   if (sp) result.sp = sp;
   if (cp) result.cp = cp;
-  if (!Object.keys(result).length) result.gp = 0;
   return result;
 }
 
