@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.0.31
+
+- Adds `magic.grimoire` as a dedicated magic-item family with explicit predefined/native and generated/rules-text paths.
+- Adds public `GrimoireProfileRegistry` as `game.pf2eItemForge.grimoireProfiles` plus `getGrimoireCapabilities()` / `getCapabilities().grimoireCapabilities`.
+- Classifies indexed `grimoire` documents separately from generic held/worn equipment and preserves complete published PF2e grimoires in predefined mode.
+- Adds five reviewed generated grimoire families with interleaved variants that provide automatic exact strict coverage from item level 4 through 20.
+- Generated grimoires use only PF2e-system `book`/`equipment` grimoire documents as implementation templates, re-check type/trait after document load, and reject third-party template fallback.
+- Hardens generated grimoire composition by clearing inherited Rule Elements, descriptions, subitems, apex/publication data, foreign flags, material/base-item/container identity, slug, and template quantity before writing the profile.
+- Adds a structured daily-preparation rules contract covering prepared-spell use, spell-slot-only benefits, cantrip/focus/innate exclusions, one-grimoire-per-caster/day, one-caster-per-grimoire/day, and no post-preparation possession requirement.
+- Adds structured grimoire activation contracts for actions/reactions/free actions, traits, arbitrary frequency counts, trigger, requirements, duration, and qualifying-spell filters.
+- Extends the Embedded Editor with Grimoire predefined/generated mode and profile controls, capability-aware availability, preview data, source guidance, localization, and dedicated errors.
+- Extends live Magic diagnostics and regression coverage with predefined/generated Grimoire paths, exact-level coverage, system-template provenance, schema cleanup, activation/filter contracts, and runtime guards.
+- Marks Magical Tattoos as intentionally out of Item Forge generation scope rather than an unfinished loot category; assistive items and apex items remain future dedicated blocks.
+- Test suite: 255 passing tests; total line coverage 94.04%.
+
 ## 0.0.30
 
 - Completes the Held Item contract review by making the structured activation manifest authoritative for activation type, action count, traits, frequency, trigger, requirements, duration, and effect text.

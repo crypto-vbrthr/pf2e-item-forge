@@ -60,7 +60,9 @@
       "WornItemProfile": "Profil für getragenen Gegenstand",
       "AccessoryRune": "Accessory-Rune",
       "HeldItemMode": "Erzeugungsart des gehaltenen Gegenstands",
-      "HeldItemProfile": "Profil des gehaltenen Gegenstands"
+      "HeldItemProfile": "Profil des gehaltenen Gegenstands",
+      "GrimoireMode": "Grimoire-Modus",
+      "GrimoireProfile": "Grimoire-Profil"
     },
     "LevelMode": {
       "Single": "Einzelne Stufe",
@@ -116,7 +118,10 @@
       "AccessoryRune": "Wählt eine quellengebundene Accessory-Rune und graviert sie auf einen kompatiblen Trägergegenstand. Sowohl Basisgegenstand als auch veröffentlichte Rune müssen in den gewählten Quellen vorhanden sein; Automatisch berücksichtigt außerdem Nutzungsart und Magie-Policy der Rune.",
       "HeldItemMode": "Vordefiniert übernimmt einen veröffentlichten PF2e-Gegenstand vollständig; Generiert baut einen neuen gehaltenen Gegenstand aus einem Item-Forge-Profil.",
       "HeldItemProfile": "Das Profil legt Händigkeit, Stufenstaffelung, Preis und besondere Fähigkeit gemeinsam fest.",
-      "GeneratedHeldSources": "Generierte gehaltene Gegenstände verwenden Item-Forge-Profile und eine technische PF2e-Systemvorlage. Die gewählten Inhaltsquellen beeinflussen vordefinierte gehaltene Gegenstände, nicht die generierte Profilbibliothek."
+      "GeneratedHeldSources": "Generierte gehaltene Gegenstände verwenden Item-Forge-Profile und eine technische PF2e-Systemvorlage. Die gewählten Inhaltsquellen beeinflussen vordefinierte gehaltene Gegenstände, nicht die generierte Profilbibliothek.",
+      "GrimoireMode": "Vordefiniert übernimmt ein vorhandenes PF2e-Grimoire vollständig. Generiert erschafft ein neues Grimoire aus einem Item-Forge-Profil.",
+      "GrimoireProfile": "Wähle eine Grimoire-Familie oder lasse Item Forge automatisch ein passendes Profil bestimmen.",
+      "GeneratedGrimoireSources": "Generierte Grimoires verwenden nur ein geeignetes PF2e-System-Grimoire als technisches Schema-Template. Zauberquellen werden dafür nicht benötigt."
     },
     "Preview": {
       "Empty": "Noch nichts geschmiedet. Parameter wählen und Generieren drücken.",
@@ -188,7 +193,11 @@
       "HeldHands": "Benötigte Hände",
       "HeldUsage": "Nutzung",
       "HeldItemVariant": "Variante",
-      "HeldEffect": "Besondere Fähigkeit"
+      "HeldEffect": "Besondere Fähigkeit",
+      "GrimoireMode": "Grimoire-Modus",
+      "GrimoireProfile": "Grimoire-Profil",
+      "GrimoireVariant": "Grimoire-Variante",
+      "GrimoireEffect": "Grimoire-Effekt"
     },
     "Notifications": {
       "GenerationFailed": "Für diese Parameter konnte kein Gegenstand erzeugt werden.",
@@ -264,7 +273,8 @@
       "MagicAccessoryRune": "Accessory-Runen-Gegenstand",
       "MagicHeld": "Gehaltene magische Gegenstände",
       "MagicHeldOneHand": "Einhandgegenstände",
-      "MagicHeldTwoHands": "Zweihandgegenstände"
+      "MagicHeldTwoHands": "Zweihandgegenstände",
+      "MagicGrimoire": "Grimoires"
     },
     "GenerationMode": {
       "Existing": "Vordefinierten Gegenstand auswählen",
@@ -325,7 +335,13 @@
       "NoHeldItemTemplate": "Es ist keine sichere PF2e-Strukturvorlage für diesen gehaltenen Gegenstand verfügbar.",
       "InvalidHeldItemTemplateType": "Die gefundene Vorlage besitzt einen unsicheren Dokumenttyp.",
       "HeldItemTemplateUsageMismatch": "Die Händigkeit der Vorlage stimmt nicht mit dem gewählten Profil überein.",
-      "UnknownHeldItemProfile": "Das gewählte Profil für gehaltene magische Gegenstände ist unbekannt."
+      "UnknownHeldItemProfile": "Das gewählte Profil für gehaltene magische Gegenstände ist unbekannt.",
+      "NoPredefinedGrimoireCandidate": "Kein vordefiniertes Grimoire passt zu den gewählten Kriterien.",
+      "NoGrimoireProfileCandidate": "Kein generiertes Grimoire-Profil passt zu den gewählten Kriterien.",
+      "NoGrimoireTemplate": "Es wurde kein geeignetes PF2e-System-Grimoire als technisches Template gefunden.",
+      "InvalidGrimoireTemplateType": "Das geladene Grimoire-Template besitzt keinen zulässigen PF2e-Gegenstandstyp.",
+      "GrimoireTemplateTraitMismatch": "Das geladene Grimoire-Template besitzt nicht mehr das Merkmal „Grimoire“.",
+      "UnknownGrimoireProfile": "Das gewählte Grimoire-Profil ist unbekannt."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatisch stufengerecht",
@@ -778,6 +794,66 @@
       "PredefinedOnly": "(nur vordefiniert)",
       "GeneratedOnly": "(nur generierbar)",
       "Unavailable": "(nicht verfügbar)"
+    },
+    "GrimoireMode": {
+      "Generated": "Generiert",
+      "Existing": "Vordefiniert"
+    },
+    "GrimoireProfiles": {
+      "Automatic": "Automatisch",
+      "ElementalConcordance": "Elementare Konkordanz",
+      "RestorativeLedger": "Ledger der Wiederherstellung",
+      "SummonersFieldNotes": "Feldnotizen des Beschwörers",
+      "AegisCommentary": "Aegis-Kommentar",
+      "CorrectiveFormulae": "Korrigierende Formeln"
+    },
+    "GrimoireActivationTraits": {
+      "Concentrate": "Konzentrieren",
+      "Spellshape": "Zauberform",
+      "Healing": "Heilung"
+    },
+    "GrimoireText": {
+      "ElementalConcordanceName": "Grimoire der elementaren Konkordanz",
+      "ElementalConcordanceDescription": "Die Seiten dieses Grimoires sind mit ineinandergreifenden Diagrammen elementarer Resonanzen bedeckt. Beim Umblättern verändern sich die Linien, als würden sie den gerade vorbereiteten Zaubern folgen.",
+      "ElementalConcordanceEffect": "Wenn der nächste passende Zauber Schaden verursacht, wähle Säure, Kälte, Elektrizität, Feuer oder Schall, sofern der Zauber diese Schadensart verursacht. Der Zauber ignoriert {resistance} Punkte Resistenz gegen die gewählte Schadensart.",
+      "RestorativeLedgerName": "Ledger der Wiederherstellung",
+      "RestorativeLedgerDescription": "In diesem sorgfältig geführten Folianten werden Heilformeln als Reihen aus Korrekturen und Nachträgen dargestellt, die sich nach jeder Anwendung neu ordnen.",
+      "RestorativeLedgerRequirement": "Deine letzte Aktion war das Wirken eines Heilzaubers, den du aus diesem Grimoire vorbereitet hast, und der Zauber stellte Trefferpunkte wieder her.",
+      "RestorativeLedgerEffect": "Wähle eine Kreatur, der der erforderliche Zauber Trefferpunkte wiedergegeben hat. Sie erhält {temp} temporäre Trefferpunkte.",
+      "SummonersFieldNotesName": "Feldnotizen des Beschwörers",
+      "SummonersFieldNotesDescription": "Skizzen von Kreaturen, Bewegungsabläufen und beschrifteten Beschwörungskreisen füllen dieses robuste Arbeitsbuch. Manche Zeichnungen krabbeln über den Seitenrand, wenn niemand hinsieht.",
+      "SummonersFieldNotesEffect": "Wenn du als nächste Aktion einen Beschwörungszauber wirkst, den du aus diesem Grimoire vorbereitet hast, erhält die beschworene Kreatur {temp} temporäre Trefferpunkte und bis zum Ende ihres ersten Zuges einen Statusbonus von {speed} Fuß auf ihre Bewegungsraten.",
+      "AegisCommentaryName": "Aegis-Kommentar",
+      "AegisCommentaryDescription": "Dieser Kommentar verknüpft offensive Zauberformeln mit kurzen defensiven Gegenmustern. Die Randnotizen glimmen jeweils in der Farbe der zuletzt studierten Energie.",
+      "AegisCommentaryTrigger": "Du hast gerade einen aus diesem Grimoire vorbereiteten Zauber mit dem Merkmal Säure, Kälte, Elektrizität, Feuer, Schall oder Geist gewirkt.",
+      "AegisCommentaryEffect": "Wähle eines dieser Merkmale, das der auslösende Zauber besitzt. Du erhältst Resistenz {resistance} gegen die entsprechende Schadensart.",
+      "CorrectiveFormulaeName": "Grimoire der korrigierenden Formeln",
+      "CorrectiveFormulaeDescription": "Jede Seite dieses Grimoires enthält winzige Korrekturzeichen an scheinbar perfekten Zauberdiagrammen. Beim Scheitern eines Zauberangriffs leuchten passende Randbemerkungen kurz auf.",
+      "CorrectiveFormulaeTrigger": "Du scheiterst, aber scheiterst nicht kritisch, bei einem Zauberangriffswurf eines Zaubers, den du aus diesem Grimoire vorbereitet hast.",
+      "CorrectiveFormulaeEffect": "Du erhältst einen Situationsbonus von +{bonus} auf den auslösenden Zauberangriffswurf. Dies kann das Ergebnis in einen Erfolg ändern.",
+      "OneHour": "1 Stunde",
+      "UntilNextTurn": "bis zum Beginn deines nächsten Zuges",
+      "OncePerDay": "einmal täglich",
+      "OncePerHour": "einmal pro Stunde",
+      "OncePerTenMinutes": "einmal pro 10 Minuten",
+      "OncePerWeek": "einmal pro Woche",
+      "TimesPerDay": "{count}-mal täglich",
+      "TimesPerHour": "{count}-mal pro Stunde",
+      "TimesPerTenMinutes": "{count}-mal pro 10 Minuten",
+      "TimesPerWeek": "{count}-mal pro Woche",
+      "Reaction": "Reaktion",
+      "FreeAction": "Freie Aktion",
+      "OneAction": "1 Aktion",
+      "MultipleActions": "{count} Aktionen",
+      "Frequency": "Frequenz {frequency}",
+      "Trigger": "Auslöser {trigger}",
+      "Requirements": "Voraussetzungen {requirements}",
+      "Duration": "Wirkungsdauer {duration}",
+      "Activation": "Aktivieren:",
+      "SpecialAbility": "Effekt:",
+      "GrimoireRules": "Grimoire:",
+      "StandardRules": "Während deiner täglichen Vorbereitungen kannst du dieses Grimoire studieren, wenn du Zauber vorbereitest. Bis zu deinen nächsten täglichen Vorbereitungen kannst du seine Aktivierungen für passende Zauber einsetzen, die du aus diesem Grimoire in Zauberplätze vorbereitet hast. Zaubertricks, Fokuszauber und angeborene Zauber zählen nicht. Du kannst pro Tag nur von einem Grimoire profitieren, und dasselbe Grimoire kann pro Tag nur von einer Kreatur studiert werden. Nach dem Studium musst du das Grimoire nicht weiter besitzen.",
+      "AutomationNote": "Dieses generierte Grimoire verwendet Regeltext und strukturierte Item-Forge-Metadaten; seine Sonderfähigkeit wird nicht durch zusätzliche Rule Elements automatisiert."
     }
   }
 }

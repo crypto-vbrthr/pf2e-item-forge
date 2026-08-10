@@ -173,6 +173,12 @@ export class ItemForgeEditor extends HandlebarsApplication {
         INVALID_HELD_ITEM_TEMPLATE_TYPE: "PF2E_ITEM_FORGE.Errors.InvalidHeldItemTemplateType",
         HELD_ITEM_TEMPLATE_USAGE_MISMATCH: "PF2E_ITEM_FORGE.Errors.HeldItemTemplateUsageMismatch",
         UNKNOWN_HELD_ITEM_PROFILE: "PF2E_ITEM_FORGE.Errors.UnknownHeldItemProfile",
+        NO_PREDEFINED_GRIMOIRE_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoPredefinedGrimoireCandidate",
+        NO_GRIMOIRE_PROFILE_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoGrimoireProfileCandidate",
+        NO_GRIMOIRE_TEMPLATE: "PF2E_ITEM_FORGE.Errors.NoGrimoireTemplate",
+        INVALID_GRIMOIRE_TEMPLATE_TYPE: "PF2E_ITEM_FORGE.Errors.InvalidGrimoireTemplateType",
+        GRIMOIRE_TEMPLATE_TRAIT_MISMATCH: "PF2E_ITEM_FORGE.Errors.GrimoireTemplateTraitMismatch",
+        UNKNOWN_GRIMOIRE_PROFILE: "PF2E_ITEM_FORGE.Errors.UnknownGrimoireProfile",
         NO_ACCESSORY_RUNE_CANDIDATE: "PF2E_ITEM_FORGE.Errors.NoAccessoryRuneCandidate",
         UNKNOWN_ACCESSORY_RUNE: "PF2E_ITEM_FORGE.Errors.UnknownAccessoryRune",
         ACCESSORY_RUNE_BASE_INVESTED: "PF2E_ITEM_FORGE.Errors.AccessoryRuneBaseInvested",
@@ -288,8 +294,16 @@ export class ItemForgeEditor extends HandlebarsApplication {
     const isWornMagicCategory = isMagicMode && (this.request.category === "magic.worn" || String(this.request.category).startsWith("magic.worn."));
     const isAccessoryRuneCategory = isMagicMode && this.request.category === "magic.accessory-rune";
     const isHeldMagicCategory = isMagicMode && (this.request.category === "magic.held" || String(this.request.category).startsWith("magic.held."));
+    const isGrimoireCategory = isMagicMode && this.request.category === "magic.grimoire";
+    const grimoireCapabilities = this.api.getGrimoireCapabilities?.() ?? this.api.getCapabilities?.().grimoireCapabilities ?? { existing: false, generated: false };
+    if (isGrimoireCategory) {
+      const requestedMode = this.request.magic?.grimoireMode ?? "existing";
+      if (requestedMode === "generated" && !grimoireCapabilities.generated && grimoireCapabilities.existing) this.request.magic.grimoireMode = "existing";
+      else if (requestedMode === "existing" && !grimoireCapabilities.existing && grimoireCapabilities.generated) this.request.magic.grimoireMode = "generated";
+    }
     const generatedHeld = isHeldMagicCategory && this.request.magic?.heldMode === "generated";
     const generatedWorn = isWornMagicCategory && this.request.magic?.wornMode === "generated";
+    const generatedGrimoire = isGrimoireCategory && this.request.magic?.grimoireMode === "generated";
     const usesSpellSources = isScrollCategory || isWandCategory || generatedStaff || generatedSpellheart;
     const packs = this.api.getAvailableItemPacks({ includeSpellPacks: usesSpellSources }).map((pack) => ({
       ...pack,
@@ -476,6 +490,24 @@ export class ItemForgeEditor extends HandlebarsApplication {
         selected: this.request.magic?.heldProfile === profile.id
       }))
     ];
+    const grimoireModes = ["existing", "generated"].map((id) => ({
+      id,
+      selected: (this.request.magic?.grimoireMode ?? "existing") === id,
+      disabled: !Boolean(grimoireCapabilities[id]),
+      label: localizeMaybe(`PF2E_ITEM_FORGE.GrimoireMode.${id === "existing" ? "Existing" : "Generated"}`)
+    }));
+    const availableGrimoireProfiles = this.api.grimoireProfiles?.getAll?.() ?? [];
+    if (generatedGrimoire && this.request.magic?.grimoireProfile !== "automatic" && !availableGrimoireProfiles.some((profile) => profile.id === this.request.magic.grimoireProfile)) {
+      this.request.magic.grimoireProfile = "automatic";
+    }
+    const grimoireProfiles = [
+      { id: "automatic", label: localizeMaybe("PF2E_ITEM_FORGE.GrimoireProfiles.Automatic"), selected: (this.request.magic?.grimoireProfile ?? "automatic") === "automatic" },
+      ...availableGrimoireProfiles.map((profile) => ({
+        id: profile.id,
+        label: localizeMaybe(profile.label),
+        selected: this.request.magic?.grimoireProfile === profile.id
+      }))
+    ];
     const accessoryRunes = [
       { id: "automatic", label: localizeMaybe("PF2E_ITEM_FORGE.AccessoryRunes.Automatic"), selected: (this.request.magic?.accessoryRune ?? "automatic") === "automatic" },
       ...((this.api.accessoryRunes?.getAll?.() ?? []).map((family) => ({
@@ -586,6 +618,20 @@ export class ItemForgeEditor extends HandlebarsApplication {
                   : localizeMaybe("PF2E_ITEM_FORGE.Automation.Native")
               }
             : null,
+          grimoire: this.previewResult.metadata?.grimoire
+            ? {
+                ...this.previewResult.metadata.grimoire,
+                profileLabelLocalized: this.previewResult.metadata.grimoire.profile
+                  ? localizeMaybe(this.api.grimoireProfiles?.get?.(this.previewResult.metadata.grimoire.profile)?.label ?? this.previewResult.metadata.grimoire.profileLabel ?? this.previewResult.metadata.grimoire.profile)
+                  : null,
+                variantLabelLocalized: this.previewResult.metadata.grimoire.variantLabel
+                  ? localizeMaybe(this.previewResult.metadata.grimoire.variantLabel)
+                  : null,
+                automationLabel: this.previewResult.metadata.grimoire.automation === "rules-text"
+                  ? localizeMaybe("PF2E_ITEM_FORGE.Automation.RulesText")
+                  : localizeMaybe("PF2E_ITEM_FORGE.Automation.Native")
+              }
+            : null,
           heldItem: this.previewResult.metadata?.heldItem
             ? {
                 ...this.previewResult.metadata.heldItem,
@@ -613,6 +659,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
                   "specific-shield": localizeMaybe("PF2E_ITEM_FORGE.Categories.MagicShield"),
                   worn: localizeMaybe("PF2E_ITEM_FORGE.Categories.MagicWorn"),
                   held: localizeMaybe("PF2E_ITEM_FORGE.Categories.MagicHeld"),
+                  grimoire: localizeMaybe("PF2E_ITEM_FORGE.Categories.MagicGrimoire"),
                   "accessory-rune": localizeMaybe("PF2E_ITEM_FORGE.Categories.MagicAccessoryRune")
                 })[this.previewResult.metadata.magic.kind] ?? this.previewResult.metadata.magic.kind,
                 wandModeLabel: this.previewResult.metadata.magic.wandMode
@@ -658,6 +705,12 @@ export class ItemForgeEditor extends HandlebarsApplication {
                   : null,
                 heldProfileLabel: this.previewResult.metadata.magic.kind === "held" && this.previewResult.metadata.magic.profile
                   ? localizeMaybe(this.api.heldMagicProfiles?.get?.(this.previewResult.metadata.magic.profile)?.label ?? this.previewResult.metadata.magic.profile)
+                  : null,
+                grimoireModeLabel: this.previewResult.metadata.magic.grimoireMode
+                  ? localizeMaybe(`PF2E_ITEM_FORGE.GrimoireMode.${this.previewResult.metadata.magic.grimoireMode === "existing" ? "Existing" : "Generated"}`)
+                  : null,
+                grimoireProfileLabel: this.previewResult.metadata.magic.kind === "grimoire" && this.previewResult.metadata.magic.profile
+                  ? localizeMaybe(this.api.grimoireProfiles?.get?.(this.previewResult.metadata.magic.profile)?.label ?? this.previewResult.metadata.magic.profile)
                   : null,
                 accessoryRuneLabel: this.previewResult.metadata.magic.kind === "accessory-rune"
                   ? (this.previewResult.metadata.magic.accessoryRuneLabel ?? this.previewResult.metadata.magic.accessoryRune)
@@ -716,6 +769,11 @@ export class ItemForgeEditor extends HandlebarsApplication {
       heldModes,
       heldProfiles,
       heldHandCapabilities,
+      isGrimoireCategory,
+      generatedGrimoire,
+      grimoireModes,
+      grimoireProfiles,
+      grimoireCapabilities,
       isAccessoryRuneCategory,
       accessoryRunes,
       generatedWorn,
@@ -774,7 +832,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
         this.previewResult = null;
         this.error = null;
         this.onChange?.(this.getRequest(), this);
-        if (["mode", "category", "levelMode", "source.mode", "equipment.propertyRunes.mode", "value.mode", "treasure.type", "magic.wandMode", "magic.wandProfile", "magic.staffMode", "magic.staffProfile", "magic.spellheartMode", "magic.spellheartProfile", "magic.specificMode", "magic.specificProfile", "magic.wornMode", "magic.wornProfile", "magic.heldMode", "magic.heldProfile", "magic.accessoryRune"].includes(input.name)) {
+        if (["mode", "category", "levelMode", "source.mode", "equipment.propertyRunes.mode", "value.mode", "treasure.type", "magic.wandMode", "magic.wandProfile", "magic.staffMode", "magic.staffProfile", "magic.spellheartMode", "magic.spellheartProfile", "magic.specificMode", "magic.specificProfile", "magic.wornMode", "magic.wornProfile", "magic.heldMode", "magic.heldProfile", "magic.grimoireMode", "magic.grimoireProfile", "magic.accessoryRune"].includes(input.name)) {
           await this.#renderPreservingView();
         }
       });
@@ -842,7 +900,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
   }
 
   #isMagicCategory(category) {
-    return ["magic.wand", "magic.staff", "magic.spellheart", "magic.weapon", "magic.armor", "magic.shield", "magic.accessory-rune", "magic.held", "magic.held.one-hand", "magic.held.two-hands"].includes(category)
+    return ["magic.wand", "magic.staff", "magic.spellheart", "magic.grimoire", "magic.weapon", "magic.armor", "magic.shield", "magic.accessory-rune", "magic.held", "magic.held.one-hand", "magic.held.two-hands"].includes(category)
       || category === "magic.worn"
       || this.api.categories.isDescendant(category, "magic.worn");
   }
@@ -932,6 +990,8 @@ export class ItemForgeEditor extends HandlebarsApplication {
     this.request.magic.wornProfile = value("magic.wornProfile", this.request.magic.wornProfile ?? "automatic");
     this.request.magic.heldMode = value("magic.heldMode", this.request.magic.heldMode ?? "existing");
     this.request.magic.heldProfile = value("magic.heldProfile", this.request.magic.heldProfile ?? "automatic");
+    this.request.magic.grimoireMode = value("magic.grimoireMode", this.request.magic.grimoireMode ?? "existing");
+    this.request.magic.grimoireProfile = value("magic.grimoireProfile", this.request.magic.grimoireProfile ?? "automatic");
     this.request.magic.accessoryRune = value("magic.accessoryRune", this.request.magic.accessoryRune ?? "automatic");
     this.request.magic.theme = value("magic.theme", this.request.magic.theme ?? "automatic");
     const heightenedInput = root.querySelector('[name="magic.allowHeightened"]');

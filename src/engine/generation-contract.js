@@ -53,6 +53,12 @@ export function applyGenerationContract(result) {
     metadata.automation = { level: "rules-text" };
   }
 
+  if (metadata.grimoire && typeof metadata.grimoire === "object") {
+    const expected = metadata.grimoire.mode === "existing" ? "native" : "rules-text";
+    metadata.grimoire.automation = expected;
+    metadata.automation = { level: expected };
+  }
+
   return result;
 }
 

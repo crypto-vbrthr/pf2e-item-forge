@@ -46,6 +46,16 @@ export class MagicItemTemplateResolver {
   }
 
 
+
+  resolveGrimoireTemplateEntry({ allowedTypes = ["book", "equipment"], sourcePolicy = "system-only" } = {}) {
+    const types = new Set(Array.isArray(allowedTypes) ? allowedTypes : [allowedTypes]);
+    const entries = this.index.entries
+      .filter((entry) => types.has(entry.type) && entry.categories?.includes?.("magic.grimoire"))
+      .sort((a, b) => Number(a.level ?? 0) - Number(b.level ?? 0) || a.uuid.localeCompare(b.uuid));
+    if (sourcePolicy === "system-only") return this.#systemOnly(entries);
+    return this.#preferSystem(entries);
+  }
+
   resolveHeldTemplateEntry(hands = null, { allowedTypes = ["equipment"], sourcePolicy = "system-only" } = {}) {
     const category = Number(hands) === 1 ? "magic.held.one-hand" : Number(hands) === 2 ? "magic.held.two-hands" : "magic.held";
     const types = new Set(Array.isArray(allowedTypes) ? allowedTypes : [allowedTypes]);

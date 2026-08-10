@@ -2,9 +2,9 @@
 
 Reusable Item Forge architecture for Foundry VTT v14 and Pathfinder 2e.
 
-## v0.0.30 scope
+## v0.0.31 scope
 
-This release completes the Held Item contract review. Published held items remain intact, while generated held items now use an authoritative structured activation contract, template-aware handedness selection, and the same capability rules in both the engine and Embedded Editor.
+This release adds Grimoires as a dedicated permanent-magic family. Published grimoires remain intact, while generated grimoires use reviewed Item Forge profiles, a safe PF2e system implementation template, and a structured daily-preparation/activation contract. Magical Tattoos are now explicitly out of scope by design rather than waiting as an unimplemented loot category.
 
 Implemented:
 
@@ -18,7 +18,7 @@ Implemented:
 - Deterministic seeded generation
 - Existing physical compendium items, excluding feats/spells/rule documents
 - Spell-bearing scroll generation with meaningful legal heightening
-- Special magic-item mode for wands, staves, spellhearts, specific magic weapons, specific magic armor, specific magic shields, worn magic items, held magic items, and Accessory Runes
+- Special magic-item mode for wands, staves, spellhearts, grimoires, specific magic weapons, specific magic armor, specific magic shields, worn magic items, held magic items, and Accessory Runes
 - Wands use the PF2e generic wand templates and embed one real spell at a legal base or meaningful heightened rank
 - Staves can either be copied exactly from selected compendia or generated as rulebook-style variant families with inherited lower variants
 - Spellhearts can either be selected as complete predefined PF2e items or generated from validated custom Spellheart profiles with coherent armor/weapon benefits, spell progressions, prices, and themes
@@ -30,11 +30,15 @@ Implemented:
 - Worn profiles support an explicit `invested` contract (default `true`), normalize canonical rarity/variant IDs, and treat arcane/divine/occult/primal as sufficient magic markers without redundantly forcing the `magical` trait
 - Held magic items have dedicated `magic.held`, `magic.held.one-hand`, and `magic.held.two-hands` categories plus a public `heldMagicProfiles` registry. Published held items preserve native PF2e data; generated held items use only matching `equipment` templates and rules-text manifests. Activation manifests distinguish actions, reactions, and free actions and can carry frequency, trigger, requirements, and duration.
 - Ten reviewed generated held-item families provide independent automatic strict coverage at every item level from 1 through 20 for both one-hand and two-hand categories; explicitly selected families remain strict to their own progression. Automatic generation filters handedness families that lack a safe PF2e system template before seeded selection.
+- Grimoires have a dedicated `magic.grimoire` category with predefined/native and generated/rules-text paths plus a public `grimoireProfiles` registry. Published grimoires preserve their complete PF2e document data.
+- Generated grimoires use only PF2e-system `book`/`equipment` documents carrying the `grimoire` trait as structural implementation templates; native Rule Elements, descriptions, subitems, apex/publication data, foreign flags, material/base/container identity, and template quantity are removed or normalized before composition.
+- Five reviewed generated grimoire families provide automatic strict coverage from item level 4 through 20. Their structured contracts record daily-preparation restrictions, spell-slot-only use, eligible-spell filters, activation type, traits, frequency, trigger, requirements, duration, and effect text without pretending to provide unverified native automation.
+- `getGrimoireCapabilities()` / `grimoireCapabilities` reports predefined availability, safe system-template count, generated-profile count, and generated levels; the Embedded Editor uses the same capability state for predefined/generated mode availability.
 - Accessory Runes are a separate `magic.accessory-rune` composition path with a public `accessoryRunes` registry; the core library contains the Treasure Vault Menacing, Pontoon, Preserving, and Trackless progressions
 - Accessory Rune variants are source-backed by indexed `sourceSlug`, so both host and rune must exist in the selected content sources; result metadata records both content packs and exact rune provenance
 - Accessory Rune host contracts declare document types, worn slots, and magic policy. The four core Treasure Vault families are `mundane-only`, matching the default rule that a magic host is legal only when a rune Usage explicitly permits it
 - Greater Accessory Rune activations are structured as actions/traits/frequency/spell metadata and rendered into localized rules text; custom native Rule Elements are still not guessed
-- Public `specificItemProfiles`, `specificShieldProfiles`, `wornMagicProfiles`, and `heldMagicProfiles` registries for extension modules and campaign content; `getWornSlotCapabilities()` / `wornSlots` and `getHeldHandCapabilities()` / `heldHandCapabilities` expose actual predefined/generated availability
+- Public `specificItemProfiles`, `specificShieldProfiles`, `wornMagicProfiles`, `heldMagicProfiles`, and `grimoireProfiles` registries for extension modules and campaign content; `getWornSlotCapabilities()` / `wornSlots`, `getHeldHandCapabilities()` / `heldHandCapabilities`, and `getGrimoireCapabilities()` / `grimoireCapabilities` expose actual predefined/generated availability
 - Magic themes for fire, cold, electricity, healing, illusion, mental, vitality, void, arcane, divine, occult, primal, and summoning
 - Composed weapons, armor, and shields with fundamental runes
 - Registry-driven property runes with automatic/random/fixed/none modes and compatibility rules
@@ -55,12 +59,13 @@ Implemented:
 - Standalone `ItemForgeApplication` container owning Foundry document creation and preserving `createdByForge` versus `generated` provenance
 - German and English localization
 - Shared generation-result contract for `contentSources`, `templateSource`, and automation level
-- Live Magic diagnostics for predefined and generated magic paths including representative worn contracts plus low/high one-/two-handed held contracts, exact-level checks, system-template provenance, structured activation/physical contracts, pack-index failures, and composed-equipment price preparation
-- 241 automated unit/integration/statistical/contract tests
+- Live Magic diagnostics for predefined and generated magic paths including representative worn contracts, low/high one-/two-handed held contracts, and predefined/generated Grimoire contracts, with exact-level checks, system-template provenance, structured activation/physical/daily-preparation contracts, pack-index failures, and composed-equipment price preparation
+- 255 automated unit/integration/statistical/contract tests
 
 Not yet implemented:
 
-- Dedicated generation blocks for grimoires, magical tattoos, assistive items, and apex items. They are intentionally not treated as generic held items.
+- Dedicated generation blocks for assistive items and apex items. They remain intentionally separate from generic held-item generation.
+- Magical Tattoos are intentionally out of scope for Item Forge generation: this module generates transferable/findable inventory objects, while a tattoo is applied to a creature rather than existing as ordinary loot after application. Formulae, services, or tattooing workflows would belong to a different feature surface.
 - Native PF2e staff-preparation/casting automation for generated custom staff-family manifests (predefined staves preserve their native PF2e data unchanged)
 - Verified native automation builders for generated custom wands/staves/spellhearts/specific items
 - Verified native PF2e Accessory Rune carrier/activation automation (current compositions retain the host's native data and store the added rune as rules text plus a structured manifest)
@@ -103,6 +108,24 @@ await game.pf2eItemForge.generate({
 ```
 
 The same source policy is applied to the host and the published rune entry. The result records the exact rune source in `metadata.accessoryRune.runeSource` and both packs in `metadata.contentSources`. Core Treasure Vault Accessory Runes reject magic hosts unless a future profile explicitly declares that its Usage permits one.
+
+Generate a rules-text grimoire from a reviewed profile:
+
+```js
+await game.pf2eItemForge.generate({
+  mode: "magic",
+  category: "magic.grimoire",
+  level: 12,
+  levelPolicy: "strict",
+  source: { mode: "system" },
+  magic: {
+    grimoireMode: "generated",
+    grimoireProfile: "automatic"
+  }
+});
+```
+
+Generated core grimoires currently cover exact item levels 4 through 20. Their abilities are rules text plus structured Item Forge metadata; a PF2e system grimoire document is used only as the physical/schema implementation template.
 
 Select a predefined item:
 

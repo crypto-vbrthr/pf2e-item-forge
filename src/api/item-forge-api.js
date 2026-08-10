@@ -1,9 +1,10 @@
 import { getWornSlotCapabilities } from "../engine/worn-item-utils.js";
 import { getHeldHandCapabilities } from "../engine/held-item-utils.js";
+import { getGrimoireCapabilities } from "../engine/grimoire-utils.js";
 import { API_VERSION } from "../constants.js";
 
 export class ItemForgeApi {
-  constructor({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes = [], wandProfiles = null, staffProfiles = null, spellheartProfiles = null, specificItemProfiles = null, specificShieldProfiles = null, wornMagicProfiles = null, accessoryRunes = null, heldMagicProfiles = null, diagnostics = null, openApplication }) {
+  constructor({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes = [], wandProfiles = null, staffProfiles = null, spellheartProfiles = null, specificItemProfiles = null, specificShieldProfiles = null, wornMagicProfiles = null, accessoryRunes = null, heldMagicProfiles = null, grimoireProfiles = null, diagnostics = null, openApplication }) {
     this.apiVersion = API_VERSION;
     this.engine = engine;
     this.categories = categories;
@@ -20,6 +21,7 @@ export class ItemForgeApi {
     this.wornMagicProfiles = wornMagicProfiles;
     this.accessoryRunes = accessoryRunes;
     this.heldMagicProfiles = heldMagicProfiles;
+    this.grimoireProfiles = grimoireProfiles;
     this.diagnostics = diagnostics;
     this.openApplication = openApplication;
   }
@@ -77,6 +79,13 @@ export class ItemForgeApi {
     });
   }
 
+  getGrimoireCapabilities() {
+    return getGrimoireCapabilities({
+      entries: this.compendiumIndex?.entries ?? [],
+      profiles: this.grimoireProfiles?.getAll?.() ?? []
+    });
+  }
+
   getCapabilities() {
     return {
       apiVersion: this.apiVersion,
@@ -88,7 +97,7 @@ export class ItemForgeApi {
       fundamentalRuneModes: ["automatic", "none"],
       propertyRuneModes: ["automatic", "random", "fixed", "none"],
       magicThemes: this.magicThemes.map((theme) => theme.id),
-      magicItemKinds: ["wand", "staff", "spellheart", "specific-weapon", "specific-armor", "specific-shield", "worn", "held", "accessory-rune"],
+      magicItemKinds: ["wand", "staff", "spellheart", "grimoire", "specific-weapon", "specific-armor", "specific-shield", "worn", "held", "accessory-rune"],
       automationLevels: ["native", "rules-text"],
       magicDiagnostics: Boolean(this.diagnostics),
       indexDiagnostics: true,
@@ -99,6 +108,8 @@ export class ItemForgeApi {
       specificItemModes: ["generated", "existing"],
       wornItemModes: ["generated", "existing"],
       heldItemModes: ["generated", "existing"],
+      grimoireModes: ["generated", "existing"],
+      grimoireCapabilities: this.getGrimoireCapabilities(),
       heldHands: [1, 2],
       heldHandCapabilities: this.getHeldHandCapabilities(),
       wornSlots: this.getWornSlotCapabilities(),
@@ -112,6 +123,14 @@ export class ItemForgeApi {
         hands: profile.hands,
         label: profile.label,
         invested: profile.invested,
+        physical: profile.physical,
+        levels: profile.variants.map((variant) => variant.level),
+        activations: profile.variants.map((variant) => variant.activation),
+        ...(profile.balance ? { balance: profile.balance } : {})
+      })) ?? [],
+      grimoireProfiles: this.grimoireProfiles?.getAll?.().map((profile) => ({
+        id: profile.id,
+        label: profile.label,
         physical: profile.physical,
         levels: profile.variants.map((variant) => variant.level),
         activations: profile.variants.map((variant) => variant.activation),

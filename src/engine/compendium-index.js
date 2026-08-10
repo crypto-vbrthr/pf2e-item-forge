@@ -1,5 +1,6 @@
 import { parseWornUsage, wornCategoryForSlot, isMagicWornTraits } from "./worn-item-utils.js";
 import { parseHeldUsage, heldCategoryForHands, hasHeldMagicMarkerTraits } from "./held-item-utils.js";
+import { isGrimoireTraits } from "./grimoire-utils.js";
 
 export const SUPPORTED_ITEM_TYPES = new Set([
   "weapon",
@@ -369,12 +370,15 @@ export class CompendiumIndex {
       if (equipmentTraits.includes("spellheart")) {
         categories.push("magic", "magic.spellheart");
       }
+      if (isGrimoireTraits(equipmentTraits)) {
+        categories.push("magic", "magic.grimoire");
+      }
       const worn = parseWornUsage(system.usage?.value);
-      if (worn.worn && isMagicWornTraits(equipmentTraits) && !equipmentTraits.includes("spellheart")) {
+      if (worn.worn && isMagicWornTraits(equipmentTraits) && !equipmentTraits.includes("spellheart") && !isGrimoireTraits(equipmentTraits)) {
         categories.push("magic", "magic.worn", wornCategoryForSlot(worn.slot));
       }
       const held = parseHeldUsage(system.usage?.value);
-      if (type === "equipment" && held.held && hasHeldMagicMarkerTraits(equipmentTraits) && !equipmentTraits.includes("spellheart")) {
+      if (type === "equipment" && held.held && hasHeldMagicMarkerTraits(equipmentTraits) && !equipmentTraits.includes("spellheart") && !isGrimoireTraits(equipmentTraits)) {
         categories.push("magic", "magic.held", heldCategoryForHands(held.hands));
       }
     } else if (type === "treasure") {

@@ -161,6 +161,24 @@
             </div>
           {{/if}}
         {{/if}}
+        {{#if isGrimoireCategory}}
+          <div class="form-group">
+            <label>{{localize "PF2E_ITEM_FORGE.Fields.GrimoireMode"}}</label>
+            <select name="magic.grimoireMode">
+              {{#each grimoireModes}}<option value="{{id}}" {{#if selected}}selected{{/if}} {{#if disabled}}disabled{{/if}}>{{label}}</option>{{/each}}
+            </select>
+            <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.GrimoireMode"}}</p>
+          </div>
+          {{#if generatedGrimoire}}
+            <div class="form-group">
+              <label>{{localize "PF2E_ITEM_FORGE.Fields.GrimoireProfile"}}</label>
+              <select name="magic.grimoireProfile">
+                {{#each grimoireProfiles}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+              </select>
+              <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.GrimoireProfile"}}</p>
+            </div>
+          {{/if}}
+        {{/if}}
         {{#if isWornMagicCategory}}
           <div class="form-group">
             <label>{{localize "PF2E_ITEM_FORGE.Fields.WornItemMode"}}</label>
@@ -358,6 +376,7 @@
         {{#if isScrollCategory}}<p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.ScrollSources"}}</p>{{/if}}
         {{#if isMagicMode}}<p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.MagicSources"}}</p>{{/if}}
         {{#if generatedHeld}}<p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.GeneratedHeldSources"}}</p>{{/if}}
+        {{#if generatedGrimoire}}<p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.GeneratedGrimoireSources"}}</p>{{/if}}
         <div class="form-group">
           <select name="source.mode">
             {{#each sourceModes}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
@@ -441,6 +460,8 @@
               {{#if preview.magic.wornProfileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.WornItemProfile"}}</dt><dd>{{preview.magic.wornProfileLabel}}</dd>{{/if}}
               {{#if preview.magic.heldModeLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.HeldItemMode"}}</dt><dd>{{preview.magic.heldModeLabel}}</dd>{{/if}}
               {{#if preview.magic.heldProfileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.HeldItemProfile"}}</dt><dd>{{preview.magic.heldProfileLabel}}</dd>{{/if}}
+              {{#if preview.magic.grimoireModeLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.GrimoireMode"}}</dt><dd>{{preview.magic.grimoireModeLabel}}</dd>{{/if}}
+              {{#if preview.magic.grimoireProfileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.GrimoireProfile"}}</dt><dd>{{preview.magic.grimoireProfileLabel}}</dd>{{/if}}
               {{#if preview.magic.accessoryRuneLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.AccessoryRune"}}</dt><dd>{{preview.magic.accessoryRuneLabel}}</dd>{{/if}}
               {{#if preview.magic.profileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.StaffProfile"}}</dt><dd>{{preview.magic.profileLabel}}</dd>{{/if}}
               {{#if preview.magic.variantLabelLocalized}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.StaffVariant"}}</dt><dd>{{preview.magic.variantLabelLocalized}}</dd>{{/if}}
@@ -482,6 +503,12 @@
               {{#if preview.wornItem.variantLabelLocalized}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.WornItemVariant"}}</dt><dd>{{preview.wornItem.variantLabelLocalized}}</dd>{{/if}}
               {{#if preview.wornItem.effect}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.WornEffect"}}</dt><dd>{{preview.wornItem.effect}}</dd>{{/if}}
               {{#if preview.wornItem.automationLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.Automation"}}</dt><dd>{{preview.wornItem.automationLabel}}</dd>{{/if}}
+            {{/if}}
+            {{#if preview.grimoire}}
+              {{#if preview.grimoire.variantLabelLocalized}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.GrimoireVariant"}}</dt><dd>{{preview.grimoire.variantLabelLocalized}}</dd>{{/if}}
+              {{#if preview.grimoire.activationSummary}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.Activation"}}</dt><dd>{{preview.grimoire.activationSummary}}</dd>{{/if}}
+              {{#if preview.grimoire.effect}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.GrimoireEffect"}}</dt><dd>{{preview.grimoire.effect}}</dd>{{/if}}
+              {{#if preview.grimoire.automationLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.Automation"}}</dt><dd>{{preview.grimoire.automationLabel}}</dd>{{/if}}
             {{/if}}
             {{#if preview.heldItem}}
               {{#if preview.heldItem.handsLabelLocalized}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.HeldHands"}}</dt><dd>{{preview.heldItem.handsLabelLocalized}}</dd>{{/if}}

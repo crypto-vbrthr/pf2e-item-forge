@@ -314,3 +314,19 @@ test("CompendiumIndex classifies magical held equipment by one- and two-hand usa
   assert.equal(byId("mundane-tool").categories.includes("magic.held"), false);
   assert.equal(byId("weapon-held").categories.includes("magic.held"), false, "weapon documents use their own magic equipment paths");
 });
+
+test("CompendiumIndex classifies grimoires without double-classifying worn or held usage", async () => {
+  const pack = makePack("pf2e.grimoires", [
+    raw("grimoire-book", "book", 8, { traits: { value: ["grimoire", "magical"], rarity: "common" }, usage: { value: "held in 1 hand" } }),
+    raw("grimoire-equipment", "equipment", 9, { traits: { value: ["grimoire", "occult"], rarity: "uncommon" }, usage: { value: "worn" } })
+  ]);
+  const categories = registerCoreCategories(new CategoryRegistry());
+  const game = { system: { id: "pf2e" }, packs: new FakePackCollection([pack]) };
+  const index = new CompendiumIndex({ categoryRegistry: categories, gameProvider: () => game });
+  await index.refresh();
+  for (const entry of index.entries) {
+    assert.ok(entry.categories.includes("magic.grimoire"));
+    assert.equal(entry.categories.includes("magic.held"), false);
+    assert.equal(entry.categories.includes("magic.worn"), false);
+  }
+});

@@ -21,6 +21,7 @@ ItemForgeEngine (canonical normalization, validation, generation)
         |     +-- WornMagicItemGenerator
         |     +-- AccessoryRuneGenerator
         |     +-- HeldMagicItemGenerator
+        |     +-- GrimoireGenerator
         |     +-- SpellheartGenerator
         |     +-- StaffGenerator
         |     +-- TreasureGenerator
@@ -43,6 +44,7 @@ ItemForgeEngine (canonical normalization, validation, generation)
         +-- SpecificShieldProfileRegistry
         +-- WornMagicProfileRegistry
         +-- HeldMagicProfileRegistry
+        +-- GrimoireProfileRegistry
         +-- ValueSolver
         +-- TreasureRegistry
               +-- types
@@ -63,7 +65,7 @@ ItemForgeEngine (canonical normalization, validation, generation)
 - Other modules should use the public engine API and may embed `ItemForgeEditor` without the standalone Item Forge window.
 - Future Loot Forge integration should distribute budgets/counts/themes and issue individual Item Forge requests.
 - Built-in and external treasure content use the same validated registries.
-- Spell documents are support data, not directly generatable physical items. `ScrollGenerator` and `WandGenerator` may select eligible spells and embed them into physical item results; `StaffGenerator` either copies a predefined PF2e staff unchanged or uses the spell index to build a structured staff-family manifest. `SpellheartGenerator` has separate predefined and generated paths. `SpecificMagicEquipmentGenerator` does not require spell sources and either preserves a complete published specific weapon/armor or composes one validated profile onto a mundane base item. Predefined magic items preserve native PF2e automation; generated custom abilities remain explicit rules text plus structured flags unless a verified system contract exists. Worn magic items follow the same split: published worn items are cloned whole, while generated worn items select a validated usage-specific profile and use an indexed PF2e worn item only as a structural implementation template.
+- Spell documents are support data, not directly generatable physical items. `ScrollGenerator` and `WandGenerator` may select eligible spells and embed them into physical item results; `StaffGenerator` either copies a predefined PF2e staff unchanged or uses the spell index to build a structured staff-family manifest. `SpellheartGenerator` has separate predefined and generated paths. `SpecificMagicEquipmentGenerator` does not require spell sources and either preserves a complete published specific weapon/armor or composes one validated profile onto a mundane base item. Predefined magic items preserve native PF2e automation; generated custom abilities remain explicit rules text plus structured flags unless a verified system contract exists. Worn magic items follow the same split: published worn items are cloned whole, while generated worn items select a validated usage-specific profile and use an indexed PF2e worn item only as a structural implementation template. Grimoires also use a dedicated split: published books remain native, while generated grimoires use a system-only grimoire document as schema/physical scaffolding and place their custom ability in localized rules text plus a structured grimoire contract.
 
 ## Generator resolution
 
@@ -79,6 +81,7 @@ WornMagicItemGenerator           217  mode magic
 AccessoryRuneGenerator           216  mode magic
 SpellheartGenerator              215  mode magic
 HeldMagicItemGenerator           214  mode magic
+GrimoireGenerator                213  mode magic
 StaffGenerator                   210  mode magic
 TreasureGenerator     200  mode treasure
 ScrollGenerator       200  mode existing
@@ -91,7 +94,7 @@ Registered generation modes are exposed through the public capabilities API and 
 
 ## Spell-bound permanent magic items
 
-`mode: "magic"` owns `magic.wand`, `magic.staff`, `magic.spellheart`, `magic.weapon`, `magic.armor`, `magic.shield`, `magic.worn` with worn-usage subcategories, and `magic.held` with one-/two-hand subcategories. Wands, generated staves, and generated spellhearts reuse the spell-support index and meaningful-heightening helpers. Specific weapons/armor, shields, and worn items instead use the physical-item index and dedicated profile registries. Predefined items preserve complete native PF2e documents, while generated custom items compose from validated whole-effect profiles rather than arbitrary effect fragments.
+`mode: "magic"` owns `magic.wand`, `magic.staff`, `magic.spellheart`, `magic.grimoire`, `magic.weapon`, `magic.armor`, `magic.shield`, `magic.worn` with worn-usage subcategories, and `magic.held` with one-/two-hand subcategories. Wands, generated staves, and generated spellhearts reuse the spell-support index and meaningful-heightening helpers. Specific weapons/armor, shields, and worn items instead use the physical-item index and dedicated profile registries. Predefined items preserve complete native PF2e documents, while generated custom items compose from validated whole-effect profiles rather than arbitrary effect fragments.
 
 ### Wands
 
@@ -158,9 +161,21 @@ Live Magic diagnostics exercise predefined worn items plus representative genera
 
 Generated held items resolve only a PF2e-system-indexed `equipment` implementation template with the same handedness; there is no silent module-content fallback. The PF2e Usage field is retained as a verified structural value, while original description, slug, Rule Elements, subitems, apex/publication data, foreign flag scopes, material identity, base-item/container identity, and template quantity are cleared or normalized. Profiles own physical Bulk plus a structured activation contract (`type: action|reaction|free-action`, action count for ordinary actions, traits, frequency, optional trigger/requirements/duration, and effect text). The renderer derives the full localized activation header from that contract, including multi-use frequencies, so built-in effect prose does not repeat structural activation metadata. The result remains `automation.level: "rules-text"`. Live diagnostics exercise predefined Held Items plus low/high generated one-hand and two-hand cases against the current PF2e document constructor, including exact level, implementation-template provenance, physical cleanup, and activation structure.
 
-Held Items are intentionally a narrow permanent-equipment family, not a synonym for all miscellaneous magic. Grimoires, magical tattoos, assistive items, and apex items remain separate rule families and should receive dedicated generators or predefined-only handling when implemented.
+Held Items are intentionally a narrow permanent-equipment family, not a synonym for all miscellaneous magic. Grimoires now have their own dedicated generator. Assistive items and apex items remain separate rule families for future dedicated handling. Magical Tattoos are deliberately outside Item Forge generation scope because the Forge models transferable/findable inventory objects rather than a body-application workflow.
 
 The public API exposes `getHeldHandCapabilities()` and `getCapabilities().heldHandCapabilities`. Each entry reports handedness, predefined availability/count, safe PF2e system-template count, generated-profile count, and generated levels so Loot Forge does not need to reverse-engineer the profile registry. Generated requests filter unavailable handedness before candidate selection, and the Embedded Editor uses the same capability data to disable dead-end handedness categories and hide generated profiles whose handedness lacks a safe system template.
+
+### Grimoires
+
+`GrimoireGenerator` resolves `magic.grimoire` and has explicit `magic.grimoireMode: "existing" | "generated"` paths. The compendium index classifies `book`/`equipment`-family documents carrying the `grimoire` trait as `magic.grimoire` and excludes them from generic worn/held classification. Existing mode selects a published grimoire under the request source policy and clones the complete PF2e document unchanged, preserving native effects, Rule Elements, description, price, traits, and automation.
+
+Generated mode selects one validated `GrimoireProfileRegistry` family. The core library contains five reviewed families whose variant levels interleave to provide automatic strict-mode coverage from item level 4 through 20. A profile owns rarity, Bulk, description, balance provenance, whole-effect variants, and a structured activation contract. Activation data can represent ordinary actions, reactions, or free actions plus traits, arbitrary count/period frequency, trigger, requirements, duration, and an explicit eligible-spell filter (`preparedFromGrimoire`, `slotsOnly`, next-action casting, spell traits, damage/healing/summon/spell-attack requirements). Explicit profile selection remains strict to that family rather than manufacturing missing tiers.
+
+The generated path requires a PF2e-system implementation template whose loaded document is still a safe `book` or `equipment` document carrying the `grimoire` trait. No third-party template fallback is permitted. The template provides schema-compatible physical structure only. Its Rule Elements, description, subitems, slug, apex/publication data, foreign flag scopes, material/base-item/container identity, and quantity are stripped or normalized before the Item Forge profile is written. Generated results use `automation.level: "rules-text"`; Item Forge does not guess a PF2e-native automation schema for custom grimoire spell modifications.
+
+Every generated result stores a daily-preparation contract in `metadata.grimoire.rules` and `flags.pf2e-item-forge.grimoire.rules`: the bearer studies the grimoire during daily preparations, benefits apply to qualifying prepared spells cast from spell slots, cantrips/focus/innate spells are excluded, one caster can benefit from only one grimoire per day, one grimoire can benefit only one caster per day, and continued possession after preparation is not required. These fields mirror the rule assumptions the generated prose is built around and provide a stable contract for future automation or integrations.
+
+The public API exposes `grimoireProfiles`, `getGrimoireCapabilities()`, and `getCapabilities().grimoireCapabilities`. Capabilities report predefined availability/count, safe PF2e system-template count, generated-profile count, and exact generated levels. The Embedded Editor uses this to disable an unavailable predefined/generated mode rather than accepting an impossible request. Live diagnostics exercise published selection plus exact low/high generated cases, verify system-template provenance, cleaned template identity, the `grimoire`/magic marker traits, empty custom Rule Elements, structured daily-preparation rules, and structured activation/spell-filter metadata.
 
 ### Accessory Runes
 

@@ -225,3 +225,18 @@ test("validation accepts held magic root and handedness subcategories", async ()
     assert.equal(result.valid, true, category);
   }
 });
+
+test("normalizeRequest hydrates grimoire settings and validation accepts the category", async () => {
+  const defaults = normalizeRequest({ mode: "magic", category: "magic.grimoire", seed: "x" });
+  assert.equal(defaults.magic.grimoireMode, "existing");
+  assert.equal(defaults.magic.grimoireProfile, "automatic");
+  const explicit = normalizeRequest({ mode: "magic", category: "magic.grimoire", magic: { grimoireMode: "generated", grimoireProfile: "core.elemental-concordance" }, seed: "x" });
+  assert.equal(explicit.magic.grimoireMode, "generated");
+  assert.equal(explicit.magic.grimoireProfile, "core.elemental-concordance");
+
+  const { validateRequest } = await import("../../src/engine/request-normalizer.js");
+  const { CategoryRegistry, registerCoreCategories } = await import("../../src/engine/category-registry.js");
+  const categories = registerCoreCategories(new CategoryRegistry());
+  const result = validateRequest({ mode: "magic", category: "magic.grimoire", level: 8, source: { mode: "system" }, seed: "x" }, { categories, generationModes: ["magic"] });
+  assert.equal(result.valid, true);
+});

@@ -60,7 +60,9 @@
       "WornItemProfile": "Worn Item Profile",
       "AccessoryRune": "Accessory Rune",
       "HeldItemMode": "Held item generation",
-      "HeldItemProfile": "Held item profile"
+      "HeldItemProfile": "Held item profile",
+      "GrimoireMode": "Grimoire Mode",
+      "GrimoireProfile": "Grimoire Profile"
     },
     "LevelMode": {
       "Single": "Single level",
@@ -116,7 +118,10 @@
       "AccessoryRune": "Selects a source-backed Accessory Rune and applies it to a compatible host item. Both the host and the published rune must exist in the selected sources; Automatic also respects each rune’s Usage and host-magic policy.",
       "HeldItemMode": "Predefined preserves a published PF2e item in full; Generated builds a new held item from an Item Forge profile.",
       "HeldItemProfile": "The profile defines handedness, level progression, price, and special ability as one package.",
-      "GeneratedHeldSources": "Generated held items use Item Forge profiles plus a PF2e system implementation template. The selected content sources affect predefined held items, not the generated profile library."
+      "GeneratedHeldSources": "Generated held items use Item Forge profiles plus a PF2e system implementation template. The selected content sources affect predefined held items, not the generated profile library.",
+      "GrimoireMode": "Predefined preserves an existing PF2e grimoire in full. Generated creates a new grimoire from an Item Forge profile.",
+      "GrimoireProfile": "Choose a grimoire family or let Item Forge select a fitting profile automatically.",
+      "GeneratedGrimoireSources": "Generated grimoires use only a suitable PF2e system grimoire as a technical schema template. Spell sources are not required."
     },
     "Preview": {
       "Empty": "Nothing forged yet. Choose parameters and press Generate.",
@@ -188,7 +193,11 @@
       "HeldHands": "Hands Required",
       "HeldUsage": "Usage",
       "HeldItemVariant": "Variant",
-      "HeldEffect": "Special Ability"
+      "HeldEffect": "Special Ability",
+      "GrimoireMode": "Grimoire Mode",
+      "GrimoireProfile": "Grimoire Profile",
+      "GrimoireVariant": "Grimoire Variant",
+      "GrimoireEffect": "Grimoire Effect"
     },
     "Notifications": {
       "GenerationFailed": "No item could be generated for these parameters.",
@@ -264,7 +273,8 @@
       "MagicAccessoryRune": "Accessory Rune Item",
       "MagicHeld": "Held Magic Items",
       "MagicHeldOneHand": "One-Handed Held Items",
-      "MagicHeldTwoHands": "Two-Handed Held Items"
+      "MagicHeldTwoHands": "Two-Handed Held Items",
+      "MagicGrimoire": "Grimoires"
     },
     "GenerationMode": {
       "Existing": "Select a predefined item",
@@ -325,7 +335,13 @@
       "NoHeldItemTemplate": "No safe PF2e structural template is available for this held item.",
       "InvalidHeldItemTemplateType": "The resolved held-item template uses an unsafe document type.",
       "HeldItemTemplateUsageMismatch": "The held-item template usage does not match the selected profile handedness.",
-      "UnknownHeldItemProfile": "The selected held magic item profile is unknown."
+      "UnknownHeldItemProfile": "The selected held magic item profile is unknown.",
+      "NoPredefinedGrimoireCandidate": "No predefined grimoire matches the selected criteria.",
+      "NoGrimoireProfileCandidate": "No generated grimoire profile matches the selected criteria.",
+      "NoGrimoireTemplate": "No suitable PF2e system grimoire was found as a technical template.",
+      "InvalidGrimoireTemplateType": "The loaded grimoire template does not use an allowed PF2e item type.",
+      "GrimoireTemplateTraitMismatch": "The loaded grimoire template no longer has the grimoire trait.",
+      "UnknownGrimoireProfile": "The selected grimoire profile is unknown."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatic level-appropriate",
@@ -778,6 +794,66 @@
       "PredefinedOnly": "(predefined only)",
       "GeneratedOnly": "(generated only)",
       "Unavailable": "(unavailable)"
+    },
+    "GrimoireMode": {
+      "Generated": "Generated",
+      "Existing": "Predefined"
+    },
+    "GrimoireProfiles": {
+      "Automatic": "Automatic",
+      "ElementalConcordance": "Elemental Concordance",
+      "RestorativeLedger": "Restorative Ledger",
+      "SummonersFieldNotes": "Summoner's Field Notes",
+      "AegisCommentary": "Aegis Commentary",
+      "CorrectiveFormulae": "Corrective Formulae"
+    },
+    "GrimoireActivationTraits": {
+      "Concentrate": "concentrate",
+      "Spellshape": "spellshape",
+      "Healing": "healing"
+    },
+    "GrimoireText": {
+      "ElementalConcordanceName": "Grimoire of Elemental Concordance",
+      "ElementalConcordanceDescription": "The pages of this grimoire are covered in interlocking diagrams of elemental resonance. As you turn the pages, the lines shift as though following the spells currently prepared from the book.",
+      "ElementalConcordanceEffect": "If your next eligible spell deals damage, choose acid, cold, electricity, fire, or sonic if the spell deals that damage type. The spell ignores {resistance} resistance to the chosen damage type.",
+      "RestorativeLedgerName": "Restorative Ledger",
+      "RestorativeLedgerDescription": "This meticulously maintained folio records healing formulae as sequences of corrections and addenda that rearrange themselves after each use.",
+      "RestorativeLedgerRequirement": "Your last action was to cast a healing spell prepared from this grimoire, and the spell restored Hit Points.",
+      "RestorativeLedgerEffect": "Choose one creature that regained Hit Points from the required spell. It gains {temp} temporary Hit Points.",
+      "SummonersFieldNotesName": "Summoner's Field Notes",
+      "SummonersFieldNotesDescription": "Sketches of creatures, movement patterns, and annotated summoning circles fill this rugged workbook. Some drawings crawl toward the edge of the page when no one is looking.",
+      "SummonersFieldNotesEffect": "If your next action is to cast a summon spell prepared from this grimoire, the summoned creature gains {temp} temporary Hit Points and a +{speed}-foot status bonus to its Speeds until the end of its first turn.",
+      "AegisCommentaryName": "Aegis Commentary",
+      "AegisCommentaryDescription": "This commentary pairs offensive spell formulae with short defensive counter-patterns. Its marginal notes glow in the hue of the last energy studied.",
+      "AegisCommentaryTrigger": "You just cast a spell prepared from this grimoire with the acid, cold, electricity, fire, sonic, or spirit trait.",
+      "AegisCommentaryEffect": "Choose one of those traits the triggering spell has. You gain resistance {resistance} to the corresponding damage type.",
+      "CorrectiveFormulaeName": "Grimoire of Corrective Formulae",
+      "CorrectiveFormulaeDescription": "Each page of this grimoire bears tiny correction marks beside otherwise flawless spell diagrams. When a spell attack goes awry, the relevant marginalia briefly shines.",
+      "CorrectiveFormulaeTrigger": "You fail, but do not critically fail, a spell attack roll for a spell prepared from this grimoire.",
+      "CorrectiveFormulaeEffect": "You gain a +{bonus} circumstance bonus to the triggering spell attack roll. This can change the result to a success.",
+      "OneHour": "1 hour",
+      "UntilNextTurn": "until the start of your next turn",
+      "OncePerDay": "once per day",
+      "OncePerHour": "once per hour",
+      "OncePerTenMinutes": "once per 10 minutes",
+      "OncePerWeek": "once per week",
+      "TimesPerDay": "{count} times per day",
+      "TimesPerHour": "{count} times per hour",
+      "TimesPerTenMinutes": "{count} times per 10 minutes",
+      "TimesPerWeek": "{count} times per week",
+      "Reaction": "Reaction",
+      "FreeAction": "Free Action",
+      "OneAction": "1 action",
+      "MultipleActions": "{count} actions",
+      "Frequency": "Frequency {frequency}",
+      "Trigger": "Trigger {trigger}",
+      "Requirements": "Requirements {requirements}",
+      "Duration": "Duration {duration}",
+      "Activation": "Activate:",
+      "SpecialAbility": "Effect:",
+      "GrimoireRules": "Grimoire:",
+      "StandardRules": "During your daily preparations, you can study this grimoire if you prepare spells. Until your next daily preparations, you can use its activations with eligible spells you prepared from this grimoire in spell slots. Cantrips, focus spells, and innate spells do not qualify. You can benefit from only one grimoire per day, and the same grimoire can be studied by only one creature per day. After studying it, you do not need to retain possession of the grimoire.",
+      "AutomationNote": "This generated grimoire uses rules text and structured Item Forge metadata; its special ability is not automated through additional Rule Elements."
     }
   }
 }

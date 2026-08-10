@@ -1,5 +1,6 @@
 import { hasMagicMarkerTraits, parseWornUsage } from "./worn-item-utils.js";
 import { hasHeldMagicMarkerTraits, parseHeldUsage } from "./held-item-utils.js";
+import { GENERATED_GRIMOIRE_TEMPLATE_TYPES, hasGrimoireMagicMarkerTraits, isGrimoireTraits } from "./grimoire-utils.js";
 
 function clone(value) {
   if (globalThis.foundry?.utils?.deepClone) return globalThis.foundry.utils.deepClone(value);
@@ -85,6 +86,9 @@ export class MagicItemDiagnostics {
       { id: "specific-armor-generated", request: { mode: "magic", category: "magic.armor", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { specificMode: "generated", specificProfile: "automatic", theme: "automatic" }, seed: "diagnostic-specific-armor-generated" } },
       { id: "specific-shield-existing", request: { mode: "magic", category: "magic.shield", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { specificMode: "existing" }, seed: "diagnostic-specific-shield-existing" } },
       { id: "specific-shield-generated", request: { mode: "magic", category: "magic.shield", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { specificMode: "generated", specificProfile: "automatic", theme: "automatic" }, seed: "diagnostic-specific-shield-generated" } },
+      { id: "grimoire-existing", request: { mode: "magic", category: "magic.grimoire", level: { min: 4, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { grimoireMode: "existing", grimoireProfile: "automatic" }, seed: "diagnostic-grimoire-existing" } },
+      { id: "grimoire-generated-low", request: { mode: "magic", category: "magic.grimoire", level: { min: 4, max: 4, target: 4 }, levelPolicy: "strict", source: { mode: "system" }, magic: { grimoireMode: "generated", grimoireProfile: "automatic" }, seed: "diagnostic-grimoire-low" } },
+      { id: "grimoire-generated-high", request: { mode: "magic", category: "magic.grimoire", level: { min: 20, max: 20, target: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { grimoireMode: "generated", grimoireProfile: "automatic" }, seed: "diagnostic-grimoire-high" } },
       { id: "held-existing", request: { mode: "magic", category: "magic.held", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { heldMode: "existing", heldProfile: "automatic" }, seed: "diagnostic-held-existing" } },
       { id: "held-generated-one-low", expectedHeldHands: 1, request: { mode: "magic", category: "magic.held.one-hand", level: { min: 1, max: 1, target: 1 }, levelPolicy: "strict", source: { mode: "system" }, magic: { heldMode: "generated", heldProfile: "automatic" }, seed: "diagnostic-held-one-low" } },
       { id: "held-generated-one-high", expectedHeldHands: 1, request: { mode: "magic", category: "magic.held.one-hand", level: { min: 20, max: 20, target: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { heldMode: "generated", heldProfile: "automatic" }, seed: "diagnostic-held-one-high" } },
@@ -179,6 +183,34 @@ export class MagicItemDiagnostics {
           issues.push("Preserving diagnostic did not resolve a container host");
         }
       }
+      if (id === "grimoire-existing" || id.startsWith("grimoire-generated-")) {
+        const traits = source.system?.traits?.value ?? [];
+        if (!isGrimoireTraits(traits)) issues.push("grimoire lacks the grimoire trait");
+      }
+      if (id.startsWith("grimoire-generated-")) {
+        const traits = source.system?.traits?.value ?? [];
+        if (!hasGrimoireMagicMarkerTraits(traits)) issues.push("generated grimoire lacks a magical or tradition trait");
+        if (!GENERATED_GRIMOIRE_TEMPLATE_TYPES.includes(source.type)) issues.push(`generated grimoire uses unsafe document type ${source.type}`);
+        if (!Array.isArray(source.system?.rules) || source.system.rules.length !== 0) issues.push("generated grimoire inherited template Rule Elements");
+        if (Object.hasOwn(source.system ?? {}, "apex")) issues.push("generated grimoire inherited template apex data");
+        if (Object.hasOwn(source.system ?? {}, "publication")) issues.push("generated grimoire inherited template publication data");
+        const foreignFlags = Object.keys(source.flags ?? {}).filter((scope) => scope !== "pf2e-item-forge");
+        if (foreignFlags.length) issues.push(`generated grimoire inherited template flags: ${foreignFlags.join(", ")}`);
+        if (result.metadata?.automation?.level !== "rules-text") issues.push("generated grimoire is not marked rules-text automation");
+        const templateSource = result.metadata?.templateSource;
+        const systemId = globalThis.game?.system?.id ?? "pf2e";
+        const systemTemplate = templateSource && (templateSource.packageType === "system" || templateSource.packageName === systemId || templateSource.packageName === "pf2e");
+        if (!systemTemplate) issues.push("generated grimoire did not use a PF2e system implementation template");
+        const rules = result.metadata?.grimoire?.rules;
+        if (!rules?.dailyPreparationStudy || !rules?.spellSlotsOnly || !rules?.oneGrimoirePerCasterPerDay || !rules?.oneCasterPerGrimoirePerDay) issues.push("generated grimoire lacks the structured daily-preparation rules contract");
+        const activation = result.metadata?.grimoire?.activation;
+        const validActivationType = ["action", "reaction", "free-action"].includes(activation?.type);
+        const validActionCount = activation?.type === "action"
+          ? Number.isInteger(activation.actions) && activation.actions >= 1 && activation.actions <= 3
+          : Number(activation?.actions) === 0;
+        if (!activation || !validActivationType || !validActionCount) issues.push("generated grimoire lacks a valid structured activation");
+        if (activation && (!Array.isArray(activation.traits) || !activation.spellFilter?.preparedFromGrimoire || !activation.spellFilter?.slotsOnly)) issues.push("generated grimoire activation lacks a structured spell filter contract");
+      }
       if (id.startsWith("held-generated-")) {
         const traits = source.system?.traits?.value ?? [];
         const expectedInvested = result.metadata?.heldItem?.invested === true;
@@ -246,7 +278,8 @@ export class MagicItemDiagnostics {
         "NO_PREDEFINED_SPECIFIC_ITEM_CANDIDATE", "NO_SPECIFIC_BASE_ITEM", "NO_SPECIFIC_PROFILE_CANDIDATE",
         "NO_PREDEFINED_SPECIFIC_SHIELD_CANDIDATE", "NO_SPECIFIC_SHIELD_BASE_ITEM", "NO_SPECIFIC_SHIELD_PROFILE_CANDIDATE",
         "NO_PREDEFINED_WORN_ITEM_CANDIDATE", "NO_WORN_ITEM_PROFILE_CANDIDATE", "NO_WORN_ITEM_TEMPLATE",
-        "NO_PREDEFINED_HELD_ITEM_CANDIDATE", "NO_HELD_ITEM_PROFILE_CANDIDATE", "NO_HELD_ITEM_TEMPLATE", "NO_ACCESSORY_RUNE_CANDIDATE"
+        "NO_PREDEFINED_HELD_ITEM_CANDIDATE", "NO_HELD_ITEM_PROFILE_CANDIDATE", "NO_HELD_ITEM_TEMPLATE",
+        "NO_PREDEFINED_GRIMOIRE_CANDIDATE", "NO_GRIMOIRE_PROFILE_CANDIDATE", "NO_GRIMOIRE_TEMPLATE", "NO_ACCESSORY_RUNE_CANDIDATE"
       ].includes(error?.code);
       return { id, status: skippable ? "skipped" : "failed", code: error?.code ?? null, message: error?.message ?? String(error) };
     }
@@ -280,6 +313,14 @@ export class MagicItemDiagnostics {
       id: "pf2e-held-usage-schema",
       status: heldEntries.length ? "passed" : "skipped",
       message: heldEntries.length ? `Indexed held magic items: ${heldEntries.length}; hand usages: ${[...heldHands].sort().join(", ") || "none parsed"}` : "No indexed held magic items available"
+    });
+
+    const grimoireEntries = (this.api.compendiumIndex?.entries ?? []).filter((entry) => entry.categories?.includes?.("magic.grimoire"));
+    const grimoireTypes = new Set(grimoireEntries.map((entry) => entry.type).filter(Boolean));
+    checks.push({
+      id: "pf2e-grimoire-schema",
+      status: grimoireEntries.length ? "passed" : "skipped",
+      message: grimoireEntries.length ? `Indexed grimoires: ${grimoireEntries.length}; document types: ${[...grimoireTypes].sort().join(", ") || "none"}` : "No indexed grimoires available"
     });
 
     const accessoryFamilies = this.api.accessoryRunes?.getAll?.() ?? [];

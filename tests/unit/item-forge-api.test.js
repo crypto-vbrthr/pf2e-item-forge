@@ -20,7 +20,8 @@ function apiFixture() {
     compendiumIndex: { refresh: async () => true, getAvailablePacks: () => [], ready: true, entries: [
       { id: 1, type: "equipment", categories: ["magic.worn", "magic.worn.footwear"] },
       { id: 3, type: "equipment", packageType: "system", packageName: "pf2e", categories: ["magic.held", "magic.held.one-hand"] },
-      { id: 4, type: "equipment", packageType: "system", packageName: "pf2e", categories: ["magic.held", "magic.held.two-hands"] }
+      { id: 4, type: "equipment", packageType: "system", packageName: "pf2e", categories: ["magic.held", "magic.held.two-hands"] },
+      { id: 5, type: "book", packageType: "system", packageName: "pf2e", categories: ["magic.grimoire"] }
     ], spellEntries: [{ id: 2 }], getPackErrors: () => [{ pack: "bad.pack" }] },
     treasure: {
       types: { getAll: () => [] }, materials: { getAll: () => [] }, components: { getAll: () => [] },
@@ -34,6 +35,10 @@ function apiFixture() {
     specificShieldProfiles: { getAll: () => [{ id: "core.restorative-shield", label: "Restorative", allowedThemes: [], variants: [{ level: 5 }, { level: 10 }, { level: 15 }] }] },
     wornMagicProfiles: { getAll: () => [{ id: "core.wayfarer-footwear", slot: "footwear", label: "Wayfarer", invested: true, variants: [{ level: 4 }, { level: 10 }, { level: 17 }] }] },
     accessoryRunes: { getAll: () => [{ id: "trackless", label: "Trackless", targetKind: "footwear", host: { documentTypes: ["equipment"], wornSlots: ["footwear"], magicPolicy: "mundane-only" }, source: "treasure-vault-remaster", variants: [{ id: "base", level: 6, priceGp: 225, sourceSlug: "trackless", activation: null }, { id: "greater", level: 10, priceGp: 900, sourceSlug: "trackless-greater", activation: { actions: 2, traits: ["concentrate"], frequency: { max: 1, period: "day" }, effectText: "effect", spell: null } }] }] },
+    grimoireProfiles: { getAll: () => [{
+      id: "core.elemental-concordance", label: "Elemental Concordance", physical: { bulk: "L" },
+      variants: [{ level: 4, activation: { type: "free-action", actions: 0 } }, { level: 9, activation: { type: "free-action", actions: 0 } }]
+    }] },
     heldMagicProfiles: { getAll: () => [{
       id: "core.waylight-lantern", hands: 1, label: "Waylight", invested: false, physical: { bulk: "L" },
       variants: [
@@ -70,12 +75,18 @@ test("ItemForgeApi capabilities expose generator priority metadata and registere
   assert.ok(capabilities.magicItemKinds.includes("specific-shield"));
   assert.ok(capabilities.magicItemKinds.includes("worn"));
   assert.ok(capabilities.magicItemKinds.includes("held"));
+  assert.ok(capabilities.magicItemKinds.includes("grimoire"));
   assert.ok(capabilities.magicItemKinds.includes("accessory-rune"));
   assert.deepEqual(capabilities.specificItemModes, ["generated", "existing"]);
   assert.deepEqual(capabilities.specificItemProfiles, [{ id: "core.retributive-weapon", itemType: "weapon", label: "Retributive", themes: [], levels: [3, 10, 16] }]);
   assert.deepEqual(capabilities.specificShieldProfiles, [{ id: "core.restorative-shield", label: "Restorative", themes: [], levels: [5, 10, 15] }]);
   assert.deepEqual(capabilities.wornItemModes, ["generated", "existing"]);
   assert.deepEqual(capabilities.heldItemModes, ["generated", "existing"]);
+  assert.deepEqual(capabilities.grimoireModes, ["generated", "existing"]);
+  assert.deepEqual(capabilities.grimoireProfiles, [{ id: "core.elemental-concordance", label: "Elemental Concordance", physical: { bulk: "L" }, levels: [4, 9], activations: [{ type: "free-action", actions: 0 }, { type: "free-action", actions: 0 }] }]);
+  assert.equal(capabilities.grimoireCapabilities.existing, true);
+  assert.equal(capabilities.grimoireCapabilities.generated, true);
+  assert.deepEqual(capabilities.grimoireCapabilities.generatedLevels, [4, 9]);
   assert.deepEqual(capabilities.heldHands, [1, 2]);
   assert.deepEqual(capabilities.heldMagicProfiles, [{
     id: "core.waylight-lantern", hands: 1, label: "Waylight", invested: false, physical: { bulk: "L" }, levels: [1, 6],
@@ -113,7 +124,7 @@ test("ItemForgeApi exposes mode-aware worn slot capabilities for external caller
 test("ItemForgeApi exposes compendium index diagnostics", () => {
   const diagnostics = apiFixture().getIndexDiagnostics();
   assert.equal(diagnostics.ready, true);
-  assert.equal(diagnostics.physicalItems, 3);
+  assert.equal(diagnostics.physicalItems, 4);
   assert.equal(diagnostics.spells, 1);
   assert.deepEqual(diagnostics.packErrors, [{ pack: "bad.pack" }]);
 });
@@ -125,4 +136,13 @@ test("ItemForgeApi exposes held hand capabilities for external callers", () => {
   assert.equal(hands.find((entry) => entry.hands === 1).generatedTemplateCount, 1);
   assert.equal(hands.find((entry) => entry.hands === 1).generatedProfileCount, 1);
   assert.equal(hands.find((entry) => entry.hands === 2).generatedProfileCount, 0);
+});
+
+
+test("ItemForgeApi exposes grimoire capabilities for external callers", () => {
+  const capabilities = apiFixture().getGrimoireCapabilities();
+  assert.equal(capabilities.existingCount, 1);
+  assert.equal(capabilities.generatedTemplateCount, 1);
+  assert.equal(capabilities.generatedProfileCount, 1);
+  assert.deepEqual(capabilities.generatedLevels, [4, 9]);
 });
