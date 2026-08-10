@@ -179,6 +179,31 @@
             </div>
           {{/if}}
         {{/if}}
+        {{#if isApexCategory}}
+          <div class="form-group">
+            <label>{{localize "PF2E_ITEM_FORGE.Fields.ApexMode"}}</label>
+            <select name="magic.apexMode">
+              {{#each apexModes}}<option value="{{id}}" {{#if selected}}selected{{/if}} {{#if disabled}}disabled{{/if}}>{{label}}</option>{{/each}}
+            </select>
+            <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.ApexMode"}}</p>
+          </div>
+          <div class="form-group">
+            <label>{{localize "PF2E_ITEM_FORGE.Fields.ApexAttribute"}}</label>
+            <select name="magic.apexAttribute">
+              {{#each apexAttributes}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+            </select>
+            <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.ApexAttribute"}}</p>
+          </div>
+          {{#if generatedApex}}
+            <div class="form-group">
+              <label>{{localize "PF2E_ITEM_FORGE.Fields.ApexProfile"}}</label>
+              <select name="magic.apexProfile">
+                {{#each apexProfiles}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+              </select>
+              <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.ApexProfile"}}</p>
+            </div>
+          {{/if}}
+        {{/if}}
         {{#if isWornMagicCategory}}
           <div class="form-group">
             <label>{{localize "PF2E_ITEM_FORGE.Fields.WornItemMode"}}</label>
@@ -462,6 +487,9 @@
               {{#if preview.magic.heldProfileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.HeldItemProfile"}}</dt><dd>{{preview.magic.heldProfileLabel}}</dd>{{/if}}
               {{#if preview.magic.grimoireModeLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.GrimoireMode"}}</dt><dd>{{preview.magic.grimoireModeLabel}}</dd>{{/if}}
               {{#if preview.magic.grimoireProfileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.GrimoireProfile"}}</dt><dd>{{preview.magic.grimoireProfileLabel}}</dd>{{/if}}
+              {{#if preview.magic.apexModeLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.ApexMode"}}</dt><dd>{{preview.magic.apexModeLabel}}</dd>{{/if}}
+              {{#if preview.magic.apexAttributeLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.ApexAttribute"}}</dt><dd>{{preview.magic.apexAttributeLabel}}</dd>{{/if}}
+              {{#if preview.magic.apexProfileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.ApexProfile"}}</dt><dd>{{preview.magic.apexProfileLabel}}</dd>{{/if}}
               {{#if preview.magic.accessoryRuneLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.AccessoryRune"}}</dt><dd>{{preview.magic.accessoryRuneLabel}}</dd>{{/if}}
               {{#if preview.magic.profileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.StaffProfile"}}</dt><dd>{{preview.magic.profileLabel}}</dd>{{/if}}
               {{#if preview.magic.variantLabelLocalized}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.StaffVariant"}}</dt><dd>{{preview.magic.variantLabelLocalized}}</dd>{{/if}}
@@ -509,6 +537,13 @@
               {{#if preview.grimoire.activationSummary}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.Activation"}}</dt><dd>{{preview.grimoire.activationSummary}}</dd>{{/if}}
               {{#if preview.grimoire.effect}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.GrimoireEffect"}}</dt><dd>{{preview.grimoire.effect}}</dd>{{/if}}
               {{#if preview.grimoire.automationLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.Automation"}}</dt><dd>{{preview.grimoire.automationLabel}}</dd>{{/if}}
+            {{/if}}
+            {{#if preview.apexItem}}
+              {{#if preview.apexItem.attributeLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.ApexAttribute"}}</dt><dd>{{preview.apexItem.attributeLabel}}</dd>{{/if}}
+              {{#if preview.apexItem.variantLabelLocalized}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.ApexVariant"}}</dt><dd>{{preview.apexItem.variantLabelLocalized}}</dd>{{/if}}
+              {{#if preview.apexItem.passive}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.ApexPassive"}}</dt><dd>{{preview.apexItem.passive}}</dd>{{/if}}
+              {{#if preview.apexItem.activationSummary}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.Activation"}}</dt><dd>{{preview.apexItem.activationSummary}}</dd>{{/if}}
+              {{#if preview.apexItem.automationLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.Automation"}}</dt><dd>{{preview.apexItem.automationLabel}}</dd>{{/if}}
             {{/if}}
             {{#if preview.heldItem}}
               {{#if preview.heldItem.handsLabelLocalized}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.HeldHands"}}</dt><dd>{{preview.heldItem.handsLabelLocalized}}</dd>{{/if}}

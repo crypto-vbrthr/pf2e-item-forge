@@ -240,3 +240,15 @@ test("normalizeRequest hydrates grimoire settings and validation accepts the cat
   const result = validateRequest({ mode: "magic", category: "magic.grimoire", level: 8, source: { mode: "system" }, seed: "x" }, { categories, generationModes: ["magic"] });
   assert.equal(result.valid, true);
 });
+
+test("normalizeRequest hydrates apex settings and validation accepts the apex category", async () => {
+  const normalized = normalizeRequest({ mode: "magic", category: "magic.apex", magic: { apexMode: "generated", apexProfile: "core.apex-might", apexAttribute: "str" } });
+  assert.equal(normalized.magic.apexMode, "generated");
+  assert.equal(normalized.magic.apexProfile, "core.apex-might");
+  assert.equal(normalized.magic.apexAttribute, "str");
+  const { validateRequest } = await import("../../src/engine/request-normalizer.js");
+  const { CategoryRegistry, registerCoreCategories } = await import("../../src/engine/category-registry.js");
+  const categories = registerCoreCategories(new CategoryRegistry());
+  const validation = validateRequest(normalized, { categories, generationModes: new Set(["magic"]) });
+  assert.equal(validation.valid, true);
+});

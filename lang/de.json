@@ -62,7 +62,10 @@
       "HeldItemMode": "Erzeugungsart des gehaltenen Gegenstands",
       "HeldItemProfile": "Profil des gehaltenen Gegenstands",
       "GrimoireMode": "Grimoire-Modus",
-      "GrimoireProfile": "Grimoire-Profil"
+      "GrimoireProfile": "Grimoire-Profil",
+      "ApexMode": "Apex-Generierung",
+      "ApexProfile": "Apex-Profil",
+      "ApexAttribute": "Apex-Attribut"
     },
     "LevelMode": {
       "Single": "Einzelne Stufe",
@@ -98,7 +101,7 @@
       "TreasureMode": "Erzeugt genau einen nichtmagischen Verkaufs- oder Kunstschatz. Material, Verarbeitung und Zustand beeinflussen seinen Wert.",
       "ValueTolerance": "0,15 entspricht ±15 % um den Zielwert. Wird kein Treffer gefunden, liefert der ValueSolver das nächstgelegene gültige Ergebnis mit Warnung.",
       "TreasureType": "Optional kann eine konkrete Schatzart gewählt werden. „Beliebig“ lässt die Item Forge innerhalb der gewählten Kategorie würfeln.",
-      "MagicMode": "Erzeugt permanente magische Spezialgegenstände wie Zauberstäbe, Zauberstecken, Zauberherzen, spezifische magische Waffen/Rüstungen/Schilde und getragene magische Gegenstände.",
+      "MagicMode": "Erzeugt dauerhafte besondere magische Gegenstände wie Zauberstäbe, Stecken, Zauberverstärker, Grimoires, Apex-Gegenstände, spezifische magische Waffen/Rüstungen/Schilde sowie getragene oder gehaltene magische Gegenstände.",
       "MagicSources": "Die ausgewählten Kompendien liefern die physischen Basisgegenstände und, bei zaubergebundenen Generatoren, zusätzlich den Zauberpool.",
       "MagicTheme": "Automatisch wählt ein Thema mit genügend passenden Zaubern. Ein festes Thema ist eine harte Vorgabe.",
       "AllowHeightenedSpells": "Nur Zauber mit einer echten Erhöhungsdefinition dürfen auf höheren Graden erneut in Zauberstäben oder Zauberstecken auftauchen.",
@@ -121,7 +124,10 @@
       "GeneratedHeldSources": "Generierte gehaltene Gegenstände verwenden Item-Forge-Profile und eine technische PF2e-Systemvorlage. Die gewählten Inhaltsquellen beeinflussen vordefinierte gehaltene Gegenstände, nicht die generierte Profilbibliothek.",
       "GrimoireMode": "Vordefiniert übernimmt ein vorhandenes PF2e-Grimoire vollständig. Generiert erschafft ein neues Grimoire aus einem Item-Forge-Profil.",
       "GrimoireProfile": "Wähle eine Grimoire-Familie oder lasse Item Forge automatisch ein passendes Profil bestimmen.",
-      "GeneratedGrimoireSources": "Generierte Grimoires verwenden nur ein geeignetes PF2e-System-Grimoire als technisches Schema-Template. Zauberquellen werden dafür nicht benötigt."
+      "GeneratedGrimoireSources": "Generierte Grimoires verwenden nur ein geeignetes PF2e-System-Grimoire als technisches Schema-Template. Zauberquellen werden dafür nicht benötigt.",
+      "ApexMode": "Vordefiniert übernimmt einen veröffentlichten PF2e-Apex-Gegenstand unverändert. Generiert erzeugt einen neuen Apex-Gegenstand der Stufen 17–20 mit nativem PF2e-Apex-Attributsvorteil und bewusst konservativen, regeltextbasierten Zusatzfähigkeiten.",
+      "ApexProfile": "Automatisch wählt ein Profil, das zum gewählten Attribut passt. Ein festes Profil ist eine harte Vorgabe.",
+      "ApexAttribute": "Beschränkt den Apex-Gegenstand optional auf Stärke, Geschicklichkeit, Konstitution, Intelligenz, Weisheit oder Charisma."
     },
     "Preview": {
       "Empty": "Noch nichts geschmiedet. Parameter wählen und Generieren drücken.",
@@ -197,7 +203,12 @@
       "GrimoireMode": "Grimoire-Modus",
       "GrimoireProfile": "Grimoire-Profil",
       "GrimoireVariant": "Grimoire-Variante",
-      "GrimoireEffect": "Grimoire-Effekt"
+      "GrimoireEffect": "Grimoire-Effekt",
+      "ApexMode": "Apex-Generierung",
+      "ApexProfile": "Apex-Profil",
+      "ApexAttribute": "Apex-Attribut",
+      "ApexVariant": "Apex-Variante",
+      "ApexPassive": "Passiver Vorteil"
     },
     "Notifications": {
       "GenerationFailed": "Für diese Parameter konnte kein Gegenstand erzeugt werden.",
@@ -275,7 +286,8 @@
       "MagicHeld": "Gehaltene magische Gegenstände",
       "MagicHeldOneHand": "Einhandgegenstände",
       "MagicHeldTwoHands": "Zweihandgegenstände",
-      "MagicGrimoire": "Grimoires"
+      "MagicGrimoire": "Grimoires",
+      "MagicApex": "Apex-Gegenstände"
     },
     "GenerationMode": {
       "Existing": "Vordefinierten Gegenstand auswählen",
@@ -299,7 +311,7 @@
       "NoTreasureType": "Für die gewählte Schatzkategorie ist keine passende Schatzart registriert.",
       "NoTreasureCandidate": "Mit den gewählten Material-, Zustands- und Wertvorgaben konnte kein gültiger Schatz erzeugt werden.",
       "UnknownTreasureContent": "Eine angeforderte Schatzdefinition ist nicht registriert oder nicht mehr verfügbar.",
-      "UnsupportedMagicCategory": "Diese Erzeugungsart unterstützt Zauberstäbe, Zauberstecken, Zauberherzen sowie spezifische magische Waffen, Rüstungen und Schilde.",
+      "UnsupportedMagicCategory": "Dieser Generierungsmodus unterstützt Zauberstäbe, Stecken, Zauberverstärker, Grimoires, Apex-Gegenstände, spezifische magische Waffen, Rüstungen und Schilde sowie getragene und gehaltene Gegenstände und Accessory Runes.",
       "NoWandSpellCandidate": "In den gewählten Quellen wurde kein für einen Zauberstab geeigneter Zauber gefunden.",
       "NoStaffSpellCandidate": "Für die gewählte Stufe und das gewählte Thema konnte keine passende Zauberliste für einen Zauberstecken zusammengestellt werden.",
       "NoStaffBaseItem": "Die PF2e-Basiswaffe für einen Zauberstecken konnte nicht gefunden werden.",
@@ -342,7 +354,12 @@
       "NoGrimoireTemplate": "Es wurde kein geeignetes PF2e-System-Grimoire als technisches Template gefunden.",
       "InvalidGrimoireTemplateType": "Das geladene Grimoire-Template besitzt keinen zulässigen PF2e-Gegenstandstyp.",
       "GrimoireTemplateTraitMismatch": "Das geladene Grimoire-Template besitzt nicht mehr das Merkmal „Grimoire“.",
-      "UnknownGrimoireProfile": "Das gewählte Grimoire-Profil ist unbekannt."
+      "UnknownGrimoireProfile": "Das gewählte Grimoire-Profil ist unbekannt.",
+      "NoPredefinedApexItemCandidate": "Kein vordefinierter Apex-Gegenstand erfüllt die gewählten Stufen-, Seltenheits-, Quellen- und Attributfilter.",
+      "NoApexProfileCandidate": "Kein generiertes Apex-Profil erfüllt die gewählten Stufen-, Seltenheits- und Attributvorgaben.",
+      "NoApexItemTemplate": "Im PF2e-System ist kein Apex-Ausrüstungsgegenstand als sicheres Implementierungstemplate verfügbar.",
+      "InvalidApexTemplateType": "Das gefundene Apex-Implementierungstemplate verwendet einen unsicheren PF2e-Dokumenttyp.",
+      "UnknownApexProfile": "Das ausgewählte Apex-Profil ist nicht registriert."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatisch stufengerecht",
@@ -855,6 +872,63 @@
       "GrimoireRules": "Grimoire:",
       "StandardRules": "Während deiner täglichen Vorbereitungen kannst du dieses Grimoire studieren, wenn du Zauber vorbereitest. Bis zu deinen nächsten täglichen Vorbereitungen kannst du seine Aktivierungen für passende Zauber einsetzen, die du aus diesem Grimoire in Zauberplätze vorbereitet hast. Zaubertricks, Fokuszauber und angeborene Zauber zählen nicht. Du kannst pro Tag nur von einem Grimoire profitieren, und dasselbe Grimoire kann pro Tag nur von einer Kreatur studiert werden. Nach dem Studium musst du das Grimoire nicht weiter besitzen.",
       "AutomationNote": "Dieses generierte Grimoire verwendet Regeltext und strukturierte Item-Forge-Metadaten; seine Sonderfähigkeit wird nicht durch zusätzliche Rule Elements automatisiert."
+    },
+    "ApexMode": {
+      "Existing": "Vordefiniert",
+      "Generated": "Generiert"
+    },
+    "ApexAttributes": {
+      "Automatic": "Automatisch",
+      "Strength": "Stärke",
+      "Dexterity": "Geschicklichkeit",
+      "Constitution": "Konstitution",
+      "Intelligence": "Intelligenz",
+      "Wisdom": "Weisheit",
+      "Charisma": "Charisma"
+    },
+    "ApexProfiles": {
+      "Automatic": "Automatisch",
+      "Might": "Apex der Stärke",
+      "Grace": "Apex der Gewandtheit",
+      "Vitality": "Apex der Lebenskraft",
+      "Intellect": "Apex des Intellekts",
+      "Insight": "Apex der Einsicht",
+      "Presence": "Apex der Präsenz"
+    },
+    "ApexText": {
+      "ApexBenefit": "Apex:",
+      "CoreRule": "Wenn du diesen Gegenstand investierst, erhöht er deinen Modifikator für {attribute} um 1 oder auf +4, je nachdem, was höher ist. Die üblichen Apex-Beschränkungen gelten weiterhin.",
+      "AutomationNote": "Der Apex-Attributsvorteil verwendet native PF2e-Apex-Daten. Zusatzfähigkeiten verwenden Regeltext und strukturierte Item-Forge-Metadaten.",
+      "HybridAutomation": "Nativer Apex-Vorteil + regeltextbasierte Zusatzfähigkeiten",
+      "OncePerMinute": "einmal pro Minute",
+      "OncePerRound": "einmal pro Runde",
+      "MightName": "Siegel aufsteigender Stärke",
+      "MightDescription": "Ein schweres Metallsiegel scheint zur Erde gezogen zu werden, bis es getragen wird und sein Gewicht sich in ein Gefühl vollkommener Hebelwirkung verwandelt.",
+      "MightPassive": "Du erhältst einen Gegenstandsbonus von +{bonus} auf Athletikwürfe.",
+      "MightTrigger": "Du erzielst einen Erfolg oder kritischen Erfolg bei Schieben.",
+      "MightActivation": "Du kannst das Ziel zusätzlich {distance} Fuß weit schieben.",
+      "GraceName": "Siegel aufsteigender Gewandtheit",
+      "GraceDescription": "Dieses schmale silberne Abzeichen verschiebt sich kaum merklich, sobald sein Träger Haltung oder Gleichgewicht verändert.",
+      "GracePassive": "Du erhältst einen Gegenstandsbonus von +{bonus} auf Akrobatikwürfe.",
+      "GraceTrigger": "Du scheiterst oder scheiterst kritisch bei einem Akrobatikwurf.",
+      "GraceActivation": "Wiederhole den auslösenden Akrobatikwurf und verwende das zweite Ergebnis. Dies ist ein Glückseffekt.",
+      "VitalityName": "Siegel aufsteigender Lebenskraft",
+      "VitalityDescription": "Ein dunkles Eisensiegel schlägt mit einem langsamen, stetigen Puls, der selbst durch Kleidung und Rüstung zu spüren ist.",
+      "VitalityPassive": "Du erhältst einen Zustandsbonus von +2 auf Zähigkeitswürfe gegen Krankheiten und Gifte.",
+      "VitalityTrigger": "Du erleidest Schaden.",
+      "VitalityActivation": "Reduziere den auslösenden Schaden um {reduction}.",
+      "IntellectName": "Siegel aufsteigenden Intellekts",
+      "IntellectDescription": "Geometrische Inschriften auf diesem Emblem aus Kupfer und Kristall ordnen sich ständig zu neuen Beweisen und Diagrammen.",
+      "IntellectPassive": "Du erhältst einen Gegenstandsbonus von +{bonus} auf Handwerkswürfe und Würfe zum Identifizieren von Magie.",
+      "IntellectActivation": "Vor Ende deines Zuges erhält dein nächster Wissen-abrufen-Wurf einen Situationsbonus von +{activationBonus}.",
+      "InsightName": "Siegel aufsteigender Einsicht",
+      "InsightDescription": "Der blasse Stein in diesem Siegel ähnelt nur dann einem Auge, wenn du ihn aus dem Augenwinkel betrachtest.",
+      "InsightPassive": "Du erhältst einen Gegenstandsbonus von +{perceptionBonus} auf Wahrnehmungswürfe.",
+      "InsightActivation": "Vor Ende deines Zuges erhält deine nächste Suchen-Aktion einen Situationsbonus von +{activationBonus}.",
+      "PresenceName": "Siegel aufsteigender Präsenz",
+      "PresenceDescription": "Dieses polierte goldene Emblem zieht Aufmerksamkeit auf sich, ohne protzig zu wirken, und lässt jede Geste bewusst erscheinen.",
+      "PresencePassive": "Du erhältst einen Gegenstandsbonus von +{perceptionBonus} auf Diplomatie- und Darbietungswürfe.",
+      "PresenceActivation": "Vor Ende deines Zuges erhält dein nächster Diplomatie-, Einschüchtern- oder Darbietungswurf einen Situationsbonus von +{activationBonus}."
     }
   }
 }

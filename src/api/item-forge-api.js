@@ -1,10 +1,11 @@
 import { getWornSlotCapabilities } from "../engine/worn-item-utils.js";
 import { getHeldHandCapabilities } from "../engine/held-item-utils.js";
 import { getGrimoireCapabilities } from "../engine/grimoire-utils.js";
+import { getApexCapabilities } from "../engine/apex-item-utils.js";
 import { API_VERSION } from "../constants.js";
 
 export class ItemForgeApi {
-  constructor({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes = [], wandProfiles = null, staffProfiles = null, spellheartProfiles = null, specificItemProfiles = null, specificShieldProfiles = null, wornMagicProfiles = null, accessoryRunes = null, heldMagicProfiles = null, grimoireProfiles = null, diagnostics = null, openApplication }) {
+  constructor({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes = [], wandProfiles = null, staffProfiles = null, spellheartProfiles = null, specificItemProfiles = null, specificShieldProfiles = null, wornMagicProfiles = null, accessoryRunes = null, heldMagicProfiles = null, grimoireProfiles = null, apexProfiles = null, diagnostics = null, openApplication }) {
     this.apiVersion = API_VERSION;
     this.engine = engine;
     this.categories = categories;
@@ -22,6 +23,7 @@ export class ItemForgeApi {
     this.accessoryRunes = accessoryRunes;
     this.heldMagicProfiles = heldMagicProfiles;
     this.grimoireProfiles = grimoireProfiles;
+    this.apexProfiles = apexProfiles;
     this.diagnostics = diagnostics;
     this.openApplication = openApplication;
   }
@@ -86,6 +88,13 @@ export class ItemForgeApi {
     });
   }
 
+  getApexCapabilities() {
+    return getApexCapabilities({
+      entries: this.compendiumIndex?.entries ?? [],
+      profiles: this.apexProfiles?.getAll?.() ?? []
+    });
+  }
+
   getCapabilities() {
     return {
       apiVersion: this.apiVersion,
@@ -97,7 +106,7 @@ export class ItemForgeApi {
       fundamentalRuneModes: ["automatic", "none"],
       propertyRuneModes: ["automatic", "random", "fixed", "none"],
       magicThemes: this.magicThemes.map((theme) => theme.id),
-      magicItemKinds: ["wand", "staff", "spellheart", "grimoire", "specific-weapon", "specific-armor", "specific-shield", "worn", "held", "accessory-rune"],
+      magicItemKinds: ["wand", "staff", "spellheart", "grimoire", "apex", "specific-weapon", "specific-armor", "specific-shield", "worn", "held", "accessory-rune"],
       automationLevels: ["native", "rules-text"],
       magicDiagnostics: Boolean(this.diagnostics),
       indexDiagnostics: true,
@@ -109,6 +118,9 @@ export class ItemForgeApi {
       wornItemModes: ["generated", "existing"],
       heldItemModes: ["generated", "existing"],
       grimoireModes: ["generated", "existing"],
+      apexModes: ["generated", "existing"],
+      apexAttributes: ["str", "dex", "con", "int", "wis", "cha"],
+      apexCapabilities: this.getApexCapabilities(),
       assistiveItems: { category: "assistive", modes: ["existing"], generated: false, policy: "existing-only" },
       grimoireCapabilities: this.getGrimoireCapabilities(),
       heldHands: [1, 2],
@@ -133,6 +145,14 @@ export class ItemForgeApi {
         id: profile.id,
         label: profile.label,
         physical: profile.physical,
+        levels: profile.variants.map((variant) => variant.level),
+        activations: profile.variants.map((variant) => variant.activation),
+        ...(profile.balance ? { balance: profile.balance } : {})
+      })) ?? [],
+      apexProfiles: this.apexProfiles?.getAll?.().map((profile) => ({
+        id: profile.id,
+        label: profile.label,
+        attribute: profile.attribute,
         levels: profile.variants.map((variant) => variant.level),
         activations: profile.variants.map((variant) => variant.activation),
         ...(profile.balance ? { balance: profile.balance } : {})

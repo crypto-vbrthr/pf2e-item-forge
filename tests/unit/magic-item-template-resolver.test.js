@@ -15,7 +15,9 @@ test("MagicItemTemplateResolver keeps implementation templates separate from sel
     { id: "system-held-one", type: "equipment", level: 4, pack: "pf2e.equipment", packageType: "system", packageName: "pf2e", categories: ["magic.held", "magic.held.one-hand"] },
     { id: "addon-held-two", type: "equipment", level: 1, pack: "addon.items", packageType: "module", packageName: "addon", categories: ["magic.held", "magic.held.two-hands"] },
     { id: "addon-grimoire", type: "book", level: 4, pack: "addon.items", packageType: "module", packageName: "addon", categories: ["magic.grimoire"] },
-    { id: "system-grimoire", type: "book", level: 6, pack: "pf2e.equipment", packageType: "system", packageName: "pf2e", categories: ["magic.grimoire"] }
+    { id: "system-grimoire", type: "book", level: 6, pack: "pf2e.equipment", packageType: "system", packageName: "pf2e", categories: ["magic.grimoire"] },
+    { id: "addon-apex", type: "equipment", level: 17, pack: "addon.items", packageType: "module", packageName: "addon", categories: ["magic.apex"] },
+    { id: "system-apex", type: "equipment", level: 17, pack: "pf2e.equipment", packageType: "system", packageName: "pf2e", categories: ["magic.apex"] }
   ];
   const resolver = new MagicItemTemplateResolver({ compendiumIndex: { entries } });
   assert.equal(resolver.resolveStaffBaseEntry().id, "system-staff");
@@ -27,6 +29,7 @@ test("MagicItemTemplateResolver keeps implementation templates separate from sel
   assert.equal(resolver.resolveHeldTemplateEntry(2, { sourcePolicy: "prefer-system" }).id, "addon-held-two", "an explicit non-core policy may opt into fallback behavior");
   assert.equal(resolver.resolveGrimoireTemplateEntry().id, "system-grimoire", "generated grimoires use system-only implementation templates");
   assert.equal(resolver.resolveGrimoireTemplateEntry({ allowedTypes: ["equipment"] }), null);
+  assert.equal(resolver.resolveApexTemplateEntry().id, "system-apex", "generated apex items use system-only apex equipment templates");
   assert.equal(resolver.templateMetadata(resolver.resolveStaffBaseEntry(), { kind: "staff-base" }).source, "implementation-template");
 });
 

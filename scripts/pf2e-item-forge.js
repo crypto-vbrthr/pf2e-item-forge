@@ -15,6 +15,7 @@ import { WornMagicItemGenerator } from "../src/engine/generators/worn-magic-item
 import { AccessoryRuneGenerator } from "../src/engine/generators/accessory-rune-generator.js";
 import { HeldMagicItemGenerator } from "../src/engine/generators/held-magic-item-generator.js";
 import { GrimoireGenerator } from "../src/engine/generators/grimoire-generator.js";
+import { ApexItemGenerator } from "../src/engine/generators/apex-item-generator.js";
 import { SpellheartProfileRegistry, registerCoreSpellheartProfiles } from "../src/engine/registries/spellheart-profile-registry.js";
 import { WandProfileRegistry, registerCoreWandProfiles } from "../src/engine/registries/wand-profile-registry.js";
 import { StaffProfileRegistry, registerCoreStaffProfiles } from "../src/engine/registries/staff-profile-registry.js";
@@ -24,6 +25,7 @@ import { WornMagicProfileRegistry, registerCoreWornMagicProfiles } from "../src/
 import { AccessoryRuneRegistry, registerCoreAccessoryRunes } from "../src/engine/registries/accessory-rune-registry.js";
 import { HeldMagicProfileRegistry, registerCoreHeldMagicProfiles } from "../src/engine/registries/held-magic-profile-registry.js";
 import { GrimoireProfileRegistry, registerCoreGrimoireProfiles } from "../src/engine/registries/grimoire-profile-registry.js";
+import { ApexProfileRegistry, registerCoreApexProfiles } from "../src/engine/registries/apex-profile-registry.js";
 import { getSelectableMagicThemes } from "../src/engine/magic-themes.js";
 import { TreasureRegistry } from "../src/engine/registries/treasure-registry.js";
 import { registerCoreTreasureContent } from "../src/engine/treasure/core-treasure-content.js";
@@ -85,6 +87,7 @@ function createApi() {
   const accessoryRunes = registerCoreAccessoryRunes(new AccessoryRuneRegistry());
   const heldMagicProfiles = registerCoreHeldMagicProfiles(new HeldMagicProfileRegistry());
   const grimoireProfiles = registerCoreGrimoireProfiles(new GrimoireProfileRegistry());
+  const apexProfiles = registerCoreApexProfiles(new ApexProfileRegistry());
   const templateResolver = new MagicItemTemplateResolver({ compendiumIndex });
   generators.register(new TreasureGenerator({ categories, treasure }), { priority: 200, modes: ["treasure"] });
   generators.register(new WandGenerator({ compendiumIndex, wandProfiles, templateResolver }), { priority: 220, modes: ["magic"] });
@@ -95,6 +98,7 @@ function createApi() {
   generators.register(new AccessoryRuneGenerator({ compendiumIndex, accessoryRunes }), { priority: 216, modes: ["magic"] });
   generators.register(new HeldMagicItemGenerator({ compendiumIndex, heldMagicProfiles, templateResolver }), { priority: 214, modes: ["magic"] });
   generators.register(new GrimoireGenerator({ compendiumIndex, grimoireProfiles, templateResolver }), { priority: 213, modes: ["magic"] });
+  generators.register(new ApexItemGenerator({ compendiumIndex, apexProfiles, templateResolver }), { priority: 212, modes: ["magic"] });
   generators.register(new SpellheartGenerator({ compendiumIndex, spellheartProfiles, templateResolver }), { priority: 215, modes: ["magic"] });
   generators.register(new ScrollGenerator({ compendiumIndex, templateResolver }), { priority: 200, modes: ["existing"] });
   generators.register(new EquipmentGenerator({ compendiumIndex, propertyRunes }), { priority: 150, modes: ["equipment"] });
@@ -116,7 +120,7 @@ function createApi() {
     return application;
   };
 
-  const itemForgeApi = new ItemForgeApi({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes: getSelectableMagicThemes(), wandProfiles, staffProfiles, spellheartProfiles, specificItemProfiles, specificShieldProfiles, wornMagicProfiles, accessoryRunes, heldMagicProfiles, grimoireProfiles, openApplication });
+  const itemForgeApi = new ItemForgeApi({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes: getSelectableMagicThemes(), wandProfiles, staffProfiles, spellheartProfiles, specificItemProfiles, specificShieldProfiles, wornMagicProfiles, accessoryRunes, heldMagicProfiles, grimoireProfiles, apexProfiles, openApplication });
   itemForgeApi.diagnostics = new MagicItemDiagnostics({ api: itemForgeApi });
   return itemForgeApi;
 }

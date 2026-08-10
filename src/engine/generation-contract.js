@@ -53,6 +53,12 @@ export function applyGenerationContract(result) {
     metadata.automation = { level: "rules-text" };
   }
 
+  if (metadata.apexItem && typeof metadata.apexItem === "object") {
+    const expected = metadata.apexItem.mode === "existing" ? "native" : "rules-text";
+    metadata.apexItem.automation = expected;
+    metadata.automation = metadata.apexItem.mode === "existing" ? { level: "native" } : { level: "rules-text", nativeParts: ["apex-attribute"] };
+  }
+
   if (metadata.grimoire && typeof metadata.grimoire === "object") {
     const expected = metadata.grimoire.mode === "existing" ? "native" : "rules-text";
     metadata.grimoire.automation = expected;

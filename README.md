@@ -2,9 +2,9 @@
 
 Reusable Item Forge architecture for Foundry VTT v14 and Pathfinder 2e.
 
-## v0.0.32 scope
+## v0.0.33 scope
 
-This release adds Assistive Items as a dedicated existing-only cross-cutting category. Published PF2e assistive items can now be selected directly even though they span equipment, weapons, prostheses, mobility devices, companion aids, and other physical document shapes. Item Forge deliberately does not synthesize new assistive items: their bespoke rules and representation-sensitive purpose are preserved by cloning the published PF2e item intact. Grimoires remain fully supported, and Magical Tattoos remain out of scope by design.
+This release completes the current permanent-equipment pass with a dedicated Apex Item family. Published apex items remain intact across worn, armor, and weapon document shapes, while generated apex items use the verified PF2e native apex attribute field for the core benefit and conservative Item Forge rules-text profiles for secondary abilities. v0.0.32 also added Assistive Items as an existing-only cross-cutting category so their bespoke published PF2e rules are preserved instead of synthesized.
 
 Implemented:
 
@@ -17,10 +17,8 @@ Implemented:
 - Exact level or level range with strict/nearest/not-above/not-below policies
 - Deterministic seeded generation
 - Existing physical compendium items, excluding feats/spells/rule documents
-- Assistive Items are indexed as a dedicated cross-cutting `assistive` category in Existing mode, preserving the complete published PF2e document regardless of whether the aid is implemented as equipment, a weapon-like cane, mobility device, prosthesis, companion aid, or another supported physical item type
-- Assistive Items are intentionally existing-only: Item Forge does not invent generic disability aids or recombine their bespoke rules into synthetic profiles; `getCapabilities().assistiveItems` exposes this policy to integrations
 - Spell-bearing scroll generation with meaningful legal heightening
-- Special magic-item mode for wands, staves, spellhearts, grimoires, specific magic weapons, specific magic armor, specific magic shields, worn magic items, held magic items, and Accessory Runes
+- Special magic-item mode for wands, staves, spellhearts, grimoires, apex items, specific magic weapons, specific magic armor, specific magic shields, worn magic items, held magic items, and Accessory Runes
 - Wands use the PF2e generic wand templates and embed one real spell at a legal base or meaningful heightened rank
 - Staves can either be copied exactly from selected compendia or generated as rulebook-style variant families with inherited lower variants
 - Spellhearts can either be selected as complete predefined PF2e items or generated from validated custom Spellheart profiles with coherent armor/weapon benefits, spell progressions, prices, and themes
@@ -36,11 +34,15 @@ Implemented:
 - Generated grimoires use only PF2e-system `book`/`equipment` documents carrying the `grimoire` trait as structural implementation templates; native Rule Elements, descriptions, subitems, apex/publication data, foreign flags, material/base/container identity, and template quantity are removed or normalized before composition.
 - Five reviewed generated grimoire families provide automatic strict coverage from item level 4 through 20. Their structured contracts record daily-preparation restrictions, spell-slot-only use, eligible-spell filters, activation type, traits, frequency, trigger, requirements, duration, and effect text without pretending to provide unverified native automation.
 - `getGrimoireCapabilities()` / `grimoireCapabilities` reports predefined availability, safe system-template count, generated-profile count, and generated levels; the Embedded Editor uses the same capability state for predefined/generated mode availability.
+- Assistive Items use the cross-cutting `assistive` category in existing-only mode. Classification recognizes explicit PF2e assistive markers and a narrow source-backed identifier allow-list without description heuristics; selected items are copied whole with native rules. `getCapabilities().assistiveItems` explicitly reports `existing-only` so integrations do not invent a generated mode.
+- Apex Items have a cross-cutting `magic.apex` category. Published apex items can remain worn items, armor, or weapons and are copied whole with native PF2e automation. Generated apex items deliberately use a safe PF2e-system `equipment` apex template and generic worn shape rather than trying to synthesize weapon/armor schemas.
+- Six reviewed generated Apex families cover Strength, Dexterity, Constitution, Intelligence, Wisdom, and Charisma at exact item levels 17–20. The core apex benefit is written to native `system.apex.attribute`; secondary passive/activation abilities remain localized rules text plus structured metadata, with explicit hybrid automation ownership.
+- `getApexCapabilities()` / `apexCapabilities` reports existing/generated availability, native attribute coverage, generated profile count, and generated levels; the Embedded Editor filters mode, attribute, and profile choices from the same capability state.
 - Accessory Runes are a separate `magic.accessory-rune` composition path with a public `accessoryRunes` registry; the core library contains the Treasure Vault Menacing, Pontoon, Preserving, and Trackless progressions
 - Accessory Rune variants are source-backed by indexed `sourceSlug`, so both host and rune must exist in the selected content sources; result metadata records both content packs and exact rune provenance
 - Accessory Rune host contracts declare document types, worn slots, and magic policy. The four core Treasure Vault families are `mundane-only`, matching the default rule that a magic host is legal only when a rune Usage explicitly permits it
 - Greater Accessory Rune activations are structured as actions/traits/frequency/spell metadata and rendered into localized rules text; custom native Rule Elements are still not guessed
-- Public `specificItemProfiles`, `specificShieldProfiles`, `wornMagicProfiles`, `heldMagicProfiles`, and `grimoireProfiles` registries for extension modules and campaign content; `getWornSlotCapabilities()` / `wornSlots`, `getHeldHandCapabilities()` / `heldHandCapabilities`, and `getGrimoireCapabilities()` / `grimoireCapabilities` expose actual predefined/generated availability
+- Public `specificItemProfiles`, `specificShieldProfiles`, `wornMagicProfiles`, `heldMagicProfiles`, `grimoireProfiles`, and `apexProfiles` registries for extension modules and campaign content; `getWornSlotCapabilities()` / `wornSlots`, `getHeldHandCapabilities()` / `heldHandCapabilities`, `getGrimoireCapabilities()` / `grimoireCapabilities`, and `getApexCapabilities()` / `apexCapabilities` expose actual predefined/generated availability
 - Magic themes for fire, cold, electricity, healing, illusion, mental, vitality, void, arcane, divine, occult, primal, and summoning
 - Composed weapons, armor, and shields with fundamental runes
 - Registry-driven property runes with automatic/random/fixed/none modes and compatibility rules
@@ -61,12 +63,12 @@ Implemented:
 - Standalone `ItemForgeApplication` container owning Foundry document creation and preserving `createdByForge` versus `generated` provenance
 - German and English localization
 - Shared generation-result contract for `contentSources`, `templateSource`, and automation level
-- Live Magic diagnostics for predefined and generated magic paths including representative worn contracts, low/high one-/two-handed held contracts, and predefined/generated Grimoire contracts, with exact-level checks, system-template provenance, structured activation/physical/daily-preparation contracts, pack-index failures, and composed-equipment price preparation
-- 259 automated unit/integration/statistical/contract tests
+- Live Magic diagnostics for predefined and generated magic paths including representative worn contracts, low/high one-/two-handed held contracts, predefined/generated Grimoire contracts, and predefined plus level-17/20 Apex contracts, with exact-level checks, native apex schema verification, system-template provenance, structured activation/physical/daily-preparation contracts, pack-index failures, and composed-equipment price preparation
+- 272 automated unit/integration/statistical/contract tests
 
 Not yet implemented:
 
-- Dedicated generation for apex items remains open. Assistive Items are now intentionally existing-only rather than a future generated block.
+- Generated Assistive Items are intentionally not implemented: published assistive items span bespoke physical forms and rules, so Item Forge exposes them as existing-only instead of fabricating generic variants.
 - Magical Tattoos are intentionally out of scope for Item Forge generation: this module generates transferable/findable inventory objects, while a tattoo is applied to a creature rather than existing as ordinary loot after application. Formulae, services, or tattooing workflows would belong to a different feature surface.
 - Native PF2e staff-preparation/casting automation for generated custom staff-family manifests (predefined staves preserve their native PF2e data unchanged)
 - Verified native automation builders for generated custom wands/staves/spellhearts/specific items

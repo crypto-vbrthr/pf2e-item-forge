@@ -369,3 +369,21 @@ test("CompendiumIndex exposes assistive items as a cross-cutting existing-item c
   });
   assert.deepEqual(candidates.map((entry) => entry.id), ["cane", "chair"]);
 });
+
+test("CompendiumIndex exposes apex as a cross-cutting magic category and indexes its attribute", async () => {
+  const pack = makePack("pf2e.apex", [
+    raw("apex-equipment", "equipment", 17, { traits: { value: ["apex", "invested", "magical"], rarity: "common" }, usage: { value: "worn" }, apex: { attribute: "wis" } }),
+    raw("apex-weapon", "weapon", 20, { traits: { value: ["apex", "invested", "magical"], rarity: "common" }, specific: { material: {}, runes: {} }, apex: { attribute: "dex" } })
+  ]);
+  const categories = registerCoreCategories(new CategoryRegistry());
+  const game = { system: { id: "pf2e" }, packs: new FakePackCollection([pack]) };
+  const index = new CompendiumIndex({ categoryRegistry: categories, gameProvider: () => game });
+  await index.refresh();
+  const equipment = index.entries.find((entry) => entry.id === "apex-equipment");
+  const weapon = index.entries.find((entry) => entry.id === "apex-weapon");
+  assert.ok(equipment.categories.includes("magic.apex"));
+  assert.ok(weapon.categories.includes("magic.apex"));
+  assert.ok(weapon.categories.includes("magic.weapon"));
+  assert.equal(equipment.apexAttribute, "wis");
+  assert.equal(weapon.apexAttribute, "dex");
+});

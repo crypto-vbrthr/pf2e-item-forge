@@ -21,7 +21,8 @@ function apiFixture() {
       { id: 1, type: "equipment", categories: ["magic.worn", "magic.worn.footwear"] },
       { id: 3, type: "equipment", packageType: "system", packageName: "pf2e", categories: ["magic.held", "magic.held.one-hand"] },
       { id: 4, type: "equipment", packageType: "system", packageName: "pf2e", categories: ["magic.held", "magic.held.two-hands"] },
-      { id: 5, type: "book", packageType: "system", packageName: "pf2e", categories: ["magic.grimoire"] }
+      { id: 5, type: "book", packageType: "system", packageName: "pf2e", categories: ["magic.grimoire"] },
+      { id: 6, type: "equipment", apexAttribute: "wis", packageType: "system", packageName: "pf2e", categories: ["magic.apex"] }
     ], spellEntries: [{ id: 2 }], getPackErrors: () => [{ pack: "bad.pack" }] },
     treasure: {
       types: { getAll: () => [] }, materials: { getAll: () => [] }, components: { getAll: () => [] },
@@ -39,6 +40,7 @@ function apiFixture() {
       id: "core.elemental-concordance", label: "Elemental Concordance", physical: { bulk: "L" },
       variants: [{ level: 4, activation: { type: "free-action", actions: 0 } }, { level: 9, activation: { type: "free-action", actions: 0 } }]
     }] },
+    apexProfiles: { getAll: () => [{ id: "core.apex-might", attribute: "str", label: "Apex of Might", variants: [{ level: 17, activation: { type: "reaction", actions: 0 } }, { level: 18, activation: { type: "reaction", actions: 0 } }] }] },
     heldMagicProfiles: { getAll: () => [{
       id: "core.waylight-lantern", hands: 1, label: "Waylight", invested: false, physical: { bulk: "L" },
       variants: [
@@ -76,6 +78,7 @@ test("ItemForgeApi capabilities expose generator priority metadata and registere
   assert.ok(capabilities.magicItemKinds.includes("worn"));
   assert.ok(capabilities.magicItemKinds.includes("held"));
   assert.ok(capabilities.magicItemKinds.includes("grimoire"));
+  assert.ok(capabilities.magicItemKinds.includes("apex"));
   assert.ok(capabilities.magicItemKinds.includes("accessory-rune"));
   assert.deepEqual(capabilities.specificItemModes, ["generated", "existing"]);
   assert.deepEqual(capabilities.specificItemProfiles, [{ id: "core.retributive-weapon", itemType: "weapon", label: "Retributive", themes: [], levels: [3, 10, 16] }]);
@@ -83,6 +86,11 @@ test("ItemForgeApi capabilities expose generator priority metadata and registere
   assert.deepEqual(capabilities.wornItemModes, ["generated", "existing"]);
   assert.deepEqual(capabilities.heldItemModes, ["generated", "existing"]);
   assert.deepEqual(capabilities.grimoireModes, ["generated", "existing"]);
+  assert.deepEqual(capabilities.apexModes, ["generated", "existing"]);
+  assert.deepEqual(capabilities.apexAttributes, ["str", "dex", "con", "int", "wis", "cha"]);
+  assert.deepEqual(capabilities.apexProfiles, [{ id: "core.apex-might", label: "Apex of Might", attribute: "str", levels: [17, 18], activations: [{ type: "reaction", actions: 0 }, { type: "reaction", actions: 0 }] }]);
+  assert.equal(capabilities.apexCapabilities.existing, true);
+  assert.equal(capabilities.apexCapabilities.generated, true);
   assert.deepEqual(capabilities.assistiveItems, { category: "assistive", modes: ["existing"], generated: false, policy: "existing-only" });
   assert.deepEqual(capabilities.grimoireProfiles, [{ id: "core.elemental-concordance", label: "Elemental Concordance", physical: { bulk: "L" }, levels: [4, 9], activations: [{ type: "free-action", actions: 0 }, { type: "free-action", actions: 0 }] }]);
   assert.equal(capabilities.grimoireCapabilities.existing, true);
@@ -125,7 +133,7 @@ test("ItemForgeApi exposes mode-aware worn slot capabilities for external caller
 test("ItemForgeApi exposes compendium index diagnostics", () => {
   const diagnostics = apiFixture().getIndexDiagnostics();
   assert.equal(diagnostics.ready, true);
-  assert.equal(diagnostics.physicalItems, 4);
+  assert.equal(diagnostics.physicalItems, 5);
   assert.equal(diagnostics.spells, 1);
   assert.deepEqual(diagnostics.packErrors, [{ pack: "bad.pack" }]);
 });
@@ -146,4 +154,14 @@ test("ItemForgeApi exposes grimoire capabilities for external callers", () => {
   assert.equal(capabilities.generatedTemplateCount, 1);
   assert.equal(capabilities.generatedProfileCount, 1);
   assert.deepEqual(capabilities.generatedLevels, [4, 9]);
+});
+
+
+test("ItemForgeApi exposes apex capabilities for external callers", () => {
+  const capabilities = apiFixture().getApexCapabilities();
+  assert.equal(capabilities.existingCount, 1);
+  assert.equal(capabilities.systemTemplateCount, 1);
+  assert.equal(capabilities.generated, true);
+  assert.deepEqual(capabilities.existingAttributes, ["wis"]);
+  assert.deepEqual(capabilities.generatedAttributes, ["str"]);
 });

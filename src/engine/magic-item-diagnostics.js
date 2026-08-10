@@ -1,6 +1,7 @@
 import { hasMagicMarkerTraits, parseWornUsage } from "./worn-item-utils.js";
 import { hasHeldMagicMarkerTraits, parseHeldUsage } from "./held-item-utils.js";
 import { GENERATED_GRIMOIRE_TEMPLATE_TYPES, hasGrimoireMagicMarkerTraits, isGrimoireTraits } from "./grimoire-utils.js";
+import { APEX_ATTRIBUTES } from "./apex-item-utils.js";
 
 function clone(value) {
   if (globalThis.foundry?.utils?.deepClone) return globalThis.foundry.utils.deepClone(value);
@@ -89,6 +90,9 @@ export class MagicItemDiagnostics {
       { id: "grimoire-existing", request: { mode: "magic", category: "magic.grimoire", level: { min: 4, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { grimoireMode: "existing", grimoireProfile: "automatic" }, seed: "diagnostic-grimoire-existing" } },
       { id: "grimoire-generated-low", request: { mode: "magic", category: "magic.grimoire", level: { min: 4, max: 4, target: 4 }, levelPolicy: "strict", source: { mode: "system" }, magic: { grimoireMode: "generated", grimoireProfile: "automatic" }, seed: "diagnostic-grimoire-low" } },
       { id: "grimoire-generated-high", request: { mode: "magic", category: "magic.grimoire", level: { min: 20, max: 20, target: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { grimoireMode: "generated", grimoireProfile: "automatic" }, seed: "diagnostic-grimoire-high" } },
+      { id: "apex-existing", request: { mode: "magic", category: "magic.apex", level: { min: 17, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { apexMode: "existing", apexProfile: "automatic", apexAttribute: "automatic" }, seed: "diagnostic-apex-existing" } },
+      { id: "apex-generated-low", request: { mode: "magic", category: "magic.apex", level: { min: 17, max: 17, target: 17 }, levelPolicy: "strict", source: { mode: "system" }, magic: { apexMode: "generated", apexProfile: "automatic", apexAttribute: "automatic" }, seed: "diagnostic-apex-low" } },
+      { id: "apex-generated-high", request: { mode: "magic", category: "magic.apex", level: { min: 20, max: 20, target: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { apexMode: "generated", apexProfile: "automatic", apexAttribute: "automatic" }, seed: "diagnostic-apex-high" } },
       { id: "held-existing", request: { mode: "magic", category: "magic.held", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { heldMode: "existing", heldProfile: "automatic" }, seed: "diagnostic-held-existing" } },
       { id: "held-generated-one-low", expectedHeldHands: 1, request: { mode: "magic", category: "magic.held.one-hand", level: { min: 1, max: 1, target: 1 }, levelPolicy: "strict", source: { mode: "system" }, magic: { heldMode: "generated", heldProfile: "automatic" }, seed: "diagnostic-held-one-low" } },
       { id: "held-generated-one-high", expectedHeldHands: 1, request: { mode: "magic", category: "magic.held.one-hand", level: { min: 20, max: 20, target: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { heldMode: "generated", heldProfile: "automatic" }, seed: "diagnostic-held-one-high" } },
@@ -211,6 +215,40 @@ export class MagicItemDiagnostics {
         if (!activation || !validActivationType || !validActionCount) issues.push("generated grimoire lacks a valid structured activation");
         if (activation && (!Array.isArray(activation.traits) || !activation.spellFilter?.preparedFromGrimoire || !activation.spellFilter?.slotsOnly)) issues.push("generated grimoire activation lacks a structured spell filter contract");
       }
+      if (id === "apex-existing" || id.startsWith("apex-generated-")) {
+        const traits = source.system?.traits?.value ?? [];
+        if (!traits.includes("apex")) issues.push("apex item lacks apex trait");
+        if (!traits.includes("invested")) issues.push("apex item lacks invested trait");
+        if (!hasMagicMarkerTraits(traits)) issues.push("apex item lacks a magical marker trait");
+        const attribute = source.system?.apex?.attribute;
+        if (!APEX_ATTRIBUTES.includes(attribute)) issues.push(`apex item has invalid native attribute ${attribute ?? "missing"}`);
+        if (result.metadata?.apexItem?.attribute && attribute !== result.metadata.apexItem.attribute) issues.push("native apex attribute does not match Item Forge metadata");
+      }
+      if (id.startsWith("apex-generated-")) {
+        if (source.type !== "equipment") issues.push(`generated apex item uses unsafe document type ${source.type}`);
+        if (String(source.system?.usage?.value ?? "") !== "worn") issues.push("generated apex item does not use the generic worn implementation contract");
+        if (!Array.isArray(source.system?.rules) || source.system.rules.length !== 0) issues.push("generated apex item inherited template Rule Elements");
+        if (Array.isArray(source.system?.subitems) && source.system.subitems.length) issues.push("generated apex item inherited template subitems");
+        if (Object.hasOwn(source.system ?? {}, "publication")) issues.push("generated apex item inherited template publication data");
+        const material = source.system?.material;
+        if (material && typeof material === "object" && Object.values(material).some((value) => value != null && value !== "")) issues.push("generated apex item inherited template material data");
+        const foreignFlags = Object.keys(source.flags ?? {}).filter((scope) => scope !== "pf2e-item-forge");
+        if (foreignFlags.length) issues.push(`generated apex item inherited template flags: ${foreignFlags.join(", ")}`);
+        if (result.metadata?.automation?.level !== "rules-text" || !result.metadata?.automation?.nativeParts?.includes?.("apex-attribute")) issues.push("generated apex item lacks hybrid native-apex/rules-text automation metadata");
+        if (result.metadata?.apexItem?.coreAutomation !== "native" || result.metadata?.apexItem?.secondaryAutomation !== "rules-text") issues.push("generated apex item automation ownership contract is invalid");
+        const templateSource = result.metadata?.templateSource;
+        const systemId = globalThis.game?.system?.id ?? "pf2e";
+        const systemTemplate = templateSource && (templateSource.packageType === "system" || templateSource.packageName === systemId || templateSource.packageName === "pf2e");
+        if (!systemTemplate) issues.push("generated apex item did not use a PF2e system implementation template");
+        const activation = result.metadata?.apexItem?.activation;
+        const validActivationType = ["action", "reaction", "free-action"].includes(activation?.type);
+        const validActionCount = activation?.type === "action"
+          ? Number.isInteger(activation.actions) && activation.actions >= 1 && activation.actions <= 3
+          : Number(activation?.actions) === 0;
+        if (!activation || !validActivationType || !validActionCount) issues.push("generated apex item lacks a valid structured activation");
+        if (activation && !Array.isArray(activation.traits)) issues.push("generated apex item activation traits are not structured");
+        if (activation?.frequency && (!Number.isInteger(activation.frequency.max) || activation.frequency.max < 1 || !activation.frequency.period)) issues.push("generated apex item activation frequency is invalid");
+      }
       if (id.startsWith("held-generated-")) {
         const traits = source.system?.traits?.value ?? [];
         const expectedInvested = result.metadata?.heldItem?.invested === true;
@@ -279,7 +317,8 @@ export class MagicItemDiagnostics {
         "NO_PREDEFINED_SPECIFIC_SHIELD_CANDIDATE", "NO_SPECIFIC_SHIELD_BASE_ITEM", "NO_SPECIFIC_SHIELD_PROFILE_CANDIDATE",
         "NO_PREDEFINED_WORN_ITEM_CANDIDATE", "NO_WORN_ITEM_PROFILE_CANDIDATE", "NO_WORN_ITEM_TEMPLATE",
         "NO_PREDEFINED_HELD_ITEM_CANDIDATE", "NO_HELD_ITEM_PROFILE_CANDIDATE", "NO_HELD_ITEM_TEMPLATE",
-        "NO_PREDEFINED_GRIMOIRE_CANDIDATE", "NO_GRIMOIRE_PROFILE_CANDIDATE", "NO_GRIMOIRE_TEMPLATE", "NO_ACCESSORY_RUNE_CANDIDATE"
+        "NO_PREDEFINED_GRIMOIRE_CANDIDATE", "NO_GRIMOIRE_PROFILE_CANDIDATE", "NO_GRIMOIRE_TEMPLATE",
+        "NO_PREDEFINED_APEX_ITEM_CANDIDATE", "NO_APEX_PROFILE_CANDIDATE", "NO_APEX_ITEM_TEMPLATE", "NO_ACCESSORY_RUNE_CANDIDATE"
       ].includes(error?.code);
       return { id, status: skippable ? "skipped" : "failed", code: error?.code ?? null, message: error?.message ?? String(error) };
     }
@@ -321,6 +360,19 @@ export class MagicItemDiagnostics {
       id: "pf2e-grimoire-schema",
       status: grimoireEntries.length ? "passed" : "skipped",
       message: grimoireEntries.length ? `Indexed grimoires: ${grimoireEntries.length}; document types: ${[...grimoireTypes].sort().join(", ") || "none"}` : "No indexed grimoires available"
+    });
+
+    const apexEntries = (this.api.compendiumIndex?.entries ?? []).filter((entry) => entry.categories?.includes?.("magic.apex"));
+    const apexAttributes = new Set(apexEntries.map((entry) => entry.apexAttribute).filter((value) => APEX_ATTRIBUTES.includes(value)));
+    const apexInvalid = apexEntries.filter((entry) => entry.apexAttribute != null && !APEX_ATTRIBUTES.includes(entry.apexAttribute));
+    checks.push({
+      id: "pf2e-apex-schema",
+      status: apexInvalid.length ? "failed" : apexEntries.length ? "passed" : "skipped",
+      message: apexInvalid.length
+        ? `Indexed apex items expose invalid attributes: ${apexInvalid.map((entry) => entry.apexAttribute).join(", ")}`
+        : apexEntries.length
+          ? `Indexed apex items: ${apexEntries.length}; native attributes: ${[...apexAttributes].sort().join(", ") || "none parsed"}`
+          : "No indexed apex items available"
     });
 
     const accessoryFamilies = this.api.accessoryRunes?.getAll?.() ?? [];

@@ -57,3 +57,10 @@ test("applyGenerationContract always marks composed accessory runes as rules-tex
   assert.equal(result.metadata.automation.level, "rules-text");
   assert.equal(result.metadata.accessoryRune.automation, "rules-text");
 });
+
+test("generation contract preserves native apex core provenance for generated apex items", () => {
+  const result = applyGenerationContract({ metadata: { apexItem: { mode: "generated" } } });
+  assert.equal(result.metadata.apexItem.automation, "rules-text");
+  assert.equal(result.metadata.automation.level, "rules-text");
+  assert.deepEqual(result.metadata.automation.nativeParts, ["apex-attribute"]);
+});

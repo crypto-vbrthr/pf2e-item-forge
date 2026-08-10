@@ -55,6 +55,9 @@ function apiFixture() {
     specificShieldProfiles: { getAll: () => [], get: () => null },
     wornMagicProfiles: { getAll: () => [], getForSlot: () => [], get: () => null },
     heldMagicProfiles: { getAll: () => [], getForHands: () => [], get: () => null },
+    grimoireProfiles: { getAll: () => [], get: () => null },
+    apexProfiles: { getAll: () => [], get: () => null },
+    getApexCapabilities: () => ({ existing: true, generated: true, existingAttributes: ["str", "dex", "con", "int", "wis", "cha"], generatedAttributes: ["str", "dex", "con", "int", "wis", "cha"] }),
     accessoryRunes: { getAll: () => [], get: () => null },
     magicThemes: [],
     treasure: {
@@ -269,4 +272,23 @@ test("generated held mode disables unavailable handedness and hides profiles wit
   assert.equal(context.categories.find((entry) => entry.id === "magic.held.one-hand").disabled, true);
   assert.equal(context.categories.find((entry) => entry.id === "magic.held.two-hands").disabled, false);
   assert.deepEqual(context.heldProfiles.map((profile) => profile.id), ["automatic", "two.profile"]);
+});
+
+
+test("ItemForgeEditor preserves Apex mode, attribute, and generated profile controls", async () => {
+  const api = apiFixture();
+  const might = { id: "core.apex-might", attribute: "str", label: "PF2E_ITEM_FORGE.ApexProfiles.Might" };
+  const grace = { id: "core.apex-grace", attribute: "dex", label: "PF2E_ITEM_FORGE.ApexProfiles.Grace" };
+  api.apexProfiles = { getAll: () => [might, grace], get: (id) => [might, grace].find((profile) => profile.id === id) ?? null };
+  api.getApexCapabilities = () => ({ existing: true, generated: true, existingAttributes: ["wis"], generatedAttributes: ["str", "dex"] });
+  const editor = new ItemForgeEditor({
+    api,
+    request: { mode: "magic", category: "magic.apex", level: 17, magic: { apexMode: "generated", apexAttribute: "str", apexProfile: "core.apex-might" }, seed: "apex-editor" }
+  });
+  const context = await editor._prepareContext({});
+  assert.equal(editor.getRequest().magic.apexMode, "generated");
+  assert.equal(editor.getRequest().magic.apexAttribute, "str");
+  assert.equal(editor.getRequest().magic.apexProfile, "core.apex-might");
+  assert.deepEqual(context.apexAttributes.map((entry) => entry.id), ["automatic", "str", "dex"]);
+  assert.deepEqual(context.apexProfiles.map((entry) => entry.id), ["automatic", "core.apex-might"]);
 });

@@ -2,6 +2,7 @@ import { parseWornUsage, wornCategoryForSlot, isMagicWornTraits } from "./worn-i
 import { parseHeldUsage, heldCategoryForHands, hasHeldMagicMarkerTraits } from "./held-item-utils.js";
 import { isGrimoireTraits } from "./grimoire-utils.js";
 import { isAssistiveItem } from "./assistive-item-utils.js";
+import { isApexItem } from "./apex-item-utils.js";
 
 export const SUPPORTED_ITEM_TYPES = new Set([
   "weapon",
@@ -120,7 +121,8 @@ export class CompendiumIndex {
             "system.hardness",
             "system.hp",
             "system.brokenThreshold",
-            "system.acBonus"
+            "system.acBonus",
+            "system.apex.attribute"
           ]
         });
 
@@ -161,6 +163,7 @@ export class CompendiumIndex {
             hp: this.#shieldHp(getProperty(raw, "system.hp")),
             brokenThreshold: this.#brokenThreshold(raw),
             acBonus: this.#numberValue(getProperty(raw, "system.acBonus"), null),
+            apexAttribute: getProperty(raw, "system.apex.attribute") ?? null,
             categories
           });
         }
@@ -387,6 +390,7 @@ export class CompendiumIndex {
     }
 
     if (isAssistiveItem(raw)) categories.push("assistive");
+    if (isApexItem(raw)) categories.push("magic", "magic.apex");
 
     return [...new Set(categories)];
   }

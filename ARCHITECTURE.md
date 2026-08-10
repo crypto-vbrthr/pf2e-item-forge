@@ -22,6 +22,7 @@ ItemForgeEngine (canonical normalization, validation, generation)
         |     +-- AccessoryRuneGenerator
         |     +-- HeldMagicItemGenerator
         |     +-- GrimoireGenerator
+        |     +-- ApexItemGenerator
         |     +-- SpellheartGenerator
         |     +-- StaffGenerator
         |     +-- TreasureGenerator
@@ -45,6 +46,7 @@ ItemForgeEngine (canonical normalization, validation, generation)
         +-- WornMagicProfileRegistry
         +-- HeldMagicProfileRegistry
         +-- GrimoireProfileRegistry
+        +-- ApexProfileRegistry
         +-- ValueSolver
         +-- TreasureRegistry
               +-- types
@@ -82,6 +84,7 @@ AccessoryRuneGenerator           216  mode magic
 SpellheartGenerator              215  mode magic
 HeldMagicItemGenerator           214  mode magic
 GrimoireGenerator                213  mode magic
+ApexItemGenerator                212  mode magic
 StaffGenerator                   210  mode magic
 TreasureGenerator     200  mode treasure
 ScrollGenerator       200  mode existing
@@ -94,7 +97,7 @@ Registered generation modes are exposed through the public capabilities API and 
 
 ## Spell-bound permanent magic items
 
-`mode: "magic"` owns `magic.wand`, `magic.staff`, `magic.spellheart`, `magic.grimoire`, `magic.weapon`, `magic.armor`, `magic.shield`, `magic.worn` with worn-usage subcategories, and `magic.held` with one-/two-hand subcategories. Wands, generated staves, and generated spellhearts reuse the spell-support index and meaningful-heightening helpers. Specific weapons/armor, shields, and worn items instead use the physical-item index and dedicated profile registries. Predefined items preserve complete native PF2e documents, while generated custom items compose from validated whole-effect profiles rather than arbitrary effect fragments.
+`mode: "magic"` owns `magic.wand`, `magic.staff`, `magic.spellheart`, `magic.grimoire`, `magic.apex`, `magic.weapon`, `magic.armor`, `magic.shield`, `magic.worn` with worn-usage subcategories, and `magic.held` with one-/two-hand subcategories. Wands, generated staves, and generated spellhearts reuse the spell-support index and meaningful-heightening helpers. Specific weapons/armor, shields, and worn items instead use the physical-item index and dedicated profile registries. Predefined items preserve complete native PF2e documents, while generated custom items compose from validated whole-effect profiles rather than arbitrary effect fragments.
 
 ### Wands
 
@@ -161,16 +164,9 @@ Live Magic diagnostics exercise predefined worn items plus representative genera
 
 Generated held items resolve only a PF2e-system-indexed `equipment` implementation template with the same handedness; there is no silent module-content fallback. The PF2e Usage field is retained as a verified structural value, while original description, slug, Rule Elements, subitems, apex/publication data, foreign flag scopes, material identity, base-item/container identity, and template quantity are cleared or normalized. Profiles own physical Bulk plus a structured activation contract (`type: action|reaction|free-action`, action count for ordinary actions, traits, frequency, optional trigger/requirements/duration, and effect text). The renderer derives the full localized activation header from that contract, including multi-use frequencies, so built-in effect prose does not repeat structural activation metadata. The result remains `automation.level: "rules-text"`. Live diagnostics exercise predefined Held Items plus low/high generated one-hand and two-hand cases against the current PF2e document constructor, including exact level, implementation-template provenance, physical cleanup, and activation structure.
 
-Held Items are intentionally a narrow permanent-equipment family, not a synonym for all miscellaneous magic. Grimoires have their own dedicated generator. Assistive Items are a separate existing-only cross-cutting category, while apex items remain a separate rule family for future dedicated handling. Magical Tattoos are deliberately outside Item Forge generation scope because the Forge models transferable/findable inventory objects rather than a body-application workflow.
+Held Items are intentionally a narrow permanent-equipment family, not a synonym for all miscellaneous magic. Grimoires and Apex Items have their own dedicated generators, while Assistive Items are a separate existing-only cross-cutting category. Magical Tattoos are deliberately outside Item Forge generation scope because the Forge models transferable/findable inventory objects rather than a body-application workflow.
 
 The public API exposes `getHeldHandCapabilities()` and `getCapabilities().heldHandCapabilities`. Each entry reports handedness, predefined availability/count, safe PF2e system-template count, generated-profile count, and generated levels so Loot Forge does not need to reverse-engineer the profile registry. Generated requests filter unavailable handedness before candidate selection, and the Embedded Editor uses the same capability data to disable dead-end handedness categories and hide generated profiles whose handedness lacks a safe system template.
-
-
-### Assistive Items
-
-Assistive Items use the ordinary `ExistingItemGenerator` rather than a synthetic generator. `CompendiumIndex` adds the cross-cutting `assistive` category after normal physical-type classification, so a published aid can remain simultaneously a weapon, equipment item, mobility device, prosthesis, companion item, or other supported physical shape. Detection prefers an explicit PF2e assistive category/trait marker when present and otherwise uses a deliberately narrow source-backed identifier allow-list for the published Player Core, Guns & Gears, and Treasure Vault aid families. Descriptions are never scanned for heuristics.
-
-The category exists only in `mode: "existing"`. Selection therefore clones the complete PF2e source document unchanged, preserving native Rule Elements, usage, activations, physical schema, price, traits, and any system-specific behavior. Item Forge intentionally does not generate new assistive-item profiles or recombine disability-aid mechanics. The public capability contract advertises this explicitly as `assistiveItems: { category: "assistive", modes: ["existing"], generated: false, policy: "existing-only" }`, allowing Loot Forge and other callers to avoid presenting a generated path that does not exist.
 
 ### Grimoires
 
@@ -183,6 +179,20 @@ The generated path requires a PF2e-system implementation template whose loaded d
 Every generated result stores a daily-preparation contract in `metadata.grimoire.rules` and `flags.pf2e-item-forge.grimoire.rules`: the bearer studies the grimoire during daily preparations, benefits apply to qualifying prepared spells cast from spell slots, cantrips/focus/innate spells are excluded, one caster can benefit from only one grimoire per day, one grimoire can benefit only one caster per day, and continued possession after preparation is not required. These fields mirror the rule assumptions the generated prose is built around and provide a stable contract for future automation or integrations.
 
 The public API exposes `grimoireProfiles`, `getGrimoireCapabilities()`, and `getCapabilities().grimoireCapabilities`. Capabilities report predefined availability/count, safe PF2e system-template count, generated-profile count, and exact generated levels. The Embedded Editor uses this to disable an unavailable predefined/generated mode rather than accepting an impossible request. Live diagnostics exercise published selection plus exact low/high generated cases, verify system-template provenance, cleaned template identity, the `grimoire`/magic marker traits, empty custom Rule Elements, structured daily-preparation rules, and structured activation/spell-filter metadata.
+
+### Assistive Items
+
+Assistive Items are intentionally modeled as an existing-only cross-cutting classification rather than a synthesis generator. `CompendiumIndex` recognizes explicit assistive category/trait markers and a deliberately narrow source-backed identifier allow-list covering published aids from core equipment sources; description text is never scanned heuristically. This matters because assistive gear can legitimately use different physical document shapes and bespoke PF2e mechanics. An item can therefore retain its ordinary physical categories while also belonging to `assistive`. `ExistingItemGenerator` clones the selected published document whole, and `getCapabilities().assistiveItems` advertises `{ modes: ["existing"], generated: false, policy: "existing-only" }` to downstream consumers.
+
+### Apex Items
+
+`ApexItemGenerator` resolves `magic.apex`. Apex classification is cross-cutting: an indexed item with the PF2e apex trait/native apex data can simultaneously remain a worn item, armor, or weapon. Existing mode therefore selects from all indexed `magic.apex` documents under the normal source policy and clones the complete PF2e source unchanged. This preserves native Rule Elements, weapon/armor structure, activations, and the system's apex handling.
+
+Generated mode is deliberately narrower. It selects one of six validated `ApexProfileRegistry` families keyed to Strength, Dexterity, Constitution, Intelligence, Wisdom, or Charisma and provides exact automatic strict coverage at item levels 17, 18, 19, and 20. The implementation template must be a PF2e-system apex `equipment` document. Generated Apex Items always become generic worn equipment, because Item Forge does not borrow a published apex weapon or armor as a hidden mechanical chassis for unrelated homebrew. Template Rule Elements, material/base/container identity, subitems, publication data, slug, quantity, and foreign flags are cleared or normalized.
+
+The Apex contract is intentionally hybrid. The defining attribute benefit is stored in the verified native PF2e `system.apex.attribute` field and the result keeps the `apex`, `invested`, and magical marker traits. Secondary passive and activated powers are owned by the Item Forge profile and remain `rules-text`, with structured activation metadata for action/reaction/free-action type, traits, frequency, trigger, requirements, duration, and effect. Metadata records `automation.level: "rules-text"`, `nativeParts: ["apex-attribute"]`, `coreAutomation: "native"`, and `secondaryAutomation: "rules-text"` so consumers can distinguish the native core from descriptive custom powers.
+
+The public API exposes `apexProfiles`, `getApexCapabilities()`, and `getCapabilities().apexCapabilities`. The Embedded Editor uses the same capability data to constrain predefined/generated mode, attribute, and generated profile choices. Live diagnostics cover a published Apex Item plus exact generated level-17 and level-20 cases, verify the native attribute field, required traits, generic worn equipment shape, system-only template provenance, cleanup, structured activation, and hybrid automation ownership.
 
 ### Accessory Runes
 

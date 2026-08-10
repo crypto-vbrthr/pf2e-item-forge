@@ -47,6 +47,15 @@ export class MagicItemTemplateResolver {
 
 
 
+  resolveApexTemplateEntry({ allowedTypes = ["equipment"], sourcePolicy = "system-only" } = {}) {
+    const types = new Set(Array.isArray(allowedTypes) ? allowedTypes : [allowedTypes]);
+    const entries = this.index.entries
+      .filter((entry) => types.has(entry.type) && entry.categories?.includes?.("magic.apex"))
+      .sort((a, b) => Number(a.level ?? 0) - Number(b.level ?? 0) || String(a.uuid ?? a.id ?? "").localeCompare(String(b.uuid ?? b.id ?? "")));
+    if (sourcePolicy === "system-only") return this.#systemOnly(entries);
+    return this.#preferSystem(entries);
+  }
+
   resolveGrimoireTemplateEntry({ allowedTypes = ["book", "equipment"], sourcePolicy = "system-only" } = {}) {
     const types = new Set(Array.isArray(allowedTypes) ? allowedTypes : [allowedTypes]);
     const entries = this.index.entries

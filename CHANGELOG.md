@@ -1,14 +1,25 @@
 # Changelog
 
+## 0.0.33
+
+- Adds `magic.apex` as a dedicated cross-cutting Apex Item family with explicit existing/native and generated/hybrid paths. Published apex weapons, armor, and worn items keep their complete PF2e document data.
+- Adds public `ApexProfileRegistry` as `game.pf2eItemForge.apexProfiles` plus `getApexCapabilities()` / `getCapabilities().apexCapabilities`.
+- Adds six reviewed generated Apex families for Strength, Dexterity, Constitution, Intelligence, Wisdom, and Charisma with exact automatic strict coverage at item levels 17–20.
+- Uses the verified PF2e native `system.apex.attribute` field for the defining generated Apex benefit while keeping custom secondary abilities as rules text plus structured metadata. Results explicitly declare hybrid ownership with native `apex-attribute` and rules-text secondary automation.
+- Restricts generated Apex templates to PF2e-system apex `equipment` documents and emits a generic worn item shape; published apex weapon/armor schemas are never repurposed as hidden templates.
+- Hardens Apex composition by clearing inherited Rule Elements, material/base/container identity, subitems, publication data, slug, quantity, and foreign flag scopes while retaining the native Apex schema shape.
+- Adds structured Apex activation contracts supporting actions, reactions, free actions, traits including fortune, frequency, trigger, requirements, duration, and localized effect text.
+- Extends the Embedded Editor with Apex existing/generated mode, attribute, and profile controls plus capability-aware filtering, preview metadata, localization, and dedicated errors.
+- Extends live Magic diagnostics with existing Apex plus exact generated level-17/20 cases, native apex schema checks, system-template provenance, cleanup, activation structure, and hybrid automation ownership.
+- Test suite: 272 passing tests; total line coverage 94.16%.
+
 ## 0.0.32
 
-- Adds `assistive` as a dedicated cross-cutting category for published PF2e Assistive Items in Existing mode.
-- Keeps each assistive item in its normal physical category as well, allowing equipment, weapon-like canes, mobility devices, prostheses, companion aids, and other supported document shapes to remain structurally native.
-- Adds conservative assistive-item detection: explicit PF2e category/trait markers are accepted when present, otherwise a narrow source-backed Player Core, Guns & Gears, and Treasure Vault identifier allow-list is used; descriptions are never scanned heuristically.
-- Deliberately makes Assistive Items existing-only. Item Forge preserves the complete published PF2e document instead of synthesizing generic disability aids or recombining bespoke mechanics into generated profiles.
-- Exposes the policy through `getCapabilities().assistiveItems` for external integrations.
-- Adds German/English category localization plus unit and integration regressions for cross-document-type classification and false-positive resistance.
-- Apex Items remain the next dedicated rule family; Magical Tattoos remain out of scope by design.
+- Adds `assistive` as an existing-only cross-cutting item category for published PF2e assistive gear.
+- Uses explicit assistive category/trait markers plus a narrow source-backed identifier allow-list; descriptions are deliberately not searched heuristically.
+- Preserves the complete native PF2e item when selected, allowing assistive gear to retain its real weapon/equipment/container or other physical document shape and bespoke automation.
+- Exposes `getCapabilities().assistiveItems` with `modes: ["existing"]`, `generated: false`, and `policy: "existing-only"` so integrations do not offer a synthetic assistive-item generator.
+- Adds Embedded Editor category support, DE/EN localization, indexing tests, and assistive-classification regression coverage.
 - Test suite: 259 passing tests; total line coverage 94.11%.
 
 ## 0.0.31

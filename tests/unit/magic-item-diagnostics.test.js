@@ -45,6 +45,19 @@ function sourceFor(request) {
       source.flags = { "pf2e-item-forge": { generated: true } };
     }
   }
+  if (request.category === "magic.apex") {
+    source.type = "equipment";
+    source.system.traits.value = ["apex", "invested", "magical"];
+    source.system.apex = { attribute: request.magic?.apexAttribute === "automatic" ? "str" : request.magic?.apexAttribute };
+    source.system.usage = { value: "worn" };
+    if (request.magic?.apexMode === "generated") {
+      source.system.rules = [];
+      source.system.subitems = [];
+      source.system.bulk = { value: "L" };
+      source.system.material = { type: null, grade: null };
+      source.flags = { "pf2e-item-forge": { generated: true } };
+    }
+  }
   if (request.category === "magic.held" || request.category.startsWith("magic.held.")) {
     const hands = request.category === "magic.held.two-hands" ? 2 : 1;
     source.system.usage = { value: `held in ${hands} hand${hands === 2 ? "s" : ""}` };
@@ -79,9 +92,13 @@ function metadataFor(request) {
   const accessory = request.category === "magic.accessory-rune";
   const generatedHeld = request.magic?.heldMode === "generated";
   const generatedGrimoire = request.magic?.grimoireMode === "generated";
+  const apex = request.category === "magic.apex";
+  const generatedApex = apex && request.magic?.apexMode === "generated";
   return {
     generator: "test",
-    automation: { level: request.magic?.wornMode === "generated" || generatedHeld || generatedGrimoire || accessory ? "rules-text" : "native" },
+    automation: generatedApex
+      ? { level: "rules-text", nativeParts: ["apex-attribute"] }
+      : { level: request.magic?.wornMode === "generated" || generatedHeld || generatedGrimoire || accessory ? "rules-text" : "native" },
     ...(request.magic?.wornMode === "generated" ? { wornItem: { slot, invested: true } } : {}),
     ...(generatedGrimoire ? {
       templateSource: { packageType: "system", packageName: "pf2e", pack: "pf2e.equipment-srd", uuid: "Compendium.pf2e.equipment-srd.Item.grimoire-template" },
@@ -89,6 +106,17 @@ function metadataFor(request) {
         physical: { bulk: "L" },
         rules: { dailyPreparationStudy: true, spellSlotsOnly: true, oneGrimoirePerCasterPerDay: true, oneCasterPerGrimoirePerDay: true },
         activation: { type: "free-action", actions: 0, traits: ["concentrate"], frequency: { max: 1, period: "day" }, spellFilter: { preparedFromGrimoire: true, slotsOnly: true }, effect: "effect" }
+      }
+    } : {}),
+    ...(apex ? {
+      ...(generatedApex ? { templateSource: { packageType: "system", packageName: "pf2e", pack: "pf2e.equipment-srd", uuid: "Compendium.pf2e.equipment-srd.Item.apex-template" } } : {}),
+      apexItem: {
+        mode: generatedApex ? "generated" : "existing",
+        attribute: request.magic?.apexAttribute === "automatic" ? "str" : request.magic?.apexAttribute,
+        automation: generatedApex ? "rules-text" : "native",
+        coreAutomation: "native",
+        secondaryAutomation: generatedApex ? "rules-text" : "native",
+        ...(generatedApex ? { activation: { type: "reaction", actions: 0, traits: ["concentrate"], frequency: { max: 1, period: "day" }, trigger: "trigger", effect: "effect" } } : {})
       }
     } : {}),
     ...(generatedHeld ? {
@@ -117,7 +145,7 @@ test("MagicItemDiagnostics validates generated sources without persisting world 
   const api = {
     async preview(request) { return { itemSource: sourceFor(request), metadata: metadataFor(request) }; },
     compendiumIndex: {
-      entries: [{ categories: ["magic.weapon"], specific: { material: {}, runes: {} } }, { categories: ["magic.held"], heldHands: 1 }, { categories: ["magic.grimoire"], type: "book" }],
+      entries: [{ categories: ["magic.weapon"], specific: { material: {}, runes: {} } }, { categories: ["magic.held"], heldHands: 1 }, { categories: ["magic.grimoire"], type: "book" }, { categories: ["magic.apex"], type: "equipment", apexAttribute: "str" }],
       spellEntries: [{ castActions: 1 }, { castActions: 2 }],
       getPackErrors: () => []
     },
@@ -130,7 +158,7 @@ test("MagicItemDiagnostics validates generated sources without persisting world 
   const result = await diagnostics.run();
   assert.equal(result.failed, 0);
   assert.equal(result.warnings, 1, "price audit warns when the runtime document does not derive a different price");
-  assert.equal(constructed, 28);
+  assert.equal(constructed, 31);
   assert.ok(result.checks.some((check) => check.id === "pf2e-specific-schema" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "specific-weapon-generated" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "specific-armor-generated" && check.status === "passed"));
@@ -141,6 +169,10 @@ test("MagicItemDiagnostics validates generated sources without persisting world 
   assert.ok(result.checks.some((check) => check.id === "grimoire-generated-low" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "grimoire-generated-high" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "pf2e-grimoire-schema" && check.status === "passed"));
+  assert.ok(result.checks.some((check) => check.id === "apex-existing" && check.status === "passed"));
+  assert.ok(result.checks.some((check) => check.id === "apex-generated-low" && check.status === "passed"));
+  assert.ok(result.checks.some((check) => check.id === "apex-generated-high" && check.status === "passed"));
+  assert.ok(result.checks.some((check) => check.id === "pf2e-apex-schema" && check.status === "passed"));
   for (const id of ["held-generated-one-low", "held-generated-one-high", "held-generated-two-low", "held-generated-two-high"]) {
     assert.ok(result.checks.some((check) => check.id === id && check.status === "passed"), `expected ${id} to pass`);
   }

@@ -62,7 +62,10 @@
       "HeldItemMode": "Held item generation",
       "HeldItemProfile": "Held item profile",
       "GrimoireMode": "Grimoire Mode",
-      "GrimoireProfile": "Grimoire Profile"
+      "GrimoireProfile": "Grimoire Profile",
+      "ApexMode": "Apex generation",
+      "ApexProfile": "Apex profile",
+      "ApexAttribute": "Apex attribute"
     },
     "LevelMode": {
       "Single": "Single level",
@@ -98,7 +101,7 @@
       "TreasureMode": "Generates exactly one nonmagical sale or art treasure. Material, craftsmanship, and condition affect its value.",
       "ValueTolerance": "0.15 means ±15% around the target value. If no match is found, the ValueSolver returns the closest valid result with a warning.",
       "TreasureType": "Optionally select one exact treasure type. “Any” lets Item Forge roll within the selected category.",
-      "MagicMode": "Generates permanent special magic items such as wands, staves, spellhearts, specific magic weapons/armor/shields, and worn magic items.",
+      "MagicMode": "Generates permanent special magic items such as wands, staves, spellhearts, grimoires, apex items, specific magic weapons/armor/shields, and worn or held magic items.",
       "MagicSources": "Selected compendia provide physical base items and, for spell-bound generators, the spell pool as well.",
       "MagicTheme": "Automatic chooses a theme with enough eligible spells. A selected theme is a hard constraint.",
       "AllowHeightenedSpells": "Only spells with actual heightening data may reappear at higher ranks in generated wands or staves.",
@@ -121,7 +124,10 @@
       "GeneratedHeldSources": "Generated held items use Item Forge profiles plus a PF2e system implementation template. The selected content sources affect predefined held items, not the generated profile library.",
       "GrimoireMode": "Predefined preserves an existing PF2e grimoire in full. Generated creates a new grimoire from an Item Forge profile.",
       "GrimoireProfile": "Choose a grimoire family or let Item Forge select a fitting profile automatically.",
-      "GeneratedGrimoireSources": "Generated grimoires use only a suitable PF2e system grimoire as a technical schema template. Spell sources are not required."
+      "GeneratedGrimoireSources": "Generated grimoires use only a suitable PF2e system grimoire as a technical schema template. Spell sources are not required.",
+      "ApexMode": "Predefined copies a published PF2e apex item unchanged. Generated creates a new level 17–20 apex item with a native PF2e apex attribute benefit and conservative rules-text secondary abilities.",
+      "ApexProfile": "Automatic selects a profile compatible with the chosen attribute. A fixed profile is a hard constraint.",
+      "ApexAttribute": "Optionally restrict the apex item to Strength, Dexterity, Constitution, Intelligence, Wisdom, or Charisma."
     },
     "Preview": {
       "Empty": "Nothing forged yet. Choose parameters and press Generate.",
@@ -197,7 +203,12 @@
       "GrimoireMode": "Grimoire Mode",
       "GrimoireProfile": "Grimoire Profile",
       "GrimoireVariant": "Grimoire Variant",
-      "GrimoireEffect": "Grimoire Effect"
+      "GrimoireEffect": "Grimoire Effect",
+      "ApexMode": "Apex generation",
+      "ApexProfile": "Apex profile",
+      "ApexAttribute": "Apex attribute",
+      "ApexVariant": "Apex variant",
+      "ApexPassive": "Passive benefit"
     },
     "Notifications": {
       "GenerationFailed": "No item could be generated for these parameters.",
@@ -275,7 +286,8 @@
       "MagicHeld": "Held Magic Items",
       "MagicHeldOneHand": "One-Handed Held Items",
       "MagicHeldTwoHands": "Two-Handed Held Items",
-      "MagicGrimoire": "Grimoires"
+      "MagicGrimoire": "Grimoires",
+      "MagicApex": "Apex Items"
     },
     "GenerationMode": {
       "Existing": "Select a predefined item",
@@ -299,7 +311,7 @@
       "NoTreasureType": "No registered treasure type matches the selected treasure category.",
       "NoTreasureCandidate": "No valid treasure could be generated with the selected material, condition, and value constraints.",
       "UnknownTreasureContent": "A requested treasure definition is not registered or is no longer available.",
-      "UnsupportedMagicCategory": "This generation mode supports wands, staves, spellhearts, and specific magic weapons, armor, and shields.",
+      "UnsupportedMagicCategory": "This generation mode supports wands, staves, spellhearts, grimoires, apex items, specific magic weapons, armor, shields, worn items, held items, and accessory runes.",
       "NoWandSpellCandidate": "No spell suitable for a wand was found in the selected sources.",
       "NoStaffSpellCandidate": "No suitable staff spell list could be assembled for the selected level and theme.",
       "NoStaffBaseItem": "The PF2e base weapon required for a staff could not be found.",
@@ -342,7 +354,12 @@
       "NoGrimoireTemplate": "No suitable PF2e system grimoire was found as a technical template.",
       "InvalidGrimoireTemplateType": "The loaded grimoire template does not use an allowed PF2e item type.",
       "GrimoireTemplateTraitMismatch": "The loaded grimoire template no longer has the grimoire trait.",
-      "UnknownGrimoireProfile": "The selected grimoire profile is unknown."
+      "UnknownGrimoireProfile": "The selected grimoire profile is unknown.",
+      "NoPredefinedApexItemCandidate": "No predefined apex item matches the selected level, rarity, source, and attribute filters.",
+      "NoApexProfileCandidate": "No generated apex profile matches the selected level, rarity, and attribute constraints.",
+      "NoApexItemTemplate": "No PF2e system apex equipment item is available as a safe implementation template.",
+      "InvalidApexTemplateType": "The resolved apex implementation template uses an unsafe PF2e document type.",
+      "UnknownApexProfile": "The selected apex profile is not registered."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatic level-appropriate",
@@ -855,6 +872,63 @@
       "GrimoireRules": "Grimoire:",
       "StandardRules": "During your daily preparations, you can study this grimoire if you prepare spells. Until your next daily preparations, you can use its activations with eligible spells you prepared from this grimoire in spell slots. Cantrips, focus spells, and innate spells do not qualify. You can benefit from only one grimoire per day, and the same grimoire can be studied by only one creature per day. After studying it, you do not need to retain possession of the grimoire.",
       "AutomationNote": "This generated grimoire uses rules text and structured Item Forge metadata; its special ability is not automated through additional Rule Elements."
+    },
+    "ApexMode": {
+      "Existing": "Predefined",
+      "Generated": "Generated"
+    },
+    "ApexAttributes": {
+      "Automatic": "Automatic",
+      "Strength": "Strength",
+      "Dexterity": "Dexterity",
+      "Constitution": "Constitution",
+      "Intelligence": "Intelligence",
+      "Wisdom": "Wisdom",
+      "Charisma": "Charisma"
+    },
+    "ApexProfiles": {
+      "Automatic": "Automatic",
+      "Might": "Apex of Might",
+      "Grace": "Apex of Grace",
+      "Vitality": "Apex of Vitality",
+      "Intellect": "Apex of Intellect",
+      "Insight": "Apex of Insight",
+      "Presence": "Apex of Presence"
+    },
+    "ApexText": {
+      "ApexBenefit": "Apex:",
+      "CoreRule": "When you invest this item, it increases your {attribute} modifier by 1 or to +4, whichever is higher. The normal apex restrictions still apply.",
+      "AutomationNote": "The apex attribute benefit uses PF2e native apex data. Secondary abilities use rules text and structured Item Forge metadata.",
+      "HybridAutomation": "Native apex benefit + rules-text secondary abilities",
+      "OncePerMinute": "once per minute",
+      "OncePerRound": "once per round",
+      "MightName": "Sigil of Ascendant Might",
+      "MightDescription": "A weighty metal sigil seems to pull toward the earth until worn, when its mass settles into a feeling of perfect leverage.",
+      "MightPassive": "You gain a +{bonus} item bonus to Athletics checks.",
+      "MightTrigger": "You succeed or critically succeed at a Shove.",
+      "MightActivation": "You can push the target an additional {distance} feet.",
+      "GraceName": "Sigil of Ascendant Grace",
+      "GraceDescription": "This narrow silver badge shifts almost imperceptibly whenever its wearer changes balance or stance.",
+      "GracePassive": "You gain a +{bonus} item bonus to Acrobatics checks.",
+      "GraceTrigger": "You fail or critically fail an Acrobatics check.",
+      "GraceActivation": "Reroll the triggering Acrobatics check and use the second result. This is a fortune effect.",
+      "VitalityName": "Sigil of Ascendant Vitality",
+      "VitalityDescription": "A dark iron emblem beats with a slow, steady pulse that can be felt through clothing and armor.",
+      "VitalityPassive": "You gain a +2 status bonus to Fortitude saves against disease and poison.",
+      "VitalityTrigger": "You take damage.",
+      "VitalityActivation": "Reduce the triggering damage by {reduction}.",
+      "IntellectName": "Sigil of Ascendant Intellect",
+      "IntellectDescription": "Geometric inscriptions on this copper-and-crystal emblem continuously rearrange into new proofs and diagrams.",
+      "IntellectPassive": "You gain a +{bonus} item bonus to Crafting checks and checks to Identify Magic.",
+      "IntellectActivation": "Before the end of your turn, your next Recall Knowledge check gains a +{activationBonus} circumstance bonus.",
+      "InsightName": "Sigil of Ascendant Insight",
+      "InsightDescription": "The pale stone set into this sigil resembles an eye only when viewed from the corner of your own vision.",
+      "InsightPassive": "You gain a +{perceptionBonus} item bonus to Perception checks.",
+      "InsightActivation": "Before the end of your turn, your next Seek action gains a +{activationBonus} circumstance bonus.",
+      "PresenceName": "Sigil of Ascendant Presence",
+      "PresenceDescription": "This polished golden emblem catches attention without seeming gaudy, making every gesture feel deliberate.",
+      "PresencePassive": "You gain a +{perceptionBonus} item bonus to Diplomacy and Performance checks.",
+      "PresenceActivation": "Before the end of your turn, your next Diplomacy, Intimidation, or Performance check gains a +{activationBonus} circumstance bonus."
     }
   }
 }
