@@ -17,10 +17,11 @@ export function isApexItem(raw) {
   return isApexTraits(raw?.system?.traits?.value);
 }
 
-export function getApexCapabilities({ entries = [], profiles = [] } = {}) {
+export function getApexCapabilities({ entries = [], templateEntries = entries, profiles = [] } = {}) {
   const systemId = globalThis.game?.system?.id ?? "pf2e";
   const apexEntries = entries.filter((entry) => entry.categories?.includes?.("magic.apex"));
-  const systemEquipmentTemplates = apexEntries.filter((entry) =>
+  const systemEquipmentTemplates = templateEntries.filter((entry) =>
+    entry.categories?.includes?.("magic.apex") &&
     entry.type === "equipment" &&
     (entry.packageType === "system" || entry.packageName === systemId || entry.packageName === "pf2e")
   );

@@ -1,6 +1,7 @@
 import { MODULE_ID } from "../constants.js";
 import { createSeed } from "../engine/seeded-rng.js";
 import { hydrateEditorRequest } from "../engine/request-normalizer.js";
+import { mergeVisibleSourceSelection } from "../engine/source-policy.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const HandlebarsApplication = HandlebarsApplicationMixin(ApplicationV2);
@@ -171,7 +172,8 @@ export class ItemForgeEditor extends HandlebarsApplication {
     const packs = this.api.getAvailableItemPacks?.({ includeSpellPacks: true }) ?? [];
     this.sourceOverride = true;
     this.request.source.mode = "selected";
-    this.request.source.includePacks = [...new Set(packs.map((pack) => pack.id).filter(Boolean))];
+    const availableIds = packs.map((pack) => pack.id).filter(Boolean);
+    this.request.source.includePacks = mergeVisibleSourceSelection(this.request.source.includePacks, availableIds, availableIds);
     this.previewResult = null;
     this.error = null;
     this.onChange?.(this.getRequest(), this);
@@ -317,7 +319,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
     const rarity = new Set(this.request.rarity ?? []);
     this.#ensureModeCategory();
 
-    const wornSlotCapabilities = this.api.getWornSlotCapabilities?.() ?? this.api.getCapabilities?.().wornSlots ?? [];
+    const wornSlotCapabilities = this.api.getWornSlotCapabilities?.(this.request.source) ?? this.api.getCapabilities?.({ source: this.request.source }).wornSlots ?? [];
     const wornCapabilityBySlot = new Map(wornSlotCapabilities.map((entry) => [entry.id, entry]));
     const wornModeForCategories = this.request.magic?.wornMode ?? "existing";
     const selectedWornSlotForCategories = String(this.request.category ?? "").startsWith("magic.worn.")
@@ -328,7 +330,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
       if (capability && !capability[wornModeForCategories]) this.request.category = "magic.worn";
     }
 
-    const heldHandCapabilities = this.api.getHeldHandCapabilities?.() ?? this.api.getCapabilities?.().heldHandCapabilities ?? [];
+    const heldHandCapabilities = this.api.getHeldHandCapabilities?.(this.request.source) ?? this.api.getCapabilities?.({ source: this.request.source }).heldHandCapabilities ?? [];
     const heldCapabilityByHands = new Map(heldHandCapabilities.map((entry) => [Number(entry.hands), entry]));
     const heldModeForCategories = this.request.magic?.heldMode ?? "existing";
     const selectedHeldHandsForCategories = this.request.category === "magic.held.one-hand"
@@ -396,8 +398,8 @@ export class ItemForgeEditor extends HandlebarsApplication {
     const isHeldMagicCategory = isMagicMode && (this.request.category === "magic.held" || String(this.request.category).startsWith("magic.held."));
     const isGrimoireCategory = isMagicMode && this.request.category === "magic.grimoire";
     const isApexCategory = isMagicMode && this.request.category === "magic.apex";
-    const grimoireCapabilities = this.api.getGrimoireCapabilities?.() ?? this.api.getCapabilities?.().grimoireCapabilities ?? { existing: false, generated: false };
-    const apexCapabilities = this.api.getApexCapabilities?.() ?? this.api.getCapabilities?.().apexCapabilities ?? { existing: false, generated: false, existingAttributes: [], generatedAttributes: [] };
+    const grimoireCapabilities = this.api.getGrimoireCapabilities?.(this.request.source) ?? this.api.getCapabilities?.({ source: this.request.source }).grimoireCapabilities ?? { existing: false, generated: false };
+    const apexCapabilities = this.api.getApexCapabilities?.(this.request.source) ?? this.api.getCapabilities?.({ source: this.request.source }).apexCapabilities ?? { existing: false, generated: false, existingAttributes: [], generatedAttributes: [] };
     if (isGrimoireCategory) {
       const requestedMode = this.request.magic?.grimoireMode ?? "existing";
       if (requestedMode === "generated" && !grimoireCapabilities.generated && grimoireCapabilities.existing) this.request.magic.grimoireMode = "existing";
@@ -715,7 +717,10 @@ export class ItemForgeEditor extends HandlebarsApplication {
           contentSources: this.previewResult.metadata?.contentSources ?? null,
           templateSource: this.previewResult.metadata?.templateSource ?? null,
           candidateCount: this.previewResult.metadata?.candidateCount,
-          warnings: this.previewResult.warnings ?? [],
+          warnings: (this.previewResult.warnings ?? []).map((warning) => ({
+            ...warning,
+            label: localizeMaybe(`PF2E_ITEM_FORGE.Warnings.${warning?.code ?? "UNKNOWN"}`)
+          })),
           description: await enrichHtml(this.previewResult.itemSource?.system?.description?.value ?? ""),
           spell: this.previewResult.metadata?.spell ?? null,
           spells: this.previewResult.metadata?.spells ?? [],
@@ -1082,9 +1087,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
   }
 
   #isMagicCategory(category) {
-    return ["magic.wand", "magic.staff", "magic.spellheart", "magic.grimoire", "magic.apex", "magic.weapon", "magic.armor", "magic.shield", "magic.accessory-rune", "magic.held", "magic.held.one-hand", "magic.held.two-hands"].includes(category)
-      || category === "magic.worn"
-      || this.api.categories.isDescendant(category, "magic.worn");
+    return category !== "magic" && Boolean(this.api.categories.isDescendant(category, "magic"));
   }
 
   #equipmentType(category) {
@@ -1197,7 +1200,9 @@ export class ItemForgeEditor extends HandlebarsApplication {
     this.request.rarity = [...root.querySelectorAll('[name="rarity"]:checked')].map((input) => input.value);
     const sourcePackInputs = [...root.querySelectorAll('[name="sourcePack"]')];
     if (this.sourceOverride && sourcePackInputs.length) {
-      this.request.source.includePacks = sourcePackInputs.filter((input) => input.checked).map((input) => input.value);
+      const availableIds = sourcePackInputs.map((input) => input.value);
+      const checkedIds = sourcePackInputs.filter((input) => input.checked).map((input) => input.value);
+      this.request.source.includePacks = mergeVisibleSourceSelection(this.request.source.includePacks, availableIds, checkedIds);
     }
   }
 }

@@ -957,6 +957,12 @@
       "PresenceDescription": "Dieses polierte goldene Emblem zieht Aufmerksamkeit auf sich, ohne protzig zu wirken, und lässt jede Geste bewusst erscheinen.",
       "PresencePassive": "Du erhältst einen Gegenstandsbonus von +{perceptionBonus} auf Diplomatie- und Darbietungswürfe.",
       "PresenceActivation": "Vor Ende deines Zuges erhält dein nächster Diplomatie-, Einschüchtern- oder Darbietungswurf einen Situationsbonus von +{activationBonus}."
+    },
+    "Warnings": {
+      "LEVEL_TARGET_APPROXIMATED": "Keine exakte Stufe verfügbar; die nächstgelegene zulässige Stufe wurde verwendet.",
+      "VALUE_TARGET_APPROXIMATED": "Der Zielwert konnte nicht exakt erreicht werden; der nächstgelegene gültige Wert wurde verwendet.",
+      "NO_VALID_VALUE_CANDIDATE": "Innerhalb der Versuchsgrenze wurde kein gültiger Wertkandidat gefunden.",
+      "UNKNOWN": "Die Generierung wurde mit einem Hinweis abgeschlossen."
     }
   }
 }

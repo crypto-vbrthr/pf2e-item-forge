@@ -38,13 +38,13 @@ function isSystemEntry(entry) {
   return entry?.packageType === "system" || entry?.packageName === systemId || entry?.packageName === "pf2e";
 }
 
-export function getHeldHandCapabilities({ entries = [], profiles = [] } = {}) {
+export function getHeldHandCapabilities({ entries = [], templateEntries = entries, profiles = [] } = {}) {
   const profileList = Array.isArray(profiles) ? profiles : (profiles?.getAll?.() ?? []);
   return HELD_HAND_DEFINITIONS.map((definition) => {
     const category = heldCategoryForHands(definition.hands);
     const existingEntries = entries.filter((entry) => entry.categories?.includes?.(category));
     const generatedProfiles = profileList.filter((profile) => Number(profile.hands) === definition.hands);
-    const templateEntries = entries.filter((entry) =>
+    const matchingTemplateEntries = templateEntries.filter((entry) =>
       GENERATED_HELD_TEMPLATE_TYPES.includes(entry.type) &&
       entry.categories?.includes?.(category) &&
       isSystemEntry(entry)
@@ -58,9 +58,9 @@ export function getHeldHandCapabilities({ entries = [], profiles = [] } = {}) {
       label: definition.label,
       existing: existingEntries.length > 0,
       existingCount: existingEntries.length,
-      generated: generatedProfiles.length > 0 && templateEntries.length > 0,
+      generated: generatedProfiles.length > 0 && matchingTemplateEntries.length > 0,
       generatedProfileCount: generatedProfiles.length,
-      generatedTemplateCount: templateEntries.length,
+      generatedTemplateCount: matchingTemplateEntries.length,
       generatedLevels
     };
   });

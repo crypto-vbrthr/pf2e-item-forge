@@ -64,6 +64,7 @@ ItemForgeEngine (canonical normalization, validation, generation)
 - `normalize()`, `validate()`, `generate()`, and the embedded editor use the same canonical request hydration path.
 - The editor edits one request and previews one result. It does not create Foundry documents.
 - The application container owns persistence/workflow actions such as `Item.create()`.
+- Reusing the standalone container through `api.open({ request })` replaces the embedded editor request, clears stale preview/diagnostic state, and re-renders the existing window instead of ignoring the new request.
 - Other modules should use the public engine API and may embed `ItemForgeEditor` without the standalone Item Forge window.
 - Future Loot Forge integration should distribute budgets/counts/themes and issue individual Item Forge requests.
 - Built-in and external treasure content use the same validated registries.
@@ -79,11 +80,13 @@ source.includePacks  explicit allow-list for selected mode
 source.excludePacks  optional deny-list
 ```
 
-`normalizeRequest()` hydrates omitted `includePacks` from the engine's `defaultSourcePacks`, while an explicitly supplied array, including an explicit empty array, is never overwritten. In Foundry the defaults are backed by hidden world settings (`defaultSourceMode` plus JSON-serialized `defaultSourcePacks`) and edited together through the dedicated `SourceCompendiumSettings` menu. The public API exposes `getDefaultSourcePolicy()` and `setDefaultSourcePolicy()` so other Forge modules can share the same policy without scraping settings.
+`normalizeRequest()` hydrates omitted `includePacks` and `excludePacks` from the engine defaults, while an explicitly supplied array, including an explicit empty array, is never overwritten. In Foundry v0.0.36 the canonical default is stored as one hidden JSON-serialized `defaultSourcePolicy` object containing `mode`, `includePacks`, and `excludePacks`. The older hidden `defaultSourceMode` / `defaultSourcePacks` settings remain registered and synchronized only for migration/backward compatibility. The dedicated `SourceCompendiumSettings` menu edits the policy as one unit. The public API exposes `getDefaultSourcePolicy()` and `setDefaultSourcePolicy()` so other Forge modules can share the same policy without scraping settings.
 
-The settings application always enumerates a stable union of indexed physical-item and spell-bearing Item compendiums, so a world allow-list can safely contain both physical and spell-only sources. Missing saved pack IDs are retained and surfaced as unavailable rather than silently erased. The Embedded Editor treats the world policy as authoritative by default and only exposes its own mode/checklist after the user enables a per-request override. Disabling the override reloads the current world policy. An explicit source policy supplied by an embedding integration remains a request-level override unless it is semantically identical to the current world default.
+The settings application always enumerates a stable union of indexed physical-item and spell-bearing Item compendiums, so a world allow-list can safely contain both physical and spell-only sources. Missing saved pack IDs are retained and surfaced as unavailable rather than silently erased. Checkbox synchronization merges visible choices with unavailable saved IDs; only explicit Select-none actions clear the entire include list. The same rule applies to per-request overrides in the Embedded Editor. The editor treats the world policy as authoritative by default and only exposes its own mode/checklist after the user enables a per-request override. Disabling the override reloads the current world policy. An explicit source policy supplied by an embedding integration remains a request-level override unless it is semantically identical to the current world default.
 
 Content sources and implementation templates are intentionally separate concerns. `CompendiumIndex.query()` / `querySpells()` enforce `request.source` for published items, base equipment, spells, and source-backed composition inputs. `MagicItemTemplateResolver` may resolve implementation templates outside the allow-list when the document is merely schema/physical scaffolding; individual generators may require PF2e-system templates or prefer them according to their template contract. Those templates are recorded as `metadata.templateSource`, while real contributing content is recorded in `metadata.contentSources`.
+
+Source-aware capability APIs preserve the same boundary. Existing-item availability for worn slots, held handedness, grimoires, and apex items is calculated from `CompendiumIndex.filterEntriesBySource(source)`, while generated availability receives the unfiltered index separately for implementation-template checks. `getCapabilities({ source })` defaults to the current world policy and can be queried for an explicit request policy by embedding modules.
 
 ## Generator resolution
 
@@ -108,7 +111,7 @@ EquipmentGenerator    150  mode equipment
 ExistingItemGenerator   0  mode existing
 ```
 
-Registered generation modes are exposed through the public capabilities API and are validated dynamically rather than being hard-coded in the request normalizer.
+Registered generation modes are exposed through the public capabilities API and are validated dynamically rather than being hard-coded in the request normalizer. Magic categories are likewise hierarchy-driven: any registered descendant of `magic` can participate when a registered generator supports the normalized request. Engine validation consults the same `GeneratorRegistry.resolve()` path before generation, so extension modules do not need a core-code change merely to add `magic.some-extension-category`.
 
 
 ## Spell-bound permanent magic items
@@ -234,7 +237,7 @@ Live Magic diagnostics exercise Trackless footwear and Preserving container host
 
 ## Equipment/Magic result contracts
 
-`ItemForgeEngine` applies a shared post-generation contract before results leave the public API. `metadata.contentSources` is always an array, `metadata.templateSource` is either a structural-template descriptor or `null`, and automation uses `metadata.automation.level` with `native` or `rules-text`. Generated specific-item metadata is normalized to `rules-text` even if an extension profile attempts to claim native behavior; profile registries reject unsupported native declarations up front.
+`ItemForgeEngine` applies a shared post-generation contract before results leave the public API. `metadata.contentSources` is always an array, `metadata.templateSource` is either a structural-template descriptor or `null`, and automation uses `metadata.automation.level` with `native` or `rules-text`. The contract also removes `itemSource._id` centrally, making every public result safe to pass to Foundry document creation without generator-specific Compendium-ID cleanup; provenance remains in `metadata.sourceUuid`, `metadata.contentSources`, and Item Forge flags. Generated specific-item metadata is normalized to `rules-text` even if an extension profile attempts to claim native behavior; profile registries reject unsupported native declarations up front.
 
 World creation adds `flags.pf2e-item-forge.createdByForge = true` without erasing the engine's `generated` meaning. A copied published item therefore remains `generated: false`, while a composed/profile-generated item is `generated: true`. This distinction is intended for Loot Forge and other downstream consumers.
 

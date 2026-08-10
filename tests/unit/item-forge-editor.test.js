@@ -354,3 +354,52 @@ test("ItemForgeEditor treats remembered selected-pack lists as irrelevant when w
   assert.equal(editor.sourceOverride, false);
   assert.equal(editor.getRequest().source.mode, "system");
 });
+
+test("ItemForgeEditor local source override preserves temporarily unavailable selected pack IDs", () => {
+  const api = apiFixture();
+  const editor = new ItemForgeEditor({
+    api,
+    request: {
+      source: { mode: "selected", includePacks: ["pf2e.items", "module.temporarily-missing"], excludePacks: ["module.blocked"] },
+      seed: "missing-local-source"
+    }
+  });
+  editor.rendered = true;
+  const sourceOverride = { checked: true };
+  const modeInput = { value: "selected" };
+  const packInputs = [
+    { value: "pf2e.items", checked: false },
+    { value: "module.loot", checked: true }
+  ];
+  editor.element = {
+    querySelector: (selector) => {
+      if (selector === '[name="sourceOverride"]') return sourceOverride;
+      if (selector === '[name="source.mode"]') return modeInput;
+      return null;
+    },
+    querySelectorAll: (selector) => {
+      if (selector === '[name="sourcePack"]') return packInputs;
+      return [];
+    }
+  };
+
+  editor.validate();
+  assert.deepEqual(editor.getRequest().source, {
+    mode: "selected",
+    includePacks: ["module.temporarily-missing", "module.loot"],
+    excludePacks: ["module.blocked"]
+  });
+});
+
+test("ItemForgeEditor includes extension magic descendants without hard-coded category changes", async () => {
+  const api = apiFixture();
+  api.categories.getAll = () => [
+    { id: "magic", label: "Magic" },
+    { id: "magic.extension-relic", label: "Extension Relic" }
+  ];
+  api.categories.getAncestors = (id) => id === "magic.extension-relic" ? ["magic", "item"] : ["item"];
+  const editor = new ItemForgeEditor({ api, request: { mode: "magic", category: "magic.extension-relic", source: { mode: "all" }, seed: "extension-ui" } });
+  const context = await editor._prepareContext({});
+  assert.equal(editor.getRequest().category, "magic.extension-relic");
+  assert.deepEqual(context.categories.map((entry) => entry.id), ["magic.extension-relic"]);
+});

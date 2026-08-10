@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.0.36
+
+- Final Contract & RC Hardening pass after the full v0.0.35 review; no generator-family redesign.
+- Persists the complete world source policy (`mode`, `includePacks`, `excludePacks`) as one canonical hidden setting while keeping legacy mode/include settings synchronized for migration/backward compatibility.
+- Fixes selected-compendium state so temporarily unavailable saved pack IDs survive ordinary settings/editor checkbox edits; explicit Select none remains the intentional full-clear operation.
+- Makes Worn/Held/Grimoire/Apex existing-item capability reporting respect the active source policy while keeping generated technical-template availability independent from content-source selection. `getCapabilities({ source })` exposes the same view.
+- Removes the hard-coded core magic-category allow-list from request validation. Registered descendants of `magic` are now accepted when a registered generator supports the normalized request, matching the extension-oriented Category/Generator registries.
+- Makes `api.open({ request })` update an already-rendered standalone Item Forge instead of silently keeping the old request; stale preview/diagnostic state is cleared.
+- Centralizes creation-ready result cleanup in the generation contract: public `itemSource` objects no longer retain copied Compendium `_id` values.
+- Localizes preview warning messages instead of exposing raw internal warning codes and localizes the preview gold-piece suffix instead of hard-coding German `GM`.
+- Removes the dangling `license: LICENSE` manifest entry because no license file is bundled. PF2e system compatibility remains intentionally unpinned until a concrete tested system version is recorded for the RC rather than guessing a range.
+- Adds targeted regression tests for source-policy serialization/excludes, legacy fallback, missing-pack preservation, source-aware capability separation, extension magic categories, application request replacement, and creation-ready `_id` cleanup.
+- Test suite: 294 passing tests; total line coverage 94.26%, branch coverage 74.74%, function coverage 89.14%.
+
 ## 0.0.35
 
 - Reworks compendium-source UX so the world default mode and its selected pack list are configured together in a dedicated Foundry module-settings submenu instead of being split between generic settings and the Item Forge window.

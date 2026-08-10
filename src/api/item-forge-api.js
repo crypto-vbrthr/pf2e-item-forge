@@ -102,35 +102,48 @@ export class ItemForgeApi {
   }
 
 
-  getWornSlotCapabilities() {
+  #entriesForSource(source) {
+    const policy = source ?? this.getDefaultSourcePolicy();
+    if (typeof this.compendiumIndex?.filterEntriesBySource === "function") {
+      return this.compendiumIndex.filterEntriesBySource(policy);
+    }
+    return this.compendiumIndex?.entries ?? [];
+  }
+
+  getWornSlotCapabilities(source = this.getDefaultSourcePolicy()) {
     return getWornSlotCapabilities({
-      entries: this.compendiumIndex?.entries ?? [],
+      entries: this.#entriesForSource(source),
+      templateEntries: this.compendiumIndex?.entries ?? [],
       profiles: this.wornMagicProfiles?.getAll?.() ?? []
     });
   }
 
-  getHeldHandCapabilities() {
+  getHeldHandCapabilities(source = this.getDefaultSourcePolicy()) {
     return getHeldHandCapabilities({
-      entries: this.compendiumIndex?.entries ?? [],
+      entries: this.#entriesForSource(source),
+      templateEntries: this.compendiumIndex?.entries ?? [],
       profiles: this.heldMagicProfiles?.getAll?.() ?? []
     });
   }
 
-  getGrimoireCapabilities() {
+  getGrimoireCapabilities(source = this.getDefaultSourcePolicy()) {
     return getGrimoireCapabilities({
-      entries: this.compendiumIndex?.entries ?? [],
+      entries: this.#entriesForSource(source),
+      templateEntries: this.compendiumIndex?.entries ?? [],
       profiles: this.grimoireProfiles?.getAll?.() ?? []
     });
   }
 
-  getApexCapabilities() {
+  getApexCapabilities(source = this.getDefaultSourcePolicy()) {
     return getApexCapabilities({
-      entries: this.compendiumIndex?.entries ?? [],
+      entries: this.#entriesForSource(source),
+      templateEntries: this.compendiumIndex?.entries ?? [],
       profiles: this.apexProfiles?.getAll?.() ?? []
     });
   }
 
-  getCapabilities() {
+  getCapabilities(options = {}) {
+    const source = options?.source ?? this.getDefaultSourcePolicy();
     return {
       apiVersion: this.apiVersion,
       generators: this.generators.getAll().map((generator) => generator.id),
@@ -156,12 +169,12 @@ export class ItemForgeApi {
       grimoireModes: ["generated", "existing"],
       apexModes: ["generated", "existing"],
       apexAttributes: ["str", "dex", "con", "int", "wis", "cha"],
-      apexCapabilities: this.getApexCapabilities(),
+      apexCapabilities: this.getApexCapabilities(source),
       assistiveItems: { category: "assistive", modes: ["existing"], generated: false, policy: "existing-only" },
-      grimoireCapabilities: this.getGrimoireCapabilities(),
+      grimoireCapabilities: this.getGrimoireCapabilities(source),
       heldHands: [1, 2],
-      heldHandCapabilities: this.getHeldHandCapabilities(),
-      wornSlots: this.getWornSlotCapabilities(),
+      heldHandCapabilities: this.getHeldHandCapabilities(source),
+      wornSlots: this.getWornSlotCapabilities(source),
       staffProfiles: this.staffProfiles?.getAll?.().map((profile) => ({ id: profile.id, label: profile.label, levels: profile.variants.map((variant) => variant.level), ...(profile.balance ? { balance: profile.balance } : {}) })) ?? [],
       spellheartProfiles: this.spellheartProfiles?.getAll?.().map((profile) => ({ id: profile.id, label: profile.label, themes: [...profile.allowedThemes], levels: profile.variants.map((variant) => variant.level), ...(profile.balance ? { balance: profile.balance } : {}) })) ?? [],
       specificItemProfiles: this.specificItemProfiles?.getAll?.().map((profile) => ({ id: profile.id, itemType: profile.itemType, label: profile.label, themes: [...profile.allowedThemes], levels: profile.variants.map((variant) => variant.level), ...(profile.balance ? { balance: profile.balance } : {}) })) ?? [],

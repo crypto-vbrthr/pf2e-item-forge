@@ -29,6 +29,7 @@ export class ItemForgeEngine {
     return validateRequest(request, {
       categories: this.categories,
       generationModes: this.generators.getModes(),
+      generatorResolver: (normalized) => this.generators.resolve(normalized),
       defaultOptions: this.getDefaultOptions()
     });
   }

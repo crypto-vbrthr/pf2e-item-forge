@@ -27,6 +27,10 @@ export function applyGenerationContract(result) {
   result.metadata ??= {};
   const metadata = result.metadata;
 
+  // Every public generator result is a creation-ready source. Provenance lives
+  // in metadata/flags, not in a copied Compendium document ID.
+  if (result.itemSource && typeof result.itemSource === "object") delete result.itemSource._id;
+
   metadata.contentSources = inferredContentSources(metadata);
   metadata.templateSource ??= null;
   metadata.automation = normalizeAutomation(metadata);

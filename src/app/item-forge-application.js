@@ -46,6 +46,12 @@ export class ItemForgeApplication extends HandlebarsApplication {
     this.diagnosticsBusy = false;
   }
 
+  setRequest(request = {}) {
+    this.magicDiagnostics = null;
+    this.editor.setRequest(request);
+    return this;
+  }
+
   async _prepareContext(options) {
     const context = await super._prepareContext(options);
     return {

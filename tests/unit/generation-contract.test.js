@@ -64,3 +64,10 @@ test("generation contract preserves native apex core provenance for generated ap
   assert.equal(result.metadata.automation.level, "rules-text");
   assert.deepEqual(result.metadata.automation.nativeParts, ["apex-attribute"]);
 });
+
+
+test("generation contract removes copied document IDs from public item sources", () => {
+  const result = applyGenerationContract({ itemSource: { _id: "compendium-id", name: "Copy" }, metadata: {} });
+  assert.equal(result.itemSource._id, undefined);
+  assert.equal(result.itemSource.name, "Copy");
+});

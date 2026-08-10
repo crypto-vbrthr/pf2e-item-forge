@@ -15,19 +15,19 @@ function isSystemEntry(entry) {
   return entry?.packageType === "system" || entry?.packageName === systemId || entry?.packageName === "pf2e";
 }
 
-export function getGrimoireCapabilities({ entries = [], profiles = [] } = {}) {
+export function getGrimoireCapabilities({ entries = [], templateEntries = entries, profiles = [] } = {}) {
   const profileList = Array.isArray(profiles) ? profiles : (profiles?.getAll?.() ?? []);
   const existingEntries = entries.filter((entry) => entry.categories?.includes?.("magic.grimoire"));
-  const templateEntries = existingEntries.filter((entry) => GENERATED_GRIMOIRE_TEMPLATE_TYPES.includes(entry.type) && isSystemEntry(entry));
+  const matchingTemplateEntries = templateEntries.filter((entry) => entry.categories?.includes?.("magic.grimoire") && GENERATED_GRIMOIRE_TEMPLATE_TYPES.includes(entry.type) && isSystemEntry(entry));
   const generatedLevels = [...new Set(profileList.flatMap((profile) => profile.variants?.map((variant) => variant.level) ?? []))]
     .filter((level) => Number.isInteger(level))
     .sort((a, b) => a - b);
   return {
     existing: existingEntries.length > 0,
     existingCount: existingEntries.length,
-    generated: profileList.length > 0 && templateEntries.length > 0,
+    generated: profileList.length > 0 && matchingTemplateEntries.length > 0,
     generatedProfileCount: profileList.length,
-    generatedTemplateCount: templateEntries.length,
+    generatedTemplateCount: matchingTemplateEntries.length,
     generatedLevels
   };
 }

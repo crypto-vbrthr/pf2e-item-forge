@@ -2,13 +2,21 @@
 
 Reusable Item Forge architecture for Foundry VTT v14 and Pathfinder 2e.
 
-## v0.0.35 scope
+## v0.0.36 scope
 
-This release finishes the compendium-source UX introduced in v0.0.34. The world default is now configured in one dedicated Foundry settings window where mode and pack list live together, while the Item Forge itself uses that default unless a single request explicitly opts into a local override. Published content and spell/base-item pools still obey the canonical request source policy, while validated implementation templates remain separate technical scaffolding.
+This release is the Final Contract & RC Hardening pass. It closes the remaining source-policy, capability, extension, application-reuse, result-contract, localization, and package-hygiene gaps found by the full v0.0.35 review without changing the overall Item Forge architecture.
+> Foundry compatibility is declared for v14. The PF2e system relationship intentionally remains unpinned in `module.json` until a concrete tested PF2e system version is recorded for the RC; this release does not guess a system-version range.
+
 
 Implemented:
 
 - Public `game.pf2eItemForge` API (API version 1)
+- Canonical world source policy now persists `mode`, `includePacks`, and `excludePacks` together, while retaining legacy hidden settings for migration/backward compatibility
+- Source checklists preserve selected pack IDs that are temporarily unavailable; only an explicit “Select none” clears them
+- Worn/Held/Grimoire/Apex existing-item capabilities are source-policy-aware, while generated implementation-template availability remains independent from user content selection
+- New `magic.*` descendant categories can be supplied by extension modules together with a registered supporting generator; request validation no longer hard-codes the core magic category list
+- Reopening the standalone Item Forge with `api.open({ request })` replaces the request in an already-rendered window instead of silently ignoring it
+- Public generation results are creation-ready and never expose a copied Compendium `_id`; provenance remains in metadata and Forge flags
 - Canonical request normalization shared by API validation, generation, and embedded-editor hydration
 - Reusable `ItemForgeEngine`
 - Priority-based, extensible `GeneratorRegistry` with dynamically registered generation modes
@@ -64,7 +72,7 @@ Implemented:
 - German and English localization
 - Shared generation-result contract for `contentSources`, `templateSource`, and automation level
 - Live Magic diagnostics for predefined and generated magic paths including representative worn contracts, low/high one-/two-handed held contracts, predefined/generated Grimoire contracts, and predefined plus level-17/20 Apex contracts, with exact-level checks, native apex schema verification, system-template provenance, structured activation/physical/daily-preparation contracts, pack-index failures, and composed-equipment price preparation
-- 278 automated unit/integration/statistical/contract tests
+- 294 automated unit/integration/statistical/contract tests
 
 Not yet implemented:
 
@@ -92,9 +100,11 @@ source: {
 }
 ```
 
-Foundry module settings now expose a dedicated **Source Compendiums** submenu. It owns the complete world-default policy in one place: `all`, `system`, or `selected`, and when `selected` is active the stable union of indexed physical-item and spell-bearing Item compendiums appears directly beneath the mode. The Item Forge no longer edits that world default. Instead it displays the active world policy compactly and offers **Override the world default for this request**; only then are the local mode and pack checklist shown. Turning the override off immediately returns the request to the current world default. New API requests that omit source fields inherit the stored policy; explicit `source` requests still win. `game.pf2eItemForge.getDefaultSourcePolicy()` and `setDefaultSourcePolicy(source)` expose the same workflow to integrations.
+Foundry module settings expose a dedicated **Source Compendiums** submenu. It owns the complete world-default policy in one place: `all`, `system`, or `selected`, plus the canonical `includePacks` and `excludePacks` arrays used by the public API. v0.0.36 persists that full policy together in one hidden world setting and keeps the older hidden mode/include settings synchronized only for migration/backward compatibility. When `selected` is active, the stable union of indexed physical-item and spell-bearing Item compendiums appears directly beneath the mode. Temporarily unavailable saved pack IDs are retained across ordinary checkbox edits and are surfaced as missing; an explicit **Select none** is the action that clears the complete allow-list. The Item Forge itself displays the active world policy compactly and offers **Override the world default for this request**; only then are the local mode and pack checklist shown. Turning the override off immediately returns the request to the current world default. New API requests that omit source fields inherit the stored policy; explicit `source` requests still win. `game.pf2eItemForge.getDefaultSourcePolicy()` and `setDefaultSourcePolicy(source)` expose the same workflow to integrations.
 
 Source selection governs actual content: published items, mundane base equipment, spell pools, and source-backed Accessory Runes. Structural implementation templates used to construct generated items are intentionally resolved outside that policy and are reported separately as `metadata.templateSource`. Individual generators may require PF2e-system templates or prefer them according to their hardened template contract.
+
+Capability queries follow the same split. `getWornSlotCapabilities(source)`, `getHeldHandCapabilities(source)`, `getGrimoireCapabilities(source)`, and `getApexCapabilities(source)` filter their **existing** availability through the supplied source policy (or the current world default when omitted), while their **generated** availability still checks the global technical-template pool. `getCapabilities({ source })` exposes the same source-aware view.
 
 ## API examples
 

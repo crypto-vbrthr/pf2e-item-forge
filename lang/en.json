@@ -957,6 +957,12 @@
       "PresenceDescription": "This polished golden emblem catches attention without seeming gaudy, making every gesture feel deliberate.",
       "PresencePassive": "You gain a +{perceptionBonus} item bonus to Diplomacy and Performance checks.",
       "PresenceActivation": "Before the end of your turn, your next Diplomacy, Intimidation, or Performance check gains a +{activationBonus} circumstance bonus."
+    },
+    "Warnings": {
+      "LEVEL_TARGET_APPROXIMATED": "No exact level was available; the nearest allowed level was used.",
+      "VALUE_TARGET_APPROXIMATED": "The target value could not be matched exactly; the nearest valid value was used.",
+      "NO_VALID_VALUE_CANDIDATE": "No valid value candidate was found within the attempt limit.",
+      "UNKNOWN": "Generation completed with a warning."
     }
   }
 }

@@ -91,3 +91,32 @@ test("SourceCompendiumSettings validates and saves the selected world default", 
   assert.equal(await app.save(), true);
   assert.deepEqual(getStored().includePacks, ["pf2e.spells", "module.loot"]);
 });
+
+test("SourceCompendiumSettings preserves unavailable selected packs and hidden exclude packs during visible edits", async () => {
+  const { api, getStored } = fixture();
+  game.pf2eItemForge = api;
+  const app = new SourceCompendiumSettings();
+  app.source = {
+    mode: "selected",
+    includePacks: ["pf2e.items", "module.temporarily-missing"],
+    excludePacks: ["module.blocked"]
+  };
+  app.rendered = true;
+  const modeInput = { value: "selected" };
+  const packInputs = [
+    { value: "pf2e.items", checked: false },
+    { value: "module.loot", checked: true }
+  ];
+  app.element = {
+    querySelector: (selector) => selector === '[name="source.mode"]' ? modeInput : null,
+    querySelectorAll: (selector) => selector === '[name="sourcePack"]' ? packInputs : []
+  };
+  app.render = async () => app;
+
+  assert.equal(await app.save(), true);
+  assert.deepEqual(getStored(), {
+    mode: "selected",
+    includePacks: ["module.temporarily-missing", "module.loot"],
+    excludePacks: ["module.blocked"]
+  });
+});

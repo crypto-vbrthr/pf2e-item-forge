@@ -109,3 +109,17 @@ test("ItemForgeApplication preserves copied-item generated=false while recording
   assert.equal(createdSource.flags["pf2e-item-forge"].generated, false);
   assert.equal(createdSource.flags["pf2e-item-forge"].sourceUuid, "Compendium.pf2e.items.Item.abc");
 });
+
+test("ItemForgeApplication can replace the request of an already-open container", () => {
+  const application = new ItemForgeApplication({ api: apiFixture(), request: { mode: "existing", category: "item", seed: "old" } });
+  application.editor.previewResult = { itemSource: { name: "Old preview" } };
+  application.magicDiagnostics = { passed: 1 };
+
+  application.setRequest({ mode: "treasure", category: "treasure", seed: "new" });
+  const request = application.editor.getRequest();
+  assert.equal(request.mode, "treasure");
+  assert.equal(request.category, "treasure");
+  assert.equal(request.seed, "new");
+  assert.equal(application.editor.getPreview(), null);
+  assert.equal(application.magicDiagnostics, null);
+});

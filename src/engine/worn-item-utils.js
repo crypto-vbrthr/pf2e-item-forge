@@ -71,13 +71,13 @@ export function hasMagicMarkerTraits(traits = []) {
   return ["magical", "arcane", "divine", "occult", "primal"].some((trait) => set.has(trait));
 }
 
-export function getWornSlotCapabilities({ entries = [], profiles = [] } = {}) {
+export function getWornSlotCapabilities({ entries = [], templateEntries = entries, profiles = [] } = {}) {
   const profileList = Array.isArray(profiles) ? profiles : (profiles?.getAll?.() ?? []);
   return WORN_SLOT_DEFINITIONS.map((slot) => {
     const category = `magic.worn.${slot.id}`;
     const existingEntries = entries.filter((entry) => entry.categories?.includes?.(category));
     const generatedProfiles = slot.id === "other" ? [] : profileList.filter((profile) => profile.slot === slot.id);
-    const templateEntries = entries.filter((entry) =>
+    const matchingTemplateEntries = templateEntries.filter((entry) =>
       GENERATED_WORN_TEMPLATE_TYPES.includes(entry.type) && entry.categories?.includes?.(category)
     );
     const generatedLevels = [...new Set(generatedProfiles.flatMap((profile) => profile.variants?.map((variant) => variant.level) ?? []))]
@@ -88,9 +88,9 @@ export function getWornSlotCapabilities({ entries = [], profiles = [] } = {}) {
       label: slot.label,
       existing: existingEntries.length > 0,
       existingCount: existingEntries.length,
-      generated: generatedProfiles.length > 0 && templateEntries.length > 0,
+      generated: generatedProfiles.length > 0 && matchingTemplateEntries.length > 0,
       generatedProfileCount: generatedProfiles.length,
-      generatedTemplateCount: templateEntries.length,
+      generatedTemplateCount: matchingTemplateEntries.length,
       generatedLevels
     };
   });

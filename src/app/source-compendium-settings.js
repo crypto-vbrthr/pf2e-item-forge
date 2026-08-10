@@ -1,4 +1,5 @@
 import { MODULE_ID } from "../constants.js";
+import { mergeVisibleSourceSelection } from "../engine/source-policy.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const HandlebarsApplication = HandlebarsApplicationMixin(ApplicationV2);
@@ -73,7 +74,11 @@ export class SourceCompendiumSettings extends HandlebarsApplication {
     const mode = this.element.querySelector?.('[name="source.mode"]')?.value;
     if (["all", "system", "selected"].includes(mode)) this.#ensureSource().mode = mode;
     const packInputs = [...(this.element.querySelectorAll?.('[name="sourcePack"]') ?? [])];
-    if (packInputs.length) this.#ensureSource().includePacks = packInputs.filter((input) => input.checked).map((input) => input.value);
+    if (packInputs.length) {
+      const availableIds = packInputs.map((input) => input.value);
+      const checkedIds = packInputs.filter((input) => input.checked).map((input) => input.value);
+      this.#ensureSource().includePacks = mergeVisibleSourceSelection(this.#ensureSource().includePacks, availableIds, checkedIds);
+    }
   }
 
   async _prepareContext(options) {
@@ -149,7 +154,8 @@ export class SourceCompendiumSettings extends HandlebarsApplication {
     this.#syncFromDom();
     const source = this.#ensureSource();
     source.mode = "selected";
-    source.includePacks = [...new Set(this.#availablePacks().map((pack) => pack.id).filter(Boolean))];
+    const availableIds = this.#availablePacks().map((pack) => pack.id).filter(Boolean);
+    source.includePacks = mergeVisibleSourceSelection(source.includePacks, availableIds, availableIds);
     this.error = null;
     await this.render();
     return source.includePacks;

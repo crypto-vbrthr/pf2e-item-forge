@@ -3,6 +3,7 @@ import { parseHeldUsage, heldCategoryForHands, hasHeldMagicMarkerTraits } from "
 import { isGrimoireTraits } from "./grimoire-utils.js";
 import { isAssistiveItem } from "./assistive-item-utils.js";
 import { isApexItem } from "./apex-item-utils.js";
+import { normalizeSourcePolicy, sourceAllowsEntry } from "./source-policy.js";
 
 export const SUPPORTED_ITEM_TYPES = new Set([
   "weapon",
@@ -217,6 +218,12 @@ export class CompendiumIndex {
     return this.entries.filter((entry) => this.#sourceAllowed(entry, request) && this.#physicalAllowed(entry, request));
   }
 
+  filterEntriesBySource(source = {}) {
+    const policy = normalizeSourcePolicy(source);
+    const systemId = this.gameProvider()?.system?.id ?? "pf2e";
+    return this.entries.filter((entry) => sourceAllowsEntry(entry, policy, { systemId }));
+  }
+
   querySpells(request) {
     return this.spellEntries.filter((entry) => {
       if (!this.#sourceAllowed(entry, request)) return false;
@@ -236,13 +243,7 @@ export class CompendiumIndex {
   }
 
   #sourceAllowed(entry, request) {
-    const include = new Set(request.source.includePacks);
-    const exclude = new Set(request.source.excludePacks);
-    const isSystemPack = entry.packageType === "system" || entry.packageName === this.gameProvider()?.system?.id;
-    if (exclude.has(entry.pack)) return false;
-    if (request.source.mode === "selected" && !include.has(entry.pack)) return false;
-    if (request.source.mode === "system" && !isSystemPack) return false;
-    return true;
+    return sourceAllowsEntry(entry, request?.source ?? {}, { systemId: this.gameProvider()?.system?.id ?? "pf2e" });
   }
 
   #physicalAllowed(entry, request) {

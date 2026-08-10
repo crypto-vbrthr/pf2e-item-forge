@@ -36,6 +36,8 @@ import { ItemForgeApplication } from "../src/app/item-forge-application.js";
 import { SourceCompendiumSettings } from "../src/app/source-compendium-settings.js";
 import { MagicItemTemplateResolver } from "../src/engine/magic-item-template-resolver.js";
 import { MagicItemDiagnostics } from "../src/engine/magic-item-diagnostics.js";
+import { normalizeSourcePolicy } from "../src/engine/source-policy.js";
+import { deserializeSourcePolicy, serializeSourcePolicy } from "../src/engine/source-policy-storage.js";
 
 let application = null;
 let api = null;
@@ -78,6 +80,17 @@ function registerSettings() {
     default: "[]"
   });
 
+  // Canonical full source-policy storage. Legacy mode/include settings remain
+  // registered for migration/backwards compatibility, but new writes persist
+  // mode, includePacks, and excludePacks together so the public API contract
+  // round-trips without loss.
+  game.settings.register(MODULE_ID, "defaultSourcePolicy", {
+    scope: "world",
+    config: false,
+    type: String,
+    default: ""
+  });
+
   game.settings.registerMenu(MODULE_ID, "sourceCompendiums", {
     name: t("PF2E_ITEM_FORGE.Settings.SourceCompendiums.Name"),
     label: t("PF2E_ITEM_FORGE.Settings.SourceCompendiums.Label"),
@@ -98,18 +111,19 @@ function parseStoredPackIds(value) {
 }
 
 function getStoredSourcePolicy() {
-  return {
-    mode: game.settings.get(MODULE_ID, "defaultSourceMode") ?? "all",
-    includePacks: parseStoredPackIds(game.settings.get(MODULE_ID, "defaultSourcePacks")),
-    excludePacks: []
-  };
+  return deserializeSourcePolicy(game.settings.get(MODULE_ID, "defaultSourcePolicy"), {
+    legacyMode: game.settings.get(MODULE_ID, "defaultSourceMode") ?? "all",
+    legacyIncludePacks: parseStoredPackIds(game.settings.get(MODULE_ID, "defaultSourcePacks"))
+  });
 }
 
 async function setStoredSourcePolicy(source = {}) {
-  const mode = ["all", "system", "selected"].includes(source.mode) ? source.mode : "all";
-  const includePacks = [...new Set(Array.isArray(source.includePacks) ? source.includePacks.filter((id) => typeof id === "string" && id) : [])];
-  await game.settings.set(MODULE_ID, "defaultSourcePacks", JSON.stringify(includePacks));
-  await game.settings.set(MODULE_ID, "defaultSourceMode", mode);
+  const policy = normalizeSourcePolicy(source);
+  await game.settings.set(MODULE_ID, "defaultSourcePolicy", serializeSourcePolicy(policy));
+  // Keep the pre-v0.0.36 backing settings synchronized for worlds/modules that
+  // still read them directly. They are no longer the canonical store.
+  await game.settings.set(MODULE_ID, "defaultSourcePacks", JSON.stringify(policy.includePacks));
+  await game.settings.set(MODULE_ID, "defaultSourceMode", policy.mode);
 }
 
 function createApi() {
@@ -148,15 +162,23 @@ function createApi() {
     categories,
     generators,
     compendiumIndex,
-    defaultOptions: () => ({
-      defaultSourceMode: getStoredSourcePolicy().mode,
-      defaultSourcePacks: getStoredSourcePolicy().includePacks,
-      defaultSolverAttempts: game.settings.get(MODULE_ID, "defaultSolverAttempts")
-    })
+    defaultOptions: () => {
+      const sourcePolicy = getStoredSourcePolicy();
+      return {
+        defaultSourceMode: sourcePolicy.mode,
+        defaultSourcePacks: sourcePolicy.includePacks,
+        defaultExcludedPacks: sourcePolicy.excludePacks,
+        defaultSolverAttempts: game.settings.get(MODULE_ID, "defaultSolverAttempts")
+      };
+    }
   });
 
   const openApplication = (options = {}) => {
-    if (!application || !application.rendered) application = new ItemForgeApplication({ api, ...options });
+    if (!application || !application.rendered) {
+      application = new ItemForgeApplication({ api, ...options });
+    } else if (Object.hasOwn(options, "request")) {
+      application.setRequest(options.request ?? {});
+    }
     application.render({ force: true });
     return application;
   };

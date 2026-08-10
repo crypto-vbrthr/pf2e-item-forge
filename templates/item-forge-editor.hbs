@@ -629,7 +629,7 @@
                   {{#each preview.treasure.attributeEntries}}<span class="property-rune-chip">{{label}}</span>{{/each}}
                 </dd>
               {{/if}}
-              <dt>{{localize "PF2E_ITEM_FORGE.Preview.Value"}}</dt><dd>{{preview.value}} GM</dd>
+              <dt>{{localize "PF2E_ITEM_FORGE.Preview.Value"}}</dt><dd>{{preview.value}} {{localize "PF2E_ITEM_FORGE.Currency.GP"}}</dd>
               <dt>{{localize "PF2E_ITEM_FORGE.Preview.SolverAttempts"}}</dt><dd>{{preview.solverAttempts}}</dd>
               {{#if preview.treasure.components.length}}
                 <dt>{{localize "PF2E_ITEM_FORGE.Preview.Components"}}</dt>
@@ -649,7 +649,7 @@
           {{/if}}
           {{#if preview.warnings.length}}
             <div class="warning-box">
-              {{#each preview.warnings}}<div><i class="fa-solid fa-triangle-exclamation"></i> {{code}}</div>{{/each}}
+              {{#each preview.warnings}}<div><i class="fa-solid fa-triangle-exclamation"></i> {{label}}</div>{{/each}}
             </div>
           {{/if}}
         </div>

@@ -176,6 +176,7 @@ export function hydrateEditorRequest(request = {}, options = {}) {
 export function validateRequest(request, {
   categories,
   generationModes = null,
+  generatorResolver = null,
   defaultOptions = {}
 } = {}) {
   const errors = [];
@@ -213,8 +214,9 @@ export function validateRequest(request, {
   }
   if (normalized.mode === "magic") {
     const category = normalized.category;
-    const supported = ["magic.wand", "magic.staff", "magic.spellheart", "magic.grimoire", "magic.apex", "magic.weapon", "magic.armor", "magic.shield", "magic.worn", "magic.held", "magic.held.one-hand", "magic.held.two-hands", "magic.accessory-rune"].includes(category) || categories?.isDescendant?.(category, "magic.worn");
-    if (!supported) errors.push({ code: "UNSUPPORTED_MAGIC_CATEGORY", field: "category", value: category });
+    const inMagicHierarchy = category === "magic" || Boolean(categories?.isDescendant?.(category, "magic"));
+    const hasGenerator = typeof generatorResolver === "function" ? Boolean(generatorResolver(normalized)) : true;
+    if (!inMagicHierarchy || !hasGenerator) errors.push({ code: "UNSUPPORTED_MAGIC_CATEGORY", field: "category", value: category });
   }
   return { valid: errors.length === 0, errors, request: normalized };
 }

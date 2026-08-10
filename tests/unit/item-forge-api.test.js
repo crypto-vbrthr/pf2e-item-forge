@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { ItemForgeApi } from "../../src/api/item-forge-api.js";
+import { filterEntriesBySourcePolicy } from "../../src/engine/source-policy.js";
 
 function apiFixture() {
   const engine = {
@@ -58,6 +59,12 @@ test("ItemForgeApi delegates canonical request operations", async () => {
   assert.equal((await api.generate({ a: 1 })).kind, "generate");
   assert.equal((await api.preview({ a: 1 })).kind, "preview");
   assert.equal(api.validate({ a: 1 }).valid, true);
+});
+
+test("ItemForgeApi getCapabilities tolerates a null options object", () => {
+  const capabilities = apiFixture().getCapabilities(null);
+  assert.equal(capabilities.apiVersion, 1);
+  assert.deepEqual(capabilities.generationModes, ["custom"]);
 });
 
 test("ItemForgeApi capabilities expose generator priority metadata and registered modes", () => {
@@ -195,4 +202,30 @@ test("ItemForgeApi rejects an empty selected world-default source policy", async
     () => api.setDefaultSourcePolicy({ mode: "selected", includePacks: [] }),
     (error) => error.code === "NO_SOURCE_PACKS"
   );
+});
+
+
+test("capability APIs filter existing content by source policy while keeping technical templates global", () => {
+  const api = apiFixture();
+  for (const entry of api.compendiumIndex.entries) {
+    entry.pack = entry.id === 1 ? "module.worn" : "pf2e.items";
+  }
+  api.compendiumIndex.entries.push({
+    id: 7, pack: "module.grimoires", type: "book", packageType: "module", packageName: "module", categories: ["magic.grimoire"]
+  });
+  api.compendiumIndex.filterEntriesBySource = function(source) {
+    return filterEntriesBySourcePolicy(this.entries, source, { systemId: "pf2e" });
+  };
+
+  const noneSelected = { mode: "selected", includePacks: ["module.unrelated"], excludePacks: [] };
+  const grimoire = api.getGrimoireCapabilities(noneSelected);
+  assert.equal(grimoire.existing, false, "excluded published grimoires are not advertised");
+  assert.equal(grimoire.generated, true, "safe PF2e implementation templates remain available globally");
+
+  const moduleSelected = { mode: "selected", includePacks: ["module.grimoires"], excludePacks: [] };
+  assert.equal(api.getGrimoireCapabilities(moduleSelected).existingCount, 1);
+  assert.equal(api.getHeldHandCapabilities(noneSelected).find((entry) => entry.hands === 1).existing, false);
+  assert.equal(api.getHeldHandCapabilities(noneSelected).find((entry) => entry.hands === 1).generated, true);
+  assert.equal(api.getApexCapabilities(noneSelected).existing, false);
+  assert.equal(api.getApexCapabilities(noneSelected).generated, true);
 });
