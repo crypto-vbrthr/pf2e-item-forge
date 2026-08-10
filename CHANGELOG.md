@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.0.30
+
+- Completes the Held Item contract review by making the structured activation manifest authoritative for activation type, action count, traits, frequency, trigger, requirements, duration, and effect text.
+- Adds explicit `action`, `reaction`, and `free-action` activation types while retaining backward compatibility for older action-count-only extension profiles.
+- Renders multi-use frequencies correctly (`2/day`, `3/hour`, and equivalent localized forms) instead of collapsing every known period to “once”.
+- Renders trigger, requirements, and duration fields into localized held-item activation headers and stores their rendered forms alongside the structured metadata.
+- Removes duplicated action/trait/frequency prose from the ten built-in Held Item effect texts so the activation contract is the single source of truth for activation metadata.
+- Filters generated Held Item profile candidates by safe PF2e system-template availability before seeded selection, preventing an unavailable handedness from defeating an otherwise valid automatic request.
+- Applies the same handedness capabilities in the Embedded Editor: unavailable one-/two-hand categories are disabled for the selected held mode and generated profile choices are limited to actually generatable handedness families.
+- Extends live diagnostics and regression coverage for activation types, multi-use frequencies, trigger/requirements/duration rendering, and missing-template handedness fallback.
+- Test suite: 241 passing tests; total line coverage 94.03%.
+
+## 0.0.29
+
+- Hardens generated Held Items with system-only PF2e implementation templates. Core generation no longer falls back to arbitrary module/third-party held equipment when no matching PF2e system template is available.
+- Expands the reviewed core Held Item library from five to ten profile families so automatic strict generation has a candidate at every item level 1–20 independently for one-hand and two-hand requests.
+- Adds structured held-item activation contracts per variant (`actions`, traits, frequency, trigger/requirements/duration slots, effect text) while retaining rules-text automation rather than inventing Rule Elements.
+- Adds profile-owned physical metadata with explicit Bulk; generated held items overwrite template Bulk, clear material/base-item/container identity, normalize quantity, and keep only the verified held Usage shape.
+- Adds `game.pf2eItemForge.getHeldHandCapabilities()` and `getCapabilities().heldHandCapabilities`, reporting existing/generated availability, profile/template counts, and generated levels per handedness.
+- Expands live Magic diagnostics to low/high one-hand and two-hand generated cases, exact-level checks, system-template provenance, Bulk/material cleanup, and structured activation validation.
+- Adds editor guidance that source selection governs predefined Held Items while generated Held Items come from Item Forge profiles plus a PF2e system implementation template.
+- Adds guard regressions for missing/changed implementation-template documents and system-only template resolution.
+- Test suite: 238 passing tests; total line coverage 93.90%.
+
 ## 0.0.28
 
 - Adds `magic.held` with explicit one-hand and two-hand subcategories for permanent held magic equipment.

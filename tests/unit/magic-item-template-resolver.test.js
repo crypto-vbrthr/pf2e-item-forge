@@ -10,13 +10,19 @@ test("MagicItemTemplateResolver keeps implementation templates separate from sel
     { id: "system-heart", pack: "pf2e.equipment", packageType: "system", packageName: "pf2e", categories: ["magic.spellheart"] },
     { id: "addon-cloak", type: "equipment", level: 2, pack: "addon.items", packageType: "module", packageName: "addon", categories: ["magic.worn", "magic.worn.cloak"] },
     { id: "system-cloak-backpack", type: "backpack", level: 1, pack: "pf2e.equipment", packageType: "system", packageName: "pf2e", categories: ["magic.worn", "magic.worn.cloak"] },
-    { id: "system-cloak", type: "equipment", level: 5, pack: "pf2e.equipment", packageType: "system", packageName: "pf2e", categories: ["magic.worn", "magic.worn.cloak"] }
+    { id: "system-cloak", type: "equipment", level: 5, pack: "pf2e.equipment", packageType: "system", packageName: "pf2e", categories: ["magic.worn", "magic.worn.cloak"] },
+    { id: "addon-held-one", type: "equipment", level: 1, pack: "addon.items", packageType: "module", packageName: "addon", categories: ["magic.held", "magic.held.one-hand"] },
+    { id: "system-held-one", type: "equipment", level: 4, pack: "pf2e.equipment", packageType: "system", packageName: "pf2e", categories: ["magic.held", "magic.held.one-hand"] },
+    { id: "addon-held-two", type: "equipment", level: 1, pack: "addon.items", packageType: "module", packageName: "addon", categories: ["magic.held", "magic.held.two-hands"] }
   ];
   const resolver = new MagicItemTemplateResolver({ compendiumIndex: { entries } });
   assert.equal(resolver.resolveStaffBaseEntry().id, "system-staff");
   assert.equal(resolver.resolveSpellheartTemplateEntry().id, "system-heart");
   assert.equal(resolver.resolveWornTemplateEntry("cloak").id, "system-cloak", "default worn templates must use the safe equipment document type");
   assert.equal(resolver.resolveWornTemplateEntry("cloak", { allowedTypes: ["backpack"] }).id, "system-cloak-backpack");
+  assert.equal(resolver.resolveHeldTemplateEntry(1).id, "system-held-one", "held implementation templates are system-only");
+  assert.equal(resolver.resolveHeldTemplateEntry(2), null, "held templates do not silently fall back to module content");
+  assert.equal(resolver.resolveHeldTemplateEntry(2, { sourcePolicy: "prefer-system" }).id, "addon-held-two", "an explicit non-core policy may opt into fallback behavior");
   assert.equal(resolver.templateMetadata(resolver.resolveStaffBaseEntry(), { kind: "staff-base" }).source, "implementation-template");
 });
 

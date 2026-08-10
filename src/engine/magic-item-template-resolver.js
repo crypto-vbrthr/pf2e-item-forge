@@ -46,12 +46,13 @@ export class MagicItemTemplateResolver {
   }
 
 
-  resolveHeldTemplateEntry(hands = null, { allowedTypes = ["equipment"] } = {}) {
+  resolveHeldTemplateEntry(hands = null, { allowedTypes = ["equipment"], sourcePolicy = "system-only" } = {}) {
     const category = Number(hands) === 1 ? "magic.held.one-hand" : Number(hands) === 2 ? "magic.held.two-hands" : "magic.held";
     const types = new Set(Array.isArray(allowedTypes) ? allowedTypes : [allowedTypes]);
     const entries = this.index.entries
       .filter((entry) => types.has(entry.type) && entry.categories?.includes?.(category))
       .sort((a, b) => Number(a.level ?? 0) - Number(b.level ?? 0) || a.uuid.localeCompare(b.uuid));
+    if (sourcePolicy === "system-only") return this.#systemOnly(entries);
     return this.#preferSystem(entries);
   }
 
@@ -71,10 +72,13 @@ export class MagicItemTemplateResolver {
     this.cache.clear();
   }
 
-  #preferSystem(entries) {
+  #systemOnly(entries) {
     const systemId = globalThis.game?.system?.id ?? "pf2e";
-    const system = entries.filter((entry) => entry.packageType === "system" || entry.packageName === systemId || entry.packageName === "pf2e");
-    return system[0] ?? entries[0] ?? null;
+    return entries.find((entry) => entry.packageType === "system" || entry.packageName === systemId || entry.packageName === "pf2e") ?? null;
+  }
+
+  #preferSystem(entries) {
+    return this.#systemOnly(entries) ?? entries[0] ?? null;
   }
 
   async #resolveConfiguredSpellcastingTemplate(kind, rank, expectedType) {

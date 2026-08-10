@@ -54,6 +54,7 @@ function apiFixture() {
     specificItemProfiles: { getAll: () => [], getForItemType: () => [], get: () => null },
     specificShieldProfiles: { getAll: () => [], get: () => null },
     wornMagicProfiles: { getAll: () => [], getForSlot: () => [], get: () => null },
+    heldMagicProfiles: { getAll: () => [], getForHands: () => [], get: () => null },
     accessoryRunes: { getAll: () => [], get: () => null },
     magicThemes: [],
     treasure: {
@@ -236,4 +237,36 @@ test("ItemForgeEditor preserves accessory rune requests and their selected famil
   const request = editor.getRequest();
   assert.equal(request.category, "magic.accessory-rune");
   assert.equal(request.magic.accessoryRune, "trackless");
+});
+
+
+test("generated held mode disables unavailable handedness and hides profiles without a safe system template", async () => {
+  const api = apiFixture();
+  const oneProfile = { id: "one.profile", hands: 1, label: "One Profile" };
+  const twoProfile = { id: "two.profile", hands: 2, label: "Two Profile" };
+  api.categories.getAll = () => [
+    { id: "magic.held", label: "PF2E_ITEM_FORGE.Categories.MagicHeld" },
+    { id: "magic.held.one-hand", label: "PF2E_ITEM_FORGE.Categories.MagicHeldOneHand" },
+    { id: "magic.held.two-hands", label: "PF2E_ITEM_FORGE.Categories.MagicHeldTwoHands" }
+  ];
+  api.categories.getAncestors = (id) => id === "magic.held" ? ["magic"] : ["magic.held", "magic"];
+  api.getHeldHandCapabilities = () => [
+    { id: "one-hand", hands: 1, existing: true, generated: false },
+    { id: "two-hands", hands: 2, existing: true, generated: true }
+  ];
+  api.heldMagicProfiles = {
+    getAll: () => [oneProfile, twoProfile],
+    getForHands: (hands) => [oneProfile, twoProfile].filter((profile) => profile.hands === Number(hands)),
+    get: (id) => [oneProfile, twoProfile].find((profile) => profile.id === id) ?? null
+  };
+  const editor = new ItemForgeEditor({
+    api,
+    request: { mode: "magic", category: "magic.held.one-hand", level: 8, magic: { heldMode: "generated", heldProfile: "one.profile" }, seed: "held-availability" }
+  });
+  const context = await editor._prepareContext({});
+  assert.equal(editor.getRequest().category, "magic.held");
+  assert.equal(editor.getRequest().magic.heldProfile, "automatic");
+  assert.equal(context.categories.find((entry) => entry.id === "magic.held.one-hand").disabled, true);
+  assert.equal(context.categories.find((entry) => entry.id === "magic.held.two-hands").disabled, false);
+  assert.deepEqual(context.heldProfiles.map((profile) => profile.id), ["automatic", "two.profile"]);
 });

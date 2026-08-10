@@ -5,6 +5,8 @@ export const HELD_HAND_DEFINITIONS = Object.freeze([
   { id: "two-hands", hands: 2, label: "PF2E_ITEM_FORGE.HeldHands.Two" }
 ]);
 
+export const GENERATED_HELD_TEMPLATE_TYPES = Object.freeze(["equipment"]);
+
 export function hasHeldMagicMarkerTraits(traits = []) {
   return (Array.isArray(traits) ? traits : []).some((trait) => MAGIC_MARKERS.has(String(trait).toLowerCase()));
 }
@@ -29,4 +31,37 @@ export function heldCategoryForHands(hands) {
 
 export function heldHandsLabelKey(hands) {
   return Number(hands) === 1 ? "PF2E_ITEM_FORGE.HeldHands.One" : Number(hands) === 2 ? "PF2E_ITEM_FORGE.HeldHands.Two" : null;
+}
+
+function isSystemEntry(entry) {
+  const systemId = globalThis.game?.system?.id ?? "pf2e";
+  return entry?.packageType === "system" || entry?.packageName === systemId || entry?.packageName === "pf2e";
+}
+
+export function getHeldHandCapabilities({ entries = [], profiles = [] } = {}) {
+  const profileList = Array.isArray(profiles) ? profiles : (profiles?.getAll?.() ?? []);
+  return HELD_HAND_DEFINITIONS.map((definition) => {
+    const category = heldCategoryForHands(definition.hands);
+    const existingEntries = entries.filter((entry) => entry.categories?.includes?.(category));
+    const generatedProfiles = profileList.filter((profile) => Number(profile.hands) === definition.hands);
+    const templateEntries = entries.filter((entry) =>
+      GENERATED_HELD_TEMPLATE_TYPES.includes(entry.type) &&
+      entry.categories?.includes?.(category) &&
+      isSystemEntry(entry)
+    );
+    const generatedLevels = [...new Set(generatedProfiles.flatMap((profile) => profile.variants?.map((variant) => variant.level) ?? []))]
+      .filter((level) => Number.isInteger(level))
+      .sort((a, b) => a - b);
+    return {
+      id: definition.id,
+      hands: definition.hands,
+      label: definition.label,
+      existing: existingEntries.length > 0,
+      existingCount: existingEntries.length,
+      generated: generatedProfiles.length > 0 && templateEntries.length > 0,
+      generatedProfileCount: generatedProfiles.length,
+      generatedTemplateCount: templateEntries.length,
+      generatedLevels
+    };
+  });
 }

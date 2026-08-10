@@ -2,9 +2,9 @@
 
 Reusable Item Forge architecture for Foundry VTT v14 and Pathfinder 2e.
 
-## v0.0.28 scope
+## v0.0.30 scope
 
-This release adds permanent Held Magic Items as their own PF2e-aware family. Published held items can be selected intact, while generated held items use hand-specific safe equipment templates and validated whole-effect profiles without collapsing grimoires, tattoos, assistive items, or apex items into one generic bucket.
+This release completes the Held Item contract review. Published held items remain intact, while generated held items now use an authoritative structured activation contract, template-aware handedness selection, and the same capability rules in both the engine and Embedded Editor.
 
 Implemented:
 
@@ -28,13 +28,13 @@ Implemented:
 - Published worn items preserve native PF2e usage, Rule Elements, activations, price, traits, and automation; generated worn items use whole-effect profiles plus rules-text manifests. Fourteen core families cover item levels 1 through 20 across footwear, eyepieces, belts, cloaks, masks, circlets, gloves, bracers, garments, unrestricted jewelry, and headwear
 - Generated worn profiles use `equipment` documents only as generic structural templates; backpack/container schemas are not borrowed by the generic worn generator
 - Worn profiles support an explicit `invested` contract (default `true`), normalize canonical rarity/variant IDs, and treat arcane/divine/occult/primal as sufficient magic markers without redundantly forcing the `magical` trait
-- Held magic items have dedicated `magic.held`, `magic.held.one-hand`, and `magic.held.two-hands` categories plus a public `heldMagicProfiles` registry. Published held items preserve native PF2e data; generated held items use only matching `equipment` templates and rules-text manifests.
-- Five reviewed generated held-item families interleave their variants so automatic strict generation has at least one candidate at every item level from 1 through 20, while explicitly selected families remain strict to their own progression.
+- Held magic items have dedicated `magic.held`, `magic.held.one-hand`, and `magic.held.two-hands` categories plus a public `heldMagicProfiles` registry. Published held items preserve native PF2e data; generated held items use only matching `equipment` templates and rules-text manifests. Activation manifests distinguish actions, reactions, and free actions and can carry frequency, trigger, requirements, and duration.
+- Ten reviewed generated held-item families provide independent automatic strict coverage at every item level from 1 through 20 for both one-hand and two-hand categories; explicitly selected families remain strict to their own progression. Automatic generation filters handedness families that lack a safe PF2e system template before seeded selection.
 - Accessory Runes are a separate `magic.accessory-rune` composition path with a public `accessoryRunes` registry; the core library contains the Treasure Vault Menacing, Pontoon, Preserving, and Trackless progressions
 - Accessory Rune variants are source-backed by indexed `sourceSlug`, so both host and rune must exist in the selected content sources; result metadata records both content packs and exact rune provenance
 - Accessory Rune host contracts declare document types, worn slots, and magic policy. The four core Treasure Vault families are `mundane-only`, matching the default rule that a magic host is legal only when a rune Usage explicitly permits it
 - Greater Accessory Rune activations are structured as actions/traits/frequency/spell metadata and rendered into localized rules text; custom native Rule Elements are still not guessed
-- Public `specificItemProfiles`, `specificShieldProfiles`, `wornMagicProfiles`, and `heldMagicProfiles` registries for extension modules and campaign content; `getWornSlotCapabilities()` and `getCapabilities().wornSlots` expose actual predefined/generated slot availability
+- Public `specificItemProfiles`, `specificShieldProfiles`, `wornMagicProfiles`, and `heldMagicProfiles` registries for extension modules and campaign content; `getWornSlotCapabilities()` / `wornSlots` and `getHeldHandCapabilities()` / `heldHandCapabilities` expose actual predefined/generated availability
 - Magic themes for fire, cold, electricity, healing, illusion, mental, vitality, void, arcane, divine, occult, primal, and summoning
 - Composed weapons, armor, and shields with fundamental runes
 - Registry-driven property runes with automatic/random/fixed/none modes and compatibility rules
@@ -55,8 +55,8 @@ Implemented:
 - Standalone `ItemForgeApplication` container owning Foundry document creation and preserving `createdByForge` versus `generated` provenance
 - German and English localization
 - Shared generation-result contract for `contentSources`, `templateSource`, and automation level
-- Live Magic diagnostics for predefined and generated magic paths including representative worn and one-/two-handed held contracts, strict source-shape checks, pack-index failures, and composed-equipment price preparation
-- 233 automated unit/integration/statistical/contract tests
+- Live Magic diagnostics for predefined and generated magic paths including representative worn contracts plus low/high one-/two-handed held contracts, exact-level checks, system-template provenance, structured activation/physical contracts, pack-index failures, and composed-equipment price preparation
+- 241 automated unit/integration/statistical/contract tests
 
 Not yet implemented:
 

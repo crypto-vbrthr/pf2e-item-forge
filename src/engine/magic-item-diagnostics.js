@@ -86,8 +86,10 @@ export class MagicItemDiagnostics {
       { id: "specific-shield-existing", request: { mode: "magic", category: "magic.shield", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { specificMode: "existing" }, seed: "diagnostic-specific-shield-existing" } },
       { id: "specific-shield-generated", request: { mode: "magic", category: "magic.shield", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { specificMode: "generated", specificProfile: "automatic", theme: "automatic" }, seed: "diagnostic-specific-shield-generated" } },
       { id: "held-existing", request: { mode: "magic", category: "magic.held", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { heldMode: "existing", heldProfile: "automatic" }, seed: "diagnostic-held-existing" } },
-      { id: "held-generated-one", expectedHeldHands: 1, request: { mode: "magic", category: "magic.held.one-hand", level: { min: 1, max: 1, target: 1 }, levelPolicy: "strict", source: { mode: "system" }, magic: { heldMode: "generated", heldProfile: "automatic" }, seed: "diagnostic-held-one" } },
-      { id: "held-generated-two", expectedHeldHands: 2, request: { mode: "magic", category: "magic.held.two-hands", level: { min: 4, max: 4, target: 4 }, levelPolicy: "strict", source: { mode: "system" }, magic: { heldMode: "generated", heldProfile: "automatic" }, seed: "diagnostic-held-two" } },
+      { id: "held-generated-one-low", expectedHeldHands: 1, request: { mode: "magic", category: "magic.held.one-hand", level: { min: 1, max: 1, target: 1 }, levelPolicy: "strict", source: { mode: "system" }, magic: { heldMode: "generated", heldProfile: "automatic" }, seed: "diagnostic-held-one-low" } },
+      { id: "held-generated-one-high", expectedHeldHands: 1, request: { mode: "magic", category: "magic.held.one-hand", level: { min: 20, max: 20, target: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { heldMode: "generated", heldProfile: "automatic" }, seed: "diagnostic-held-one-high" } },
+      { id: "held-generated-two-low", expectedHeldHands: 2, request: { mode: "magic", category: "magic.held.two-hands", level: { min: 1, max: 1, target: 1 }, levelPolicy: "strict", source: { mode: "system" }, magic: { heldMode: "generated", heldProfile: "automatic" }, seed: "diagnostic-held-two-low" } },
+      { id: "held-generated-two-high", expectedHeldHands: 2, request: { mode: "magic", category: "magic.held.two-hands", level: { min: 20, max: 20, target: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { heldMode: "generated", heldProfile: "automatic" }, seed: "diagnostic-held-two-high" } },
       { id: "worn-existing", request: { mode: "magic", category: "magic.worn", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { wornMode: "existing", wornProfile: "automatic" }, seed: "diagnostic-worn-existing" } },
       { id: "worn-generated-unrestricted", expectedWornSlot: "unrestricted", request: { mode: "magic", category: "magic.worn.unrestricted", level: { min: 1, max: 1, target: 1 }, levelPolicy: "strict", source: { mode: "system" }, magic: { wornMode: "generated", wornProfile: "automatic" }, seed: "diagnostic-worn-unrestricted" } },
       { id: "worn-generated-eyepiece", expectedWornSlot: "eyepiece", request: { mode: "magic", category: "magic.worn.eyepiece", level: { min: 5, max: 5, target: 5 }, levelPolicy: "strict", source: { mode: "system" }, magic: { wornMode: "generated", wornProfile: "automatic" }, seed: "diagnostic-worn-eyepiece" } },
@@ -128,6 +130,10 @@ export class MagicItemDiagnostics {
       const issues = [];
       if (!source.type) issues.push("missing item type");
       if (!validLevel(source)) issues.push("missing or invalid level field");
+      const exactRequestedLevel = Number(request?.level?.min) === Number(request?.level?.max) ? Number(request?.level?.min) : null;
+      if (Number.isFinite(exactRequestedLevel) && validLevel(source) && Number(rawLevel(source)) !== exactRequestedLevel) {
+        issues.push(`generated level ${rawLevel(source)} does not match exact requested level ${exactRequestedLevel}`);
+      }
       if (!validPrice(source)) issues.push("missing or invalid price structure");
       if (!validTraits(source)) issues.push("missing or invalid traits structure");
       if (id === "scroll" || id === "wand") {
@@ -187,6 +193,23 @@ export class MagicItemDiagnostics {
         const foreignFlags = Object.keys(source.flags ?? {}).filter((scope) => scope !== "pf2e-item-forge");
         if (foreignFlags.length) issues.push(`generated held item inherited template flags: ${foreignFlags.join(", ")}`);
         if (result.metadata?.automation?.level !== "rules-text") issues.push("generated held item is not marked rules-text automation");
+        const templateSource = result.metadata?.templateSource;
+        const systemId = globalThis.game?.system?.id ?? "pf2e";
+        const systemTemplate = templateSource && (templateSource.packageType === "system" || templateSource.packageName === systemId || templateSource.packageName === "pf2e");
+        if (!systemTemplate) issues.push("generated held item did not use a PF2e system implementation template");
+        const expectedBulk = String(result.metadata?.heldItem?.physical?.bulk ?? "");
+        const actualBulk = String(source.system?.bulk?.value ?? source.system?.bulk ?? "");
+        if (!expectedBulk || actualBulk !== expectedBulk) issues.push(`generated held item bulk ${actualBulk || "missing"} does not match profile bulk ${expectedBulk || "missing"}`);
+        const material = source.system?.material;
+        if (material && typeof material === "object" && Object.values(material).some((value) => value != null && value !== "")) issues.push("generated held item inherited template material data");
+        const activation = result.metadata?.heldItem?.activation;
+        const validActivationType = ["action", "reaction", "free-action"].includes(activation?.type);
+        const validActionCount = activation?.type === "action"
+          ? Number.isInteger(activation.actions) && activation.actions >= 1 && activation.actions <= 3
+          : Number(activation?.actions) === 0;
+        if (!activation || !validActivationType || !validActionCount) issues.push("generated held item lacks a valid structured activation");
+        if (activation && !Array.isArray(activation.traits)) issues.push("generated held item activation traits are not structured");
+        if (activation?.frequency && (!Number.isInteger(activation.frequency.max) || activation.frequency.max < 1 || !activation.frequency.period)) issues.push("generated held item activation frequency is invalid");
       }
       if (id.startsWith("worn-generated-")) {
         const traits = source.system?.traits?.value ?? [];

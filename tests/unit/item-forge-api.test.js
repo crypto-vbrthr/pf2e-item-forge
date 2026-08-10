@@ -17,7 +17,11 @@ function apiFixture() {
       getMetadata: () => [{ id: "test", priority: 10, modes: ["custom"] }],
       getModes: () => ["custom"]
     },
-    compendiumIndex: { refresh: async () => true, getAvailablePacks: () => [], ready: true, entries: [{ id: 1, type: "equipment", categories: ["magic.worn", "magic.worn.footwear"] }], spellEntries: [{ id: 2 }], getPackErrors: () => [{ pack: "bad.pack" }] },
+    compendiumIndex: { refresh: async () => true, getAvailablePacks: () => [], ready: true, entries: [
+      { id: 1, type: "equipment", categories: ["magic.worn", "magic.worn.footwear"] },
+      { id: 3, type: "equipment", packageType: "system", packageName: "pf2e", categories: ["magic.held", "magic.held.one-hand"] },
+      { id: 4, type: "equipment", packageType: "system", packageName: "pf2e", categories: ["magic.held", "magic.held.two-hands"] }
+    ], spellEntries: [{ id: 2 }], getPackErrors: () => [{ pack: "bad.pack" }] },
     treasure: {
       types: { getAll: () => [] }, materials: { getAll: () => [] }, components: { getAll: () => [] },
       motifs: { getAll: () => [] }, conditions: { getAll: () => [] }, craftsmanship: { getAll: () => [] }, styles: { getAll: () => [] }
@@ -30,7 +34,13 @@ function apiFixture() {
     specificShieldProfiles: { getAll: () => [{ id: "core.restorative-shield", label: "Restorative", allowedThemes: [], variants: [{ level: 5 }, { level: 10 }, { level: 15 }] }] },
     wornMagicProfiles: { getAll: () => [{ id: "core.wayfarer-footwear", slot: "footwear", label: "Wayfarer", invested: true, variants: [{ level: 4 }, { level: 10 }, { level: 17 }] }] },
     accessoryRunes: { getAll: () => [{ id: "trackless", label: "Trackless", targetKind: "footwear", host: { documentTypes: ["equipment"], wornSlots: ["footwear"], magicPolicy: "mundane-only" }, source: "treasure-vault-remaster", variants: [{ id: "base", level: 6, priceGp: 225, sourceSlug: "trackless", activation: null }, { id: "greater", level: 10, priceGp: 900, sourceSlug: "trackless-greater", activation: { actions: 2, traits: ["concentrate"], frequency: { max: 1, period: "day" }, effectText: "effect", spell: null } }] }] },
-    heldMagicProfiles: { getAll: () => [{ id: "core.waylight-lantern", hands: 1, label: "Waylight", invested: false, variants: [{ level: 1 }, { level: 6 }] }] },
+    heldMagicProfiles: { getAll: () => [{
+      id: "core.waylight-lantern", hands: 1, label: "Waylight", invested: false, physical: { bulk: "L" },
+      variants: [
+        { level: 1, activation: { actions: 1, traits: ["concentrate"], frequency: { max: 1, period: "day" } } },
+        { level: 6, activation: { actions: 1, traits: ["concentrate"], frequency: { max: 1, period: "hour" } } }
+      ]
+    }] },
     openApplication: () => "opened"
   });
 }
@@ -67,7 +77,20 @@ test("ItemForgeApi capabilities expose generator priority metadata and registere
   assert.deepEqual(capabilities.wornItemModes, ["generated", "existing"]);
   assert.deepEqual(capabilities.heldItemModes, ["generated", "existing"]);
   assert.deepEqual(capabilities.heldHands, [1, 2]);
-  assert.deepEqual(capabilities.heldMagicProfiles, [{ id: "core.waylight-lantern", hands: 1, label: "Waylight", invested: false, levels: [1, 6] }]);
+  assert.deepEqual(capabilities.heldMagicProfiles, [{
+    id: "core.waylight-lantern", hands: 1, label: "Waylight", invested: false, physical: { bulk: "L" }, levels: [1, 6],
+    activations: [
+      { actions: 1, traits: ["concentrate"], frequency: { max: 1, period: "day" } },
+      { actions: 1, traits: ["concentrate"], frequency: { max: 1, period: "hour" } }
+    ]
+  }]);
+  const oneHand = capabilities.heldHandCapabilities.find((entry) => entry.hands === 1);
+  assert.equal(oneHand.existing, true);
+  assert.equal(oneHand.generated, true);
+  assert.deepEqual(oneHand.generatedLevels, [1, 6]);
+  const twoHands = capabilities.heldHandCapabilities.find((entry) => entry.hands === 2);
+  assert.equal(twoHands.existing, true);
+  assert.equal(twoHands.generated, false);
   assert.deepEqual(capabilities.wornMagicProfiles, [{ id: "core.wayfarer-footwear", slot: "footwear", label: "Wayfarer", invested: true, levels: [4, 10, 17] }]);
   assert.deepEqual(capabilities.accessoryRunes, [{ id: "trackless", label: "Trackless", targetKind: "footwear", host: { documentTypes: ["equipment"], wornSlots: ["footwear"], magicPolicy: "mundane-only" }, levels: [6, 10], variants: [{ id: "base", level: 6, priceGp: 225, sourceSlug: "trackless", activation: null }, { id: "greater", level: 10, priceGp: 900, sourceSlug: "trackless-greater", activation: { actions: 2, traits: ["concentrate"], frequency: { max: 1, period: "day" }, effectText: "effect", spell: null } }], source: "treasure-vault-remaster" }]);
   const footwear = capabilities.wornSlots.find((slot) => slot.id === "footwear");
@@ -90,7 +113,16 @@ test("ItemForgeApi exposes mode-aware worn slot capabilities for external caller
 test("ItemForgeApi exposes compendium index diagnostics", () => {
   const diagnostics = apiFixture().getIndexDiagnostics();
   assert.equal(diagnostics.ready, true);
-  assert.equal(diagnostics.physicalItems, 1);
+  assert.equal(diagnostics.physicalItems, 3);
   assert.equal(diagnostics.spells, 1);
   assert.deepEqual(diagnostics.packErrors, [{ pack: "bad.pack" }]);
+});
+
+
+test("ItemForgeApi exposes held hand capabilities for external callers", () => {
+  const api = apiFixture();
+  const hands = api.getHeldHandCapabilities();
+  assert.equal(hands.find((entry) => entry.hands === 1).generatedTemplateCount, 1);
+  assert.equal(hands.find((entry) => entry.hands === 1).generatedProfileCount, 1);
+  assert.equal(hands.find((entry) => entry.hands === 2).generatedProfileCount, 0);
 });

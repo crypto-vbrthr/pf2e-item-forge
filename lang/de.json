@@ -115,7 +115,8 @@
       "WornItemProfile": "Das Profil legt Nutzungsart, Stufenprogression, Preis und besondere Wirkung als zusammenhängendes Paket fest.",
       "AccessoryRune": "Wählt eine quellengebundene Accessory-Rune und graviert sie auf einen kompatiblen Trägergegenstand. Sowohl Basisgegenstand als auch veröffentlichte Rune müssen in den gewählten Quellen vorhanden sein; Automatisch berücksichtigt außerdem Nutzungsart und Magie-Policy der Rune.",
       "HeldItemMode": "Vordefiniert übernimmt einen veröffentlichten PF2e-Gegenstand vollständig; Generiert baut einen neuen gehaltenen Gegenstand aus einem Item-Forge-Profil.",
-      "HeldItemProfile": "Das Profil legt Händigkeit, Stufenstaffelung, Preis und besondere Fähigkeit gemeinsam fest."
+      "HeldItemProfile": "Das Profil legt Händigkeit, Stufenstaffelung, Preis und besondere Fähigkeit gemeinsam fest.",
+      "GeneratedHeldSources": "Generierte gehaltene Gegenstände verwenden Item-Forge-Profile und eine technische PF2e-Systemvorlage. Die gewählten Inhaltsquellen beeinflussen vordefinierte gehaltene Gegenstände, nicht die generierte Profilbibliothek."
     },
     "Preview": {
       "Empty": "Noch nichts geschmiedet. Parameter wählen und Generieren drücken.",
@@ -708,7 +709,12 @@
       "ScholarPrism": "Gelehrtenprisma",
       "ResonanceBaton": "Resonanzstab",
       "StormglassSphere": "Sturmglaskugel",
-      "GuardianStandard": "Wächterstandarte"
+      "GuardianStandard": "Wächterstandarte",
+      "EchoCompass": "Echokompass",
+      "WardingBell": "Schutzglocke",
+      "GuidingBrazier": "Leitfeuer-Kohlenbecken",
+      "MemoryTablet": "Erinnerungstafel",
+      "RescuePole": "Rettungsstange"
     },
     "HeldText": {
       "OncePerDay": "einmal täglich",
@@ -718,19 +724,60 @@
       "AutomationNote": "Dieser generierte gehaltene Gegenstand verwendet Regeltext und strukturierte Item-Forge-Metadaten; es werden keine ungeprüften PF2e-Rule-Elements erzeugt.",
       "WaylightLanternName": "Weglicht-Laterne",
       "WaylightLanternDescription": "Eine kompakte Laterne, deren Glas einen sanften magischen Schein sammelt.",
-      "WaylightLanternEffect": "{frequency} kannst du mit 1 Aktion (Konzentration) das Licht der Laterne bis zum Beginn deines nächsten Zuges schärfen. Solange du sie hältst, erzeugt sie helles Licht in einem Radius von {radius} Fuß; während des geschärften Lichts erhältst du einen Situationsbonus von +1 auf Suchen innerhalb dieses Lichts.",
+      "WaylightLanternEffect": "Du schärfst das Licht der Laterne bis zum Beginn deines nächsten Zuges. Solange du sie hältst, erzeugt sie helles Licht in einem Radius von {radius} Fuß; während des geschärften Lichts erhältst du einen Situationsbonus von +1 auf Suchen innerhalb dieses Lichts.",
       "ScholarPrismName": "Gelehrtenprisma",
       "ScholarPrismDescription": "Ein handgroßes Kristallprisma, in dessen Facetten sich magische Muster ordnen.",
-      "ScholarPrismEffect": "{frequency} kannst du das Prisma mit 1 Aktion (Konzentration) ausrichten. Bis zum Ende deines Zuges erhältst du einen Gegenstandsbonus von +{bonus} auf Magie identifizieren und Wissen abrufen über magische Effekte.",
+      "ScholarPrismEffect": "Bis zum Ende deines Zuges erhältst du einen Gegenstandsbonus von +{bonus} auf Magie identifizieren und Wissen abrufen über magische Effekte.",
       "ResonanceBatonName": "Resonanzstab",
       "ResonanceBatonDescription": "Dieser kurze Stab summt leise, wenn er auf die Lebenskraft einer nahen Kreatur abgestimmt wird.",
-      "ResonanceBatonEffect": "{frequency} kannst du mit 1 Aktion (akustisch, Konzentration) einen willigen Verbündeten innerhalb von 30 Fuß stärken. Er erhält {temp} temporäre Trefferpunkte bis zum Ende seines nächsten Zuges.",
+      "ResonanceBatonEffect": "Wähle einen bereitwilligen Verbündeten innerhalb von 30 Fuß. Er erhält {temp} temporäre Trefferpunkte bis zum Ende seines nächsten Zuges.",
       "StormglassSphereName": "Sturmglaskugel",
       "StormglassSphereDescription": "In dieser zweihändig gehaltenen Glaskugel drehen sich winzige Wolken und Windfäden.",
-      "StormglassSphereEffect": "{frequency} kannst du die Kugel mit 2 Aktionen (Konzentration, Handhaben) entfesseln. Bis zum Ende deines nächsten Zuges erhalten du und deine Verbündeten innerhalb von {distance} Fuß einen Statusbonus von +5 Fuß auf ihre Bewegungsraten.",
+      "StormglassSphereEffect": "Bis zum Ende deines nächsten Zuges erhalten du und deine Verbündeten innerhalb von {distance} Fuß einen Statusbonus von +5 Fuß auf ihre Bewegungsraten.",
       "GuardianStandardName": "Wächterstandarte",
       "GuardianStandardDescription": "Eine kleine Schlachtstandarte, deren Zeichen Mut und Zusammenhalt ausstrahlt.",
-      "GuardianStandardEffect": "{frequency} kannst du die Standarte mit 1 Aktion (Konzentration) aufrichten. Bis zum Beginn deines nächsten Zuges erhalten Verbündete innerhalb von 15 Fuß einen Statusbonus von +{bonus} auf Rettungswürfe gegen Furcht."
+      "GuardianStandardEffect": "Bis zum Beginn deines nächsten Zuges erhalten Verbündete innerhalb von 15 Fuß einen Statusbonus von +{bonus} auf Rettungswürfe gegen Furcht.",
+      "ActionCount": "Aktionen: {count}",
+      "NoTraits": "keine Aktivierungsmerkmale",
+      "Passive": "Passiv:",
+      "Activation": "Aktivieren:",
+      "EchoCompassName": "Echokompass",
+      "EchoCompassDescription": "Die Nadel dieses Messingkompasses folgt schwachen magischen Echos, die Reisen und Verfolgungen hinterlassen.",
+      "EchoCompassEffect": "Bis zum Ende deines Zuges erhältst du einen Gegenstandsbonus von +{bonus} auf Überlebenskunst zum Richtungssinn oder Spuren verfolgen; bei einem Erfolg erkennst du zusätzlich, ob die Route oder Spur innerhalb von {distance} Fuß weiterführt.",
+      "WardingBellName": "Schutzglocke",
+      "WardingBellDescription": "In diese kleine Silberglocke sind ineinandergreifende Schutzkreise graviert.",
+      "WardingBellEffect": "Bis zum Beginn deines nächsten Zuges erhalten Verbündete innerhalb von {radius} Fuß einen Statusbonus von +{bonus} auf Rettungswürfe gegen mentale Effekte.",
+      "GuidingBrazierName": "Leitfeuer-Kohlenbecken",
+      "GuidingBrazierDescription": "Dieses zweihändig gehaltene bronzene Kohlenbecken brennt mit einer ruhigen Flamme, die sicheren Tritt und Schutz sichtbar macht.",
+      "GuidingBrazierEffect": "Bis zum Ende deines nächsten Zuges erhalten Verbündete innerhalb von {radius} Fuß einen Situationsbonus von +1 auf Rettungswürfe gegen Umgebungseffekte und ignorieren Schwieriges Gelände durch gewöhnlichen natürlichen Unterwuchs.",
+      "MemoryTabletName": "Erinnerungstafel",
+      "MemoryTabletDescription": "Runen wandern über diese breite Steintafel, wenn jemand in ihrer Nähe nach einer entscheidenden Erinnerung sucht.",
+      "MemoryTabletEffect": "Wähle eine bereitwillige Kreatur innerhalb von 30 Fuß; bis zum Ende ihres nächsten Zuges erhält sie einen Gegenstandsbonus von +{bonus} auf Wissen abrufen und Schrift entziffern.",
+      "RescuePoleName": "Rettungsstange",
+      "RescuePoleDescription": "Eine verstärkte zweihändige Stange mit leuchtenden Griffmarkierungen und Hilfen für sicheren Halt.",
+      "RescuePoleEffect": "Wähle einen bereitwilligen Verbündeten innerhalb von {distance} Fuß; bis zum Ende seines nächsten Zuges erhält er einen Situationsbonus von +2 auf Akrobatik und Athletik zum Balancieren, Klettern oder Schwimmen.",
+      "TimesPerDay": "{count}-mal täglich",
+      "TimesPerHour": "{count}-mal pro Stunde",
+      "TimesPerTenMinutes": "{count}-mal pro 10 Minuten",
+      "OneAction": "1 Aktion",
+      "MultipleActions": "{count} Aktionen",
+      "Reaction": "Reaktion",
+      "FreeAction": "Freie Aktion",
+      "Frequency": "Häufigkeit {frequency}",
+      "Trigger": "Auslöser {trigger}",
+      "Requirements": "Voraussetzungen {requirements}",
+      "Duration": "Wirkungsdauer {duration}"
+    },
+    "HeldActivationTraits": {
+      "Concentrate": "Konzentration",
+      "Manipulate": "Handhaben",
+      "Auditory": "akustisch",
+      "Fortune": "Glück"
+    },
+    "HeldAvailability": {
+      "PredefinedOnly": "(nur vordefiniert)",
+      "GeneratedOnly": "(nur generierbar)",
+      "Unavailable": "(nicht verfügbar)"
     }
   }
 }

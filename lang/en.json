@@ -115,7 +115,8 @@
       "WornItemProfile": "The profile defines worn usage, level progression, price, and special ability as one coherent package.",
       "AccessoryRune": "Selects a source-backed Accessory Rune and applies it to a compatible host item. Both the host and the published rune must exist in the selected sources; Automatic also respects each rune’s Usage and host-magic policy.",
       "HeldItemMode": "Predefined preserves a published PF2e item in full; Generated builds a new held item from an Item Forge profile.",
-      "HeldItemProfile": "The profile defines handedness, level progression, price, and special ability as one package."
+      "HeldItemProfile": "The profile defines handedness, level progression, price, and special ability as one package.",
+      "GeneratedHeldSources": "Generated held items use Item Forge profiles plus a PF2e system implementation template. The selected content sources affect predefined held items, not the generated profile library."
     },
     "Preview": {
       "Empty": "Nothing forged yet. Choose parameters and press Generate.",
@@ -708,7 +709,12 @@
       "ScholarPrism": "Scholar Prism",
       "ResonanceBaton": "Resonance Baton",
       "StormglassSphere": "Stormglass Sphere",
-      "GuardianStandard": "Guardian Standard"
+      "GuardianStandard": "Guardian Standard",
+      "EchoCompass": "Echo Compass",
+      "WardingBell": "Warding Bell",
+      "GuidingBrazier": "Guiding Brazier",
+      "MemoryTablet": "Memory Tablet",
+      "RescuePole": "Rescue Pole"
     },
     "HeldText": {
       "OncePerDay": "once per day",
@@ -718,19 +724,60 @@
       "AutomationNote": "This generated held item uses rules text and structured Item Forge metadata; no unverified PF2e Rule Elements are created.",
       "WaylightLanternName": "Waylight Lantern",
       "WaylightLanternDescription": "A compact lantern whose glass gathers a soft magical radiance.",
-      "WaylightLanternEffect": "{frequency}, you can spend 1 action (concentrate) to sharpen the lantern’s light until the start of your next turn. While held, it sheds bright light in a {radius}-foot radius; during the sharpened light, you gain a +1 circumstance bonus to Seek within that light.",
+      "WaylightLanternEffect": "Sharpen the lantern’s light until the start of your next turn. While held, it sheds bright light in a {radius}-foot radius; during the sharpened light, you gain a +1 circumstance bonus to Seek within that light.",
       "ScholarPrismName": "Scholar Prism",
       "ScholarPrismDescription": "A palm-sized crystal prism whose facets arrange magical patterns.",
-      "ScholarPrismEffect": "{frequency}, you can align the prism with 1 action (concentrate). Until the end of your turn, you gain a +{bonus} item bonus to Identify Magic and Recall Knowledge about magical effects.",
+      "ScholarPrismEffect": "Until the end of your turn, you gain a +{bonus} item bonus to Identify Magic and Recall Knowledge about magical effects.",
       "ResonanceBatonName": "Resonance Baton",
       "ResonanceBatonDescription": "This short baton hums softly when tuned to the vitality of a nearby creature.",
-      "ResonanceBatonEffect": "{frequency}, you can spend 1 action (auditory, concentrate) to bolster a willing ally within 30 feet. The ally gains {temp} temporary Hit Points until the end of its next turn.",
+      "ResonanceBatonEffect": "Choose a willing ally within 30 feet. The ally gains {temp} temporary Hit Points until the end of its next turn.",
       "StormglassSphereName": "Stormglass Sphere",
       "StormglassSphereDescription": "Tiny clouds and threads of wind turn inside this two-handed glass sphere.",
-      "StormglassSphereEffect": "{frequency}, you can unleash the sphere with 2 actions (concentrate, manipulate). Until the end of your next turn, you and your allies within {distance} feet gain a +5-foot status bonus to their Speeds.",
+      "StormglassSphereEffect": "Until the end of your next turn, you and your allies within {distance} feet gain a +5-foot status bonus to their Speeds.",
       "GuardianStandardName": "Guardian Standard",
       "GuardianStandardDescription": "A compact battle standard whose sigil radiates courage and solidarity.",
-      "GuardianStandardEffect": "{frequency}, you can raise the standard with 1 action (concentrate). Until the start of your next turn, allies within 15 feet gain a +{bonus} status bonus to saving throws against fear."
+      "GuardianStandardEffect": "Until the start of your next turn, allies within 15 feet gain a +{bonus} status bonus to saving throws against fear.",
+      "ActionCount": "Actions: {count}",
+      "NoTraits": "no activation traits",
+      "Passive": "Passive:",
+      "Activation": "Activate:",
+      "EchoCompassName": "Echo Compass",
+      "EchoCompassDescription": "A brass compass whose needle follows faint magical echoes left by travel and pursuit.",
+      "EchoCompassEffect": "Until the end of your turn, you gain a +{bonus} item bonus to Survival checks to Sense Direction or Track; on a success, you can also tell whether the route or trail continues within {distance} feet.",
+      "WardingBellName": "Warding Bell",
+      "WardingBellDescription": "A small silver bell etched with interlocking warding circles.",
+      "WardingBellEffect": "Until the start of your next turn, allies within {radius} feet gain a +{bonus} status bonus to saving throws against mental effects.",
+      "GuidingBrazierName": "Guiding Brazier",
+      "GuidingBrazierDescription": "This two-handed bronze brazier burns with a steady flame that outlines safe footing and shelter.",
+      "GuidingBrazierEffect": "Until the end of your next turn, allies within {radius} feet gain a +1 circumstance bonus to saves against environmental effects and ignore difficult terrain caused by ordinary natural undergrowth.",
+      "MemoryTabletName": "Memory Tablet",
+      "MemoryTabletDescription": "Runes drift across this broad stone tablet whenever someone nearby strains to remember a crucial detail.",
+      "MemoryTabletEffect": "Choose one willing creature within 30 feet; until the end of its next turn, it gains a +{bonus} item bonus to Recall Knowledge and Decipher Writing.",
+      "RescuePoleName": "Rescue Pole",
+      "RescuePoleDescription": "A reinforced two-handed pole marked with luminous handholds and balance guides.",
+      "RescuePoleEffect": "Choose one willing ally within {distance} feet; until the end of its next turn, that ally gains a +2 circumstance bonus to Acrobatics and Athletics checks to Balance, Climb, or Swim.",
+      "TimesPerDay": "{count} times per day",
+      "TimesPerHour": "{count} times per hour",
+      "TimesPerTenMinutes": "{count} times per 10 minutes",
+      "OneAction": "1 action",
+      "MultipleActions": "{count} actions",
+      "Reaction": "Reaction",
+      "FreeAction": "Free Action",
+      "Frequency": "Frequency {frequency}",
+      "Trigger": "Trigger {trigger}",
+      "Requirements": "Requirements {requirements}",
+      "Duration": "Duration {duration}"
+    },
+    "HeldActivationTraits": {
+      "Concentrate": "concentrate",
+      "Manipulate": "manipulate",
+      "Auditory": "auditory",
+      "Fortune": "fortune"
+    },
+    "HeldAvailability": {
+      "PredefinedOnly": "(predefined only)",
+      "GeneratedOnly": "(generated only)",
+      "Unavailable": "(unavailable)"
     }
   }
 }

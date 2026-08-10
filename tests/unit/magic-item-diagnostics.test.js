@@ -12,10 +12,11 @@ function sourceFor(request) {
         : request.category.includes("staff") || request.category.includes("weapon")
           ? "weapon"
           : "equipment";
+  const exactLevel = Number(request?.level?.min) === Number(request?.level?.max) ? Number(request?.level?.min) : 5;
   const source = {
     name: request.category,
     type,
-    system: { level: { value: 5 }, price: { value: { gp: 10 } }, traits: { value: [] } }
+    system: { level: { value: exactLevel }, price: { value: { gp: 10 } }, traits: { value: [] } }
   };
   if (request.category === "consumable.scroll" || request.category === "magic.wand") source.system.spell = { name: "Test Spell" };
   if (request.magic?.specificMode === "generated" && ["magic.weapon", "magic.armor"].includes(request.category)) {
@@ -39,6 +40,8 @@ function sourceFor(request) {
     source.system.traits.value = ["magical"];
     if (request.magic?.heldMode === "generated") {
       source.system.rules = [];
+      source.system.bulk = { value: request.category === "magic.held.two-hands" ? "1" : "L" };
+      source.system.material = { type: null, grade: null };
       source.flags = { "pf2e-item-forge": { generated: true } };
     }
   }
@@ -68,7 +71,15 @@ function metadataFor(request) {
     generator: "test",
     automation: { level: request.magic?.wornMode === "generated" || generatedHeld || accessory ? "rules-text" : "native" },
     ...(request.magic?.wornMode === "generated" ? { wornItem: { slot, invested: true } } : {}),
-    ...(generatedHeld ? { heldItem: { hands: request.category === "magic.held.two-hands" ? 2 : 1, invested: false } } : {}),
+    ...(generatedHeld ? {
+      templateSource: { packageType: "system", packageName: "pf2e", pack: "pf2e.equipment-srd", uuid: "Compendium.pf2e.equipment-srd.Item.template" },
+      heldItem: {
+        hands: request.category === "magic.held.two-hands" ? 2 : 1,
+        invested: false,
+        physical: { bulk: request.category === "magic.held.two-hands" ? "1" : "L" },
+        activation: { type: "action", actions: 1, traits: ["concentrate"], frequency: { max: 1, period: "day" }, effect: "effect" }
+      }
+    } : {}),
     ...(accessory ? {
       contentSources: ["pf2e.equipment-srd"],
       accessoryRune: {
@@ -99,15 +110,16 @@ test("MagicItemDiagnostics validates generated sources without persisting world 
   const result = await diagnostics.run();
   assert.equal(result.failed, 0);
   assert.equal(result.warnings, 1, "price audit warns when the runtime document does not derive a different price");
-  assert.equal(constructed, 23);
+  assert.equal(constructed, 25);
   assert.ok(result.checks.some((check) => check.id === "pf2e-specific-schema" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "specific-weapon-generated" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "specific-armor-generated" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "specific-shield-generated" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "worn-existing" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "held-existing" && check.status === "passed"));
-  assert.ok(result.checks.some((check) => check.id === "held-generated-one" && check.status === "passed"));
-  assert.ok(result.checks.some((check) => check.id === "held-generated-two" && check.status === "passed"));
+  for (const id of ["held-generated-one-low", "held-generated-one-high", "held-generated-two-low", "held-generated-two-high"]) {
+    assert.ok(result.checks.some((check) => check.id === id && check.status === "passed"), `expected ${id} to pass`);
+  }
   assert.ok(result.checks.some((check) => check.id === "accessory-rune-trackless" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "accessory-rune-preserving" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "accessory-rune-activation-contract" && check.status === "passed"));

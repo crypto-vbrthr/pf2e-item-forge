@@ -357,6 +357,7 @@
         <legend>{{localize "PF2E_ITEM_FORGE.Fields.Sources"}}</legend>
         {{#if isScrollCategory}}<p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.ScrollSources"}}</p>{{/if}}
         {{#if isMagicMode}}<p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.MagicSources"}}</p>{{/if}}
+        {{#if generatedHeld}}<p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.GeneratedHeldSources"}}</p>{{/if}}
         <div class="form-group">
           <select name="source.mode">
             {{#each sourceModes}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
@@ -486,6 +487,7 @@
               {{#if preview.heldItem.handsLabelLocalized}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.HeldHands"}}</dt><dd>{{preview.heldItem.handsLabelLocalized}}</dd>{{/if}}
               {{#if preview.heldItem.usage}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.HeldUsage"}}</dt><dd>{{preview.heldItem.usage}}</dd>{{/if}}
               {{#if preview.heldItem.variantLabelLocalized}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.HeldItemVariant"}}</dt><dd>{{preview.heldItem.variantLabelLocalized}}</dd>{{/if}}
+              {{#if preview.heldItem.activationSummary}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.Activation"}}</dt><dd>{{preview.heldItem.activationSummary}}</dd>{{/if}}
               {{#if preview.heldItem.effect}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.HeldEffect"}}</dt><dd>{{preview.heldItem.effect}}</dd>{{/if}}
               {{#if preview.heldItem.automationLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.Automation"}}</dt><dd>{{preview.heldItem.automationLabel}}</dd>{{/if}}
             {{/if}}

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseHeldUsage, heldCategoryForHands, heldHandsLabelKey, hasHeldMagicMarkerTraits } from "../../src/engine/held-item-utils.js";
+import { parseHeldUsage, heldCategoryForHands, heldHandsLabelKey, hasHeldMagicMarkerTraits, getHeldHandCapabilities } from "../../src/engine/held-item-utils.js";
 
 test("parseHeldUsage recognizes PF2e one- and two-hand usage shapes", () => {
   assert.deepEqual(parseHeldUsage("held in 1 hand"), { held: true, hands: 1, id: "one-hand", raw: "held in 1 hand" });
@@ -22,4 +22,23 @@ test("held magic markers accept magical and tradition traits", () => {
   assert.equal(hasHeldMagicMarkerTraits(["magical"]), true);
   assert.equal(hasHeldMagicMarkerTraits(["Occult"]), true);
   assert.equal(hasHeldMagicMarkerTraits(["light"]), false);
+});
+
+
+test("held hand capabilities require system templates and report generated levels", () => {
+  const entries = [
+    { type: "equipment", packageType: "system", packageName: "pf2e", categories: ["magic.held", "magic.held.one-hand"] },
+    { type: "equipment", packageType: "module", packageName: "addon", categories: ["magic.held", "magic.held.two-hands"] }
+  ];
+  const profiles = [
+    { hands: 1, variants: [{ level: 1 }, { level: 6 }] },
+    { hands: 2, variants: [{ level: 2 }, { level: 7 }] }
+  ];
+  const capabilities = getHeldHandCapabilities({ entries, profiles });
+  const one = capabilities.find((entry) => entry.hands === 1);
+  const two = capabilities.find((entry) => entry.hands === 2);
+  assert.equal(one.generated, true);
+  assert.deepEqual(one.generatedLevels, [1, 6]);
+  assert.equal(two.existing, true);
+  assert.equal(two.generated, false, "third-party content is not a core implementation template");
 });

@@ -222,6 +222,17 @@ export class ItemForgeEditor extends HandlebarsApplication {
       if (capability && !capability[wornModeForCategories]) this.request.category = "magic.worn";
     }
 
+    const heldHandCapabilities = this.api.getHeldHandCapabilities?.() ?? this.api.getCapabilities?.().heldHandCapabilities ?? [];
+    const heldCapabilityByHands = new Map(heldHandCapabilities.map((entry) => [Number(entry.hands), entry]));
+    const heldModeForCategories = this.request.magic?.heldMode ?? "existing";
+    const selectedHeldHandsForCategories = this.request.category === "magic.held.one-hand"
+      ? 1
+      : this.request.category === "magic.held.two-hands" ? 2 : null;
+    if (this.request.mode === "magic" && selectedHeldHandsForCategories) {
+      const capability = heldCapabilityByHands.get(selectedHeldHandsForCategories);
+      if (capability && !capability[heldModeForCategories]) this.request.category = "magic.held";
+    }
+
     const categories = this.api.categories.getAll()
       .filter((category) => {
         if (this.request.mode === "equipment") return this.#isEquipmentCategory(category.id);
@@ -232,15 +243,26 @@ export class ItemForgeEditor extends HandlebarsApplication {
       .map((category) => {
         const depth = this.api.categories.getAncestors(category.id).length;
         const slot = category.id.startsWith?.("magic.worn.") ? category.id.slice("magic.worn.".length) : null;
-        const capability = slot ? wornCapabilityBySlot.get(slot) : null;
-        const disabled = Boolean(capability && this.request.mode === "magic" && !capability[wornModeForCategories]);
+        const wornCapability = slot ? wornCapabilityBySlot.get(slot) : null;
+        const heldHands = category.id === "magic.held.one-hand" ? 1 : category.id === "magic.held.two-hands" ? 2 : null;
+        const heldCapability = heldHands ? heldCapabilityByHands.get(heldHands) : null;
+        const wornDisabled = Boolean(wornCapability && this.request.mode === "magic" && !wornCapability[wornModeForCategories]);
+        const heldDisabled = Boolean(heldCapability && this.request.mode === "magic" && !heldCapability[heldModeForCategories]);
+        const disabled = wornDisabled || heldDisabled;
         let availabilitySuffix = "";
-        if (disabled) {
-          const key = wornModeForCategories === "generated" && capability.existing
+        if (wornDisabled) {
+          const key = wornModeForCategories === "generated" && wornCapability.existing
             ? "PF2E_ITEM_FORGE.WornAvailability.PredefinedOnly"
-            : wornModeForCategories === "existing" && capability.generated
+            : wornModeForCategories === "existing" && wornCapability.generated
               ? "PF2E_ITEM_FORGE.WornAvailability.GeneratedOnly"
               : "PF2E_ITEM_FORGE.WornAvailability.Unavailable";
+          availabilitySuffix = ` ${localizeMaybe(key)}`;
+        } else if (heldDisabled) {
+          const key = heldModeForCategories === "generated" && heldCapability.existing
+            ? "PF2E_ITEM_FORGE.HeldAvailability.PredefinedOnly"
+            : heldModeForCategories === "existing" && heldCapability.generated
+              ? "PF2E_ITEM_FORGE.HeldAvailability.GeneratedOnly"
+              : "PF2E_ITEM_FORGE.HeldAvailability.Unavailable";
           availabilitySuffix = ` ${localizeMaybe(key)}`;
         }
         return {
@@ -437,9 +459,12 @@ export class ItemForgeEditor extends HandlebarsApplication {
       label: localizeMaybe(`PF2E_ITEM_FORGE.HeldItemMode.${id === "existing" ? "Existing" : "Generated"}`)
     }));
     const requestedHeldHands = this.request.category === "magic.held.one-hand" ? 1 : this.request.category === "magic.held.two-hands" ? 2 : null;
-    const availableHeldProfiles = requestedHeldHands
+    let availableHeldProfiles = requestedHeldHands
       ? (this.api.heldMagicProfiles?.getForHands?.(requestedHeldHands) ?? [])
       : (this.api.heldMagicProfiles?.getAll?.() ?? []);
+    if (generatedHeld && heldHandCapabilities.length) {
+      availableHeldProfiles = availableHeldProfiles.filter((profile) => heldCapabilityByHands.get(Number(profile.hands))?.generated === true);
+    }
     if (generatedHeld && this.request.magic?.heldProfile !== "automatic" && !availableHeldProfiles.some((profile) => profile.id === this.request.magic.heldProfile)) {
       this.request.magic.heldProfile = "automatic";
     }
@@ -690,6 +715,7 @@ export class ItemForgeEditor extends HandlebarsApplication {
       generatedHeld,
       heldModes,
       heldProfiles,
+      heldHandCapabilities,
       isAccessoryRuneCategory,
       accessoryRunes,
       generatedWorn,
