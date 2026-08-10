@@ -232,6 +232,7 @@
       "ConsumableScroll": "Scroll",
       "ConsumableAmmunition": "Ammunition",
       "Equipment": "Equipment",
+      "Assistive": "Assistive item",
       "Treasure": "Treasure",
       "TreasureGemstone": "Gemstone",
       "TreasureArt": "Art object",

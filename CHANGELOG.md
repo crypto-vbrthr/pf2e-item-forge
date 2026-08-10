@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.0.32
+
+- Adds `assistive` as a dedicated cross-cutting category for published PF2e Assistive Items in Existing mode.
+- Keeps each assistive item in its normal physical category as well, allowing equipment, weapon-like canes, mobility devices, prostheses, companion aids, and other supported document shapes to remain structurally native.
+- Adds conservative assistive-item detection: explicit PF2e category/trait markers are accepted when present, otherwise a narrow source-backed Player Core, Guns & Gears, and Treasure Vault identifier allow-list is used; descriptions are never scanned heuristically.
+- Deliberately makes Assistive Items existing-only. Item Forge preserves the complete published PF2e document instead of synthesizing generic disability aids or recombining bespoke mechanics into generated profiles.
+- Exposes the policy through `getCapabilities().assistiveItems` for external integrations.
+- Adds German/English category localization plus unit and integration regressions for cross-document-type classification and false-positive resistance.
+- Apex Items remain the next dedicated rule family; Magical Tattoos remain out of scope by design.
+- Test suite: 259 passing tests; total line coverage 94.11%.
+
 ## 0.0.31
 
 - Adds `magic.grimoire` as a dedicated magic-item family with explicit predefined/native and generated/rules-text paths.

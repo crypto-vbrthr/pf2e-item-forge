@@ -2,9 +2,9 @@
 
 Reusable Item Forge architecture for Foundry VTT v14 and Pathfinder 2e.
 
-## v0.0.31 scope
+## v0.0.32 scope
 
-This release adds Grimoires as a dedicated permanent-magic family. Published grimoires remain intact, while generated grimoires use reviewed Item Forge profiles, a safe PF2e system implementation template, and a structured daily-preparation/activation contract. Magical Tattoos are now explicitly out of scope by design rather than waiting as an unimplemented loot category.
+This release adds Assistive Items as a dedicated existing-only cross-cutting category. Published PF2e assistive items can now be selected directly even though they span equipment, weapons, prostheses, mobility devices, companion aids, and other physical document shapes. Item Forge deliberately does not synthesize new assistive items: their bespoke rules and representation-sensitive purpose are preserved by cloning the published PF2e item intact. Grimoires remain fully supported, and Magical Tattoos remain out of scope by design.
 
 Implemented:
 
@@ -17,6 +17,8 @@ Implemented:
 - Exact level or level range with strict/nearest/not-above/not-below policies
 - Deterministic seeded generation
 - Existing physical compendium items, excluding feats/spells/rule documents
+- Assistive Items are indexed as a dedicated cross-cutting `assistive` category in Existing mode, preserving the complete published PF2e document regardless of whether the aid is implemented as equipment, a weapon-like cane, mobility device, prosthesis, companion aid, or another supported physical item type
+- Assistive Items are intentionally existing-only: Item Forge does not invent generic disability aids or recombine their bespoke rules into synthetic profiles; `getCapabilities().assistiveItems` exposes this policy to integrations
 - Spell-bearing scroll generation with meaningful legal heightening
 - Special magic-item mode for wands, staves, spellhearts, grimoires, specific magic weapons, specific magic armor, specific magic shields, worn magic items, held magic items, and Accessory Runes
 - Wands use the PF2e generic wand templates and embed one real spell at a legal base or meaningful heightened rank
@@ -60,11 +62,11 @@ Implemented:
 - German and English localization
 - Shared generation-result contract for `contentSources`, `templateSource`, and automation level
 - Live Magic diagnostics for predefined and generated magic paths including representative worn contracts, low/high one-/two-handed held contracts, and predefined/generated Grimoire contracts, with exact-level checks, system-template provenance, structured activation/physical/daily-preparation contracts, pack-index failures, and composed-equipment price preparation
-- 255 automated unit/integration/statistical/contract tests
+- 259 automated unit/integration/statistical/contract tests
 
 Not yet implemented:
 
-- Dedicated generation blocks for assistive items and apex items. They remain intentionally separate from generic held-item generation.
+- Dedicated generation for apex items remains open. Assistive Items are now intentionally existing-only rather than a future generated block.
 - Magical Tattoos are intentionally out of scope for Item Forge generation: this module generates transferable/findable inventory objects, while a tattoo is applied to a creature rather than existing as ordinary loot after application. Formulae, services, or tattooing workflows would belong to a different feature surface.
 - Native PF2e staff-preparation/casting automation for generated custom staff-family manifests (predefined staves preserve their native PF2e data unchanged)
 - Verified native automation builders for generated custom wands/staves/spellhearts/specific items

@@ -109,6 +109,7 @@ export class ItemForgeApi {
       wornItemModes: ["generated", "existing"],
       heldItemModes: ["generated", "existing"],
       grimoireModes: ["generated", "existing"],
+      assistiveItems: { category: "assistive", modes: ["existing"], generated: false, policy: "existing-only" },
       grimoireCapabilities: this.getGrimoireCapabilities(),
       heldHands: [1, 2],
       heldHandCapabilities: this.getHeldHandCapabilities(),

@@ -83,6 +83,7 @@ test("ItemForgeApi capabilities expose generator priority metadata and registere
   assert.deepEqual(capabilities.wornItemModes, ["generated", "existing"]);
   assert.deepEqual(capabilities.heldItemModes, ["generated", "existing"]);
   assert.deepEqual(capabilities.grimoireModes, ["generated", "existing"]);
+  assert.deepEqual(capabilities.assistiveItems, { category: "assistive", modes: ["existing"], generated: false, policy: "existing-only" });
   assert.deepEqual(capabilities.grimoireProfiles, [{ id: "core.elemental-concordance", label: "Elemental Concordance", physical: { bulk: "L" }, levels: [4, 9], activations: [{ type: "free-action", actions: 0 }, { type: "free-action", actions: 0 }] }]);
   assert.equal(capabilities.grimoireCapabilities.existing, true);
   assert.equal(capabilities.grimoireCapabilities.generated, true);

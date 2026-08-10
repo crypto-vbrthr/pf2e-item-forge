@@ -1,6 +1,7 @@
 import { parseWornUsage, wornCategoryForSlot, isMagicWornTraits } from "./worn-item-utils.js";
 import { parseHeldUsage, heldCategoryForHands, hasHeldMagicMarkerTraits } from "./held-item-utils.js";
 import { isGrimoireTraits } from "./grimoire-utils.js";
+import { isAssistiveItem } from "./assistive-item-utils.js";
 
 export const SUPPORTED_ITEM_TYPES = new Set([
   "weapon",
@@ -384,6 +385,8 @@ export class CompendiumIndex {
     } else if (type === "treasure") {
       categories.push("treasure");
     }
+
+    if (isAssistiveItem(raw)) categories.push("assistive");
 
     return [...new Set(categories)];
   }

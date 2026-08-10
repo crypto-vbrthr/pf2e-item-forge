@@ -330,3 +330,42 @@ test("CompendiumIndex classifies grimoires without double-classifying worn or he
     assert.equal(entry.categories.includes("magic.worn"), false);
   }
 });
+
+test("CompendiumIndex exposes assistive items as a cross-cutting existing-item category", async () => {
+  const pack = makePack("pf2e.assistive", [
+    raw("chair", "equipment", 8, {
+      slug: "chair-of-inventions",
+      traits: { value: ["magical"], rarity: "common" },
+      usage: { value: "worn" }
+    }),
+    raw("cane", "weapon", 10, {
+      slug: "batsbreath-cane",
+      traits: { value: ["magical"], rarity: "common" },
+      range: null
+    }),
+    raw("ordinary", "equipment", 8, {
+      slug: "ordinary-tool",
+      traits: { value: ["magical"], rarity: "common" }
+    })
+  ]);
+  const categories = registerCoreCategories(new CategoryRegistry());
+  const game = { system: { id: "pf2e" }, packs: new FakePackCollection([pack]) };
+  const index = new CompendiumIndex({ categoryRegistry: categories, gameProvider: () => game });
+  await index.refresh();
+
+  const chair = index.entries.find((entry) => entry.id === "chair");
+  const cane = index.entries.find((entry) => entry.id === "cane");
+  const ordinary = index.entries.find((entry) => entry.id === "ordinary");
+  assert.ok(chair.categories.includes("equipment"));
+  assert.ok(chair.categories.includes("assistive"));
+  assert.ok(cane.categories.includes("weapon"));
+  assert.ok(cane.categories.includes("assistive"));
+  assert.equal(ordinary.categories.includes("assistive"), false);
+
+  const candidates = index.query({
+    category: "assistive",
+    rarity: [],
+    source: { mode: "all", includePacks: [], excludePacks: [] }
+  });
+  assert.deepEqual(candidates.map((entry) => entry.id), ["cane", "chair"]);
+});
