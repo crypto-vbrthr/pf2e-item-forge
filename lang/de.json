@@ -58,7 +58,9 @@
       "SpecificItemProfile": "Spezifisches Gegenstandsprofil",
       "WornItemMode": "Erzeugungsart",
       "WornItemProfile": "Profil für getragenen Gegenstand",
-      "AccessoryRune": "Accessory-Rune"
+      "AccessoryRune": "Accessory-Rune",
+      "HeldItemMode": "Erzeugungsart des gehaltenen Gegenstands",
+      "HeldItemProfile": "Profil des gehaltenen Gegenstands"
     },
     "LevelMode": {
       "Single": "Einzelne Stufe",
@@ -111,7 +113,9 @@
       "SpecificItemRunes": "Bei generierten spezifischen Gegenständen stammen Eigenschaftsrunen ausschließlich aus dem Profil. Basisrunen bleiben normal verbesserbar; zusätzliche Eigenschaftsrunen können nicht frei hinzugefügt werden.",
       "WornItemMode": "Vordefiniert übernimmt einen vollständigen PF2e-Gegenstand aus den gewählten Kompendien. Generiert erschafft einen neuen investierten Gegenstand aus einem geprüften Item-Forge-Profil.",
       "WornItemProfile": "Das Profil legt Nutzungsart, Stufenprogression, Preis und besondere Wirkung als zusammenhängendes Paket fest.",
-      "AccessoryRune": "Wählt eine quellengebundene Accessory-Rune und graviert sie auf einen kompatiblen Trägergegenstand. Sowohl Basisgegenstand als auch veröffentlichte Rune müssen in den gewählten Quellen vorhanden sein; Automatisch berücksichtigt außerdem Nutzungsart und Magie-Policy der Rune."
+      "AccessoryRune": "Wählt eine quellengebundene Accessory-Rune und graviert sie auf einen kompatiblen Trägergegenstand. Sowohl Basisgegenstand als auch veröffentlichte Rune müssen in den gewählten Quellen vorhanden sein; Automatisch berücksichtigt außerdem Nutzungsart und Magie-Policy der Rune.",
+      "HeldItemMode": "Vordefiniert übernimmt einen veröffentlichten PF2e-Gegenstand vollständig; Generiert baut einen neuen gehaltenen Gegenstand aus einem Item-Forge-Profil.",
+      "HeldItemProfile": "Das Profil legt Händigkeit, Stufenstaffelung, Preis und besondere Fähigkeit gemeinsam fest."
     },
     "Preview": {
       "Empty": "Noch nichts geschmiedet. Parameter wählen und Generieren drücken.",
@@ -177,7 +181,13 @@
       "RuneLevel": "Runenstufe",
       "RunePrice": "Runenpreis",
       "RuneSource": "Runenquelle",
-      "Activation": "Aktivierung"
+      "Activation": "Aktivierung",
+      "HeldItemMode": "Gehaltene Gegenstandsart",
+      "HeldItemProfile": "Gehaltenes Gegenstandsprofil",
+      "HeldHands": "Benötigte Hände",
+      "HeldUsage": "Nutzung",
+      "HeldItemVariant": "Variante",
+      "HeldEffect": "Besondere Fähigkeit"
     },
     "Notifications": {
       "GenerationFailed": "Für diese Parameter konnte kein Gegenstand erzeugt werden.",
@@ -250,7 +260,10 @@
       "MagicWornFootwear": "Magisches Schuhwerk",
       "MagicWornCollar": "Magischer Kragen",
       "MagicWornOther": "Sonstiger getragener magischer Gegenstand",
-      "MagicAccessoryRune": "Accessory-Runen-Gegenstand"
+      "MagicAccessoryRune": "Accessory-Runen-Gegenstand",
+      "MagicHeld": "Gehaltene magische Gegenstände",
+      "MagicHeldOneHand": "Einhandgegenstände",
+      "MagicHeldTwoHands": "Zweihandgegenstände"
     },
     "GenerationMode": {
       "Existing": "Vordefinierten Gegenstand auswählen",
@@ -305,7 +318,13 @@
       "AccessoryRuneBaseInvested": "Ein Gegenstand mit dem Merkmal Investiert kann keine Accessory-Rune erhalten.",
       "AccessoryRuneAlreadyPresent": "Ein Gegenstand kann höchstens eine Accessory-Rune tragen.",
       "AccessoryRuneUsageMismatch": "Der geladene Basisgegenstand entspricht nicht mehr der Nutzungsart der ausgewählten Accessory-Rune.",
-      "AccessoryRuneBaseMagicNotAllowed": "Die ausgewählte Accessory-Rune kann nur auf einen mundanen Basisgegenstand graviert werden, sofern ihre Nutzungsart einen magischen Träger nicht ausdrücklich erlaubt."
+      "AccessoryRuneBaseMagicNotAllowed": "Die ausgewählte Accessory-Rune kann nur auf einen mundanen Basisgegenstand graviert werden, sofern ihre Nutzungsart einen magischen Träger nicht ausdrücklich erlaubt.",
+      "NoPredefinedHeldItemCandidate": "Kein vordefinierter gehaltener magischer Gegenstand erfüllt die Anfrage.",
+      "NoHeldItemProfileCandidate": "Kein generiertes Profil für gehaltene magische Gegenstände erfüllt die Anfrage.",
+      "NoHeldItemTemplate": "Es ist keine sichere PF2e-Strukturvorlage für diesen gehaltenen Gegenstand verfügbar.",
+      "InvalidHeldItemTemplateType": "Die gefundene Vorlage besitzt einen unsicheren Dokumenttyp.",
+      "HeldItemTemplateUsageMismatch": "Die Händigkeit der Vorlage stimmt nicht mit dem gewählten Profil überein.",
+      "UnknownHeldItemProfile": "Das gewählte Profil für gehaltene magische Gegenstände ist unbekannt."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatisch stufengerecht",
@@ -485,7 +504,8 @@
     "SpecificItemVariants": {
       "Base": "Grundform",
       "Greater": "Stark",
-      "Major": "Mächtig"
+      "Major": "Mächtig",
+      "Supreme": "Höchste"
     },
     "SpecificItemText": {
       "RetributiveWeaponName": "{base} der Vergeltung",
@@ -673,6 +693,44 @@
     "AccessoryRuneActivationTraits": {
       "Concentrate": "konzentrieren",
       "Manipulate": "manipulieren"
+    },
+    "HeldItemMode": {
+      "Existing": "Vordefiniert",
+      "Generated": "Generiert"
+    },
+    "HeldHands": {
+      "One": "1 Hand",
+      "Two": "2 Hände"
+    },
+    "HeldProfiles": {
+      "Automatic": "Automatisch",
+      "WaylightLantern": "Weglicht-Laterne",
+      "ScholarPrism": "Gelehrtenprisma",
+      "ResonanceBaton": "Resonanzstab",
+      "StormglassSphere": "Sturmglaskugel",
+      "GuardianStandard": "Wächterstandarte"
+    },
+    "HeldText": {
+      "OncePerDay": "einmal täglich",
+      "OncePerHour": "einmal pro Stunde",
+      "OncePerTenMinutes": "einmal pro 10 Minuten",
+      "SpecialAbility": "Besondere Fähigkeit:",
+      "AutomationNote": "Dieser generierte gehaltene Gegenstand verwendet Regeltext und strukturierte Item-Forge-Metadaten; es werden keine ungeprüften PF2e-Rule-Elements erzeugt.",
+      "WaylightLanternName": "Weglicht-Laterne",
+      "WaylightLanternDescription": "Eine kompakte Laterne, deren Glas einen sanften magischen Schein sammelt.",
+      "WaylightLanternEffect": "{frequency} kannst du mit 1 Aktion (Konzentration) das Licht der Laterne bis zum Beginn deines nächsten Zuges schärfen. Solange du sie hältst, erzeugt sie helles Licht in einem Radius von {radius} Fuß; während des geschärften Lichts erhältst du einen Situationsbonus von +1 auf Suchen innerhalb dieses Lichts.",
+      "ScholarPrismName": "Gelehrtenprisma",
+      "ScholarPrismDescription": "Ein handgroßes Kristallprisma, in dessen Facetten sich magische Muster ordnen.",
+      "ScholarPrismEffect": "{frequency} kannst du das Prisma mit 1 Aktion (Konzentration) ausrichten. Bis zum Ende deines Zuges erhältst du einen Gegenstandsbonus von +{bonus} auf Magie identifizieren und Wissen abrufen über magische Effekte.",
+      "ResonanceBatonName": "Resonanzstab",
+      "ResonanceBatonDescription": "Dieser kurze Stab summt leise, wenn er auf die Lebenskraft einer nahen Kreatur abgestimmt wird.",
+      "ResonanceBatonEffect": "{frequency} kannst du mit 1 Aktion (akustisch, Konzentration) einen willigen Verbündeten innerhalb von 30 Fuß stärken. Er erhält {temp} temporäre Trefferpunkte bis zum Ende seines nächsten Zuges.",
+      "StormglassSphereName": "Sturmglaskugel",
+      "StormglassSphereDescription": "In dieser zweihändig gehaltenen Glaskugel drehen sich winzige Wolken und Windfäden.",
+      "StormglassSphereEffect": "{frequency} kannst du die Kugel mit 2 Aktionen (Konzentration, Handhaben) entfesseln. Bis zum Ende deines nächsten Zuges erhalten du und deine Verbündeten innerhalb von {distance} Fuß einen Statusbonus von +5 Fuß auf ihre Bewegungsraten.",
+      "GuardianStandardName": "Wächterstandarte",
+      "GuardianStandardDescription": "Eine kleine Schlachtstandarte, deren Zeichen Mut und Zusammenhalt ausstrahlt.",
+      "GuardianStandardEffect": "{frequency} kannst du die Standarte mit 1 Aktion (Konzentration) aufrichten. Bis zum Beginn deines nächsten Zuges erhalten Verbündete innerhalb von 15 Fuß einen Statusbonus von +{bonus} auf Rettungswürfe gegen Furcht."
     }
   }
 }

@@ -19,6 +19,8 @@ ItemForgeEngine (canonical normalization, validation, generation)
         |     +-- SpecificMagicShieldGenerator
         |     +-- SpecificMagicEquipmentGenerator
         |     +-- WornMagicItemGenerator
+        |     +-- AccessoryRuneGenerator
+        |     +-- HeldMagicItemGenerator
         |     +-- SpellheartGenerator
         |     +-- StaffGenerator
         |     +-- TreasureGenerator
@@ -40,6 +42,7 @@ ItemForgeEngine (canonical normalization, validation, generation)
         +-- SpecificItemProfileRegistry
         +-- SpecificShieldProfileRegistry
         +-- WornMagicProfileRegistry
+        +-- HeldMagicProfileRegistry
         +-- ValueSolver
         +-- TreasureRegistry
               +-- types
@@ -75,6 +78,7 @@ SpecificMagicEquipmentGenerator  218  mode magic
 WornMagicItemGenerator           217  mode magic
 AccessoryRuneGenerator           216  mode magic
 SpellheartGenerator              215  mode magic
+HeldMagicItemGenerator           214  mode magic
 StaffGenerator                   210  mode magic
 TreasureGenerator     200  mode treasure
 ScrollGenerator       200  mode existing
@@ -87,7 +91,7 @@ Registered generation modes are exposed through the public capabilities API and 
 
 ## Spell-bound permanent magic items
 
-`mode: "magic"` owns `magic.wand`, `magic.staff`, `magic.spellheart`, `magic.weapon`, `magic.armor`, `magic.shield`, and `magic.worn` with worn-usage subcategories. Wands, generated staves, and generated spellhearts reuse the spell-support index and meaningful-heightening helpers. Specific weapons/armor, shields, and worn items instead use the physical-item index and dedicated profile registries. Predefined items preserve complete native PF2e documents, while generated custom items compose from validated whole-effect profiles rather than arbitrary effect fragments.
+`mode: "magic"` owns `magic.wand`, `magic.staff`, `magic.spellheart`, `magic.weapon`, `magic.armor`, `magic.shield`, `magic.worn` with worn-usage subcategories, and `magic.held` with one-/two-hand subcategories. Wands, generated staves, and generated spellhearts reuse the spell-support index and meaningful-heightening helpers. Specific weapons/armor, shields, and worn items instead use the physical-item index and dedicated profile registries. Predefined items preserve complete native PF2e documents, while generated custom items compose from validated whole-effect profiles rather than arbitrary effect fragments.
 
 ### Wands
 
@@ -145,6 +149,16 @@ The public API exposes worn availability through `getWornSlotCapabilities()` and
 Live Magic diagnostics exercise predefined worn items plus representative generated contracts for unrestricted worn items, eyepieces, headwear, and footwear. They verify normalized usage/slot agreement, `equipment` document type, profile-driven investment state, a valid magic marker trait, absence of inherited Rule Elements/subitems/apex data/foreign flag scopes, and the `rules-text` automation contract.
 
 
+
+### Held magic items
+
+`HeldMagicItemGenerator` resolves `magic.held`, `magic.held.one-hand`, and `magic.held.two-hands`. The compendium index recognizes magical `equipment` documents whose PF2e Usage is `held in 1 hand` or `held in 2 hands` (including normalized slug-like forms), records `heldHands`, and deliberately does not classify weapons or specialized `book`/`backpack`/`kit` schemas into this family.
+
+`magic.heldMode: "existing"` selects a published held magic item from the configured content sources and clones its complete PF2e document, preserving Usage, Rule Elements, activations, traits, price, and native automation. `magic.heldMode: "generated"` selects a validated `HeldMagicProfileRegistry` family. A profile owns its handedness, rarity, optional investment state, traits, whole-effect description, balance provenance, and a strictly increasing level/price variant progression. Five core families interleave variants so automatic strict generation has at least one candidate at every item level from 1 through 20; explicitly selected profiles do not synthesize missing tiers.
+
+Generated held items resolve only a system-indexed `equipment` implementation template with the same handedness. The PF2e Usage field is retained as a verified structural value, while original description, slug, Rule Elements, subitems, apex/publication data, and foreign flag scopes are removed. The result receives the profile's traits and effect and is marked `automation.level: "rules-text"`. Live diagnostics exercise a predefined held item plus generated one-hand and two-hand contracts against the current PF2e document constructor.
+
+Held Items are intentionally a narrow permanent-equipment family, not a synonym for all miscellaneous magic. Grimoires, magical tattoos, assistive items, and apex items remain separate rule families and should receive dedicated generators or predefined-only handling when implemented.
 
 ### Accessory Runes
 

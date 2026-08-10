@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.0.28
+
+- Adds `magic.held` with explicit one-hand and two-hand subcategories for permanent held magic equipment.
+- Adds `HeldMagicItemGenerator` with separate predefined/native and generated/rules-text paths. Published PF2e held items are cloned whole; generated items use safe hand-matched `equipment` templates.
+- Adds public `HeldMagicProfileRegistry` as `game.pf2eItemForge.heldMagicProfiles` and exposes held modes, handedness, profile levels, investment, and balance provenance through capabilities.
+- Adds five reviewed generated families: Waylight Lantern, Scholar Prism, Resonance Baton, Stormglass Sphere, and Guardian Standard. Their interleaved variants provide automatic strict-mode coverage at every item level from 1 through 20.
+- Compendium indexing now recognizes magical `held in 1 hand` / `held in 2 hands` equipment and records normalized handedness without absorbing weapons, grimoires/books, worn items, or other specialized document types.
+- Generated held items strip template Rule Elements, subitems, apex/publication data, slugs, descriptions, and foreign flags while preserving the verified PF2e usage shape.
+- Adds embedded-editor mode/profile controls, held-item preview fields, DE/EN localization, canonical request hydration, and dedicated error handling.
+- Extends live Magic diagnostics with predefined held items plus generated one-hand/two-hand contract checks.
+- Keeps grimoires, magical tattoos, assistive items, and apex items outside the Held Items generator for future dedicated blocks.
+- Test suite: 233 passing tests.
+
 ## 0.0.27
 
 - Hardens Accessory Rune hosts with an explicit `host` contract (`documentTypes`, `wornSlots`, `magicPolicy`). Core Treasure Vault runes default to `mundane-only`; non-invested magic hosts are accepted only by profiles that explicitly opt into `magicPolicy: "allowed"`.

@@ -294,3 +294,23 @@ test("CompendiumIndex classifies invested worn magic items by PF2e worn usage", 
   assert.equal(byId("held-magic").categories.includes("magic.worn"), false);
   assert.equal(byId("spellheart").categories.includes("magic.worn"), false);
 });
+
+test("CompendiumIndex classifies magical held equipment by one- and two-hand usage", async () => {
+  const pack = makePack("pf2e.held-items", [
+    raw("lantern", "equipment", 12, { traits: { value: ["magical", "light"], rarity: "common" }, usage: { value: "held in 1 hand" } }),
+    raw("figurine", "equipment", 8, { traits: { value: ["occult"], rarity: "uncommon" }, usage: { value: "held in 2 hands" } }),
+    raw("mundane-tool", "equipment", 1, { traits: { value: [], rarity: "common" }, usage: { value: "held in 1 hand" } }),
+    raw("weapon-held", "weapon", 3, { traits: { value: ["magical"], rarity: "common" }, usage: { value: "held in 1 hand" } })
+  ]);
+  const categories = registerCoreCategories(new CategoryRegistry());
+  const game = { system: { id: "pf2e" }, packs: new FakePackCollection([pack]) };
+  const index = new CompendiumIndex({ categoryRegistry: categories, gameProvider: () => game });
+  await index.refresh();
+  const byId = (id) => index.entries.find((entry) => entry.id === id);
+  assert.equal(byId("lantern").heldHands, 1);
+  assert.ok(byId("lantern").categories.includes("magic.held.one-hand"));
+  assert.equal(byId("figurine").heldHands, 2);
+  assert.ok(byId("figurine").categories.includes("magic.held.two-hands"));
+  assert.equal(byId("mundane-tool").categories.includes("magic.held"), false);
+  assert.equal(byId("weapon-held").categories.includes("magic.held"), false, "weapon documents use their own magic equipment paths");
+});

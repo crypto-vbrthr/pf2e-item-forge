@@ -33,6 +33,15 @@ function sourceFor(request) {
     if (preserving) source.system.usage = { value: "worn backpack" };
     source.flags = { "pf2e-item-forge": { accessoryRune: { family: request.magic?.accessoryRune } } };
   }
+  if (request.category === "magic.held" || request.category.startsWith("magic.held.")) {
+    const hands = request.category === "magic.held.two-hands" ? 2 : 1;
+    source.system.usage = { value: `held in ${hands} hand${hands === 2 ? "s" : ""}` };
+    source.system.traits.value = ["magical"];
+    if (request.magic?.heldMode === "generated") {
+      source.system.rules = [];
+      source.flags = { "pf2e-item-forge": { generated: true } };
+    }
+  }
   if (request.category === "magic.worn" || request.category.startsWith("magic.worn.")) {
     const slot = request.category.startsWith("magic.worn.") ? request.category.slice("magic.worn.".length) : "cloak";
     const usage = {
@@ -54,10 +63,12 @@ function sourceFor(request) {
 function metadataFor(request) {
   const slot = request.category.startsWith("magic.worn.") ? request.category.slice("magic.worn.".length) : null;
   const accessory = request.category === "magic.accessory-rune";
+  const generatedHeld = request.magic?.heldMode === "generated";
   return {
     generator: "test",
-    automation: { level: request.magic?.wornMode === "generated" || accessory ? "rules-text" : "native" },
+    automation: { level: request.magic?.wornMode === "generated" || generatedHeld || accessory ? "rules-text" : "native" },
     ...(request.magic?.wornMode === "generated" ? { wornItem: { slot, invested: true } } : {}),
+    ...(generatedHeld ? { heldItem: { hands: request.category === "magic.held.two-hands" ? 2 : 1, invested: false } } : {}),
     ...(accessory ? {
       contentSources: ["pf2e.equipment-srd"],
       accessoryRune: {
@@ -75,7 +86,7 @@ test("MagicItemDiagnostics validates generated sources without persisting world 
   const api = {
     async preview(request) { return { itemSource: sourceFor(request), metadata: metadataFor(request) }; },
     compendiumIndex: {
-      entries: [{ categories: ["magic.weapon"], specific: { material: {}, runes: {} } }],
+      entries: [{ categories: ["magic.weapon"], specific: { material: {}, runes: {} } }, { categories: ["magic.held"], heldHands: 1 }],
       spellEntries: [{ castActions: 1 }, { castActions: 2 }],
       getPackErrors: () => []
     },
@@ -88,12 +99,15 @@ test("MagicItemDiagnostics validates generated sources without persisting world 
   const result = await diagnostics.run();
   assert.equal(result.failed, 0);
   assert.equal(result.warnings, 1, "price audit warns when the runtime document does not derive a different price");
-  assert.equal(constructed, 20);
+  assert.equal(constructed, 23);
   assert.ok(result.checks.some((check) => check.id === "pf2e-specific-schema" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "specific-weapon-generated" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "specific-armor-generated" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "specific-shield-generated" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "worn-existing" && check.status === "passed"));
+  assert.ok(result.checks.some((check) => check.id === "held-existing" && check.status === "passed"));
+  assert.ok(result.checks.some((check) => check.id === "held-generated-one" && check.status === "passed"));
+  assert.ok(result.checks.some((check) => check.id === "held-generated-two" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "accessory-rune-trackless" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "accessory-rune-preserving" && check.status === "passed"));
   assert.ok(result.checks.some((check) => check.id === "accessory-rune-activation-contract" && check.status === "passed"));

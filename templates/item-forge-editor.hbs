@@ -18,7 +18,7 @@
       <label>{{localize "PF2E_ITEM_FORGE.Fields.Category"}}</label>
       <select name="category">
         {{#each categories}}
-          <option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>
+          <option value="{{id}}" {{#if selected}}selected{{/if}} {{#if disabled}}disabled{{/if}}>{{label}}</option>
         {{/each}}
       </select>
     </div>
@@ -142,6 +142,24 @@
             </select>
             <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.AccessoryRune"}}</p>
           </div>
+        {{/if}}
+        {{#if isHeldMagicCategory}}
+          <div class="form-group">
+            <label>{{localize "PF2E_ITEM_FORGE.Fields.HeldItemMode"}}</label>
+            <select name="magic.heldMode">
+              {{#each heldModes}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+            </select>
+            <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.HeldItemMode"}}</p>
+          </div>
+          {{#if generatedHeld}}
+            <div class="form-group">
+              <label>{{localize "PF2E_ITEM_FORGE.Fields.HeldItemProfile"}}</label>
+              <select name="magic.heldProfile">
+                {{#each heldProfiles}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+              </select>
+              <p class="hint">{{localize "PF2E_ITEM_FORGE.Hints.HeldItemProfile"}}</p>
+            </div>
+          {{/if}}
         {{/if}}
         {{#if isWornMagicCategory}}
           <div class="form-group">
@@ -420,6 +438,8 @@
               {{#if preview.magic.specificProfileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.SpecificItemProfile"}}</dt><dd>{{preview.magic.specificProfileLabel}}</dd>{{/if}}
               {{#if preview.magic.wornModeLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.WornItemMode"}}</dt><dd>{{preview.magic.wornModeLabel}}</dd>{{/if}}
               {{#if preview.magic.wornProfileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.WornItemProfile"}}</dt><dd>{{preview.magic.wornProfileLabel}}</dd>{{/if}}
+              {{#if preview.magic.heldModeLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.HeldItemMode"}}</dt><dd>{{preview.magic.heldModeLabel}}</dd>{{/if}}
+              {{#if preview.magic.heldProfileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.HeldItemProfile"}}</dt><dd>{{preview.magic.heldProfileLabel}}</dd>{{/if}}
               {{#if preview.magic.accessoryRuneLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.AccessoryRune"}}</dt><dd>{{preview.magic.accessoryRuneLabel}}</dd>{{/if}}
               {{#if preview.magic.profileLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.StaffProfile"}}</dt><dd>{{preview.magic.profileLabel}}</dd>{{/if}}
               {{#if preview.magic.variantLabelLocalized}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.StaffVariant"}}</dt><dd>{{preview.magic.variantLabelLocalized}}</dd>{{/if}}
@@ -461,6 +481,13 @@
               {{#if preview.wornItem.variantLabelLocalized}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.WornItemVariant"}}</dt><dd>{{preview.wornItem.variantLabelLocalized}}</dd>{{/if}}
               {{#if preview.wornItem.effect}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.WornEffect"}}</dt><dd>{{preview.wornItem.effect}}</dd>{{/if}}
               {{#if preview.wornItem.automationLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.Automation"}}</dt><dd>{{preview.wornItem.automationLabel}}</dd>{{/if}}
+            {{/if}}
+            {{#if preview.heldItem}}
+              {{#if preview.heldItem.handsLabelLocalized}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.HeldHands"}}</dt><dd>{{preview.heldItem.handsLabelLocalized}}</dd>{{/if}}
+              {{#if preview.heldItem.usage}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.HeldUsage"}}</dt><dd>{{preview.heldItem.usage}}</dd>{{/if}}
+              {{#if preview.heldItem.variantLabelLocalized}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.HeldItemVariant"}}</dt><dd>{{preview.heldItem.variantLabelLocalized}}</dd>{{/if}}
+              {{#if preview.heldItem.effect}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.HeldEffect"}}</dt><dd>{{preview.heldItem.effect}}</dd>{{/if}}
+              {{#if preview.heldItem.automationLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.Automation"}}</dt><dd>{{preview.heldItem.automationLabel}}</dd>{{/if}}
             {{/if}}
             {{#if preview.spellheart}}
               {{#if preview.spellheart.variantLabel}}<dt>{{localize "PF2E_ITEM_FORGE.Preview.SpellheartVariant"}}</dt><dd>{{preview.spellheart.variantLabel}}</dd>{{/if}}

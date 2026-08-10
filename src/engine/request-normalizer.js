@@ -15,6 +15,7 @@ const STAFF_MODES = new Set(["generated", "existing"]);
 const SPELLHEART_MODES = new Set(["generated", "existing"]);
 const SPECIFIC_ITEM_MODES = new Set(["generated", "existing"]);
 const WORN_ITEM_MODES = new Set(["generated", "existing"]);
+const HELD_ITEM_MODES = new Set(["generated", "existing"]);
 
 function integer(value, fallback) {
   const parsed = Number.parseInt(value, 10);
@@ -129,6 +130,8 @@ export function normalizeRequest(request = {}, options = {}) {
       specificProfile: typeof request.magic?.specificProfile === "string" && request.magic.specificProfile ? request.magic.specificProfile : "automatic",
       wornMode: WORN_ITEM_MODES.has(request.magic?.wornMode) ? request.magic.wornMode : "existing",
       wornProfile: typeof request.magic?.wornProfile === "string" && request.magic.wornProfile ? request.magic.wornProfile : "automatic",
+      heldMode: HELD_ITEM_MODES.has(request.magic?.heldMode) ? request.magic.heldMode : "existing",
+      heldProfile: typeof request.magic?.heldProfile === "string" && request.magic.heldProfile ? request.magic.heldProfile : "automatic",
       accessoryRune: typeof request.magic?.accessoryRune === "string" && request.magic.accessoryRune ? request.magic.accessoryRune : "automatic"
     },
     seed: String(request.seed ?? createSeed()),
@@ -196,7 +199,7 @@ export function validateRequest(request, {
   }
   if (normalized.mode === "magic") {
     const category = normalized.category;
-    const supported = ["magic.wand", "magic.staff", "magic.spellheart", "magic.weapon", "magic.armor", "magic.shield", "magic.worn", "magic.accessory-rune"].includes(category) || categories?.isDescendant?.(category, "magic.worn");
+    const supported = ["magic.wand", "magic.staff", "magic.spellheart", "magic.weapon", "magic.armor", "magic.shield", "magic.worn", "magic.held", "magic.held.one-hand", "magic.held.two-hands", "magic.accessory-rune"].includes(category) || categories?.isDescendant?.(category, "magic.worn");
     if (!supported) errors.push({ code: "UNSUPPORTED_MAGIC_CATEGORY", field: "category", value: category });
   }
   return { valid: errors.length === 0, errors, request: normalized };

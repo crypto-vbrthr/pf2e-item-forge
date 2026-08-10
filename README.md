@@ -2,9 +2,9 @@
 
 Reusable Item Forge architecture for Foundry VTT v14 and Pathfinder 2e.
 
-## v0.0.27 scope
+## v0.0.28 scope
 
-This release hardens the Accessory Rune composition contract. Accessory Runes now obey the same selected-source policy as their host item, use explicit mundane/magic host permissions, preserve source provenance, and carry structured activation metadata while remaining conservative rules-text automation.
+This release adds permanent Held Magic Items as their own PF2e-aware family. Published held items can be selected intact, while generated held items use hand-specific safe equipment templates and validated whole-effect profiles without collapsing grimoires, tattoos, assistive items, or apex items into one generic bucket.
 
 Implemented:
 
@@ -18,7 +18,7 @@ Implemented:
 - Deterministic seeded generation
 - Existing physical compendium items, excluding feats/spells/rule documents
 - Spell-bearing scroll generation with meaningful legal heightening
-- Special magic-item mode for wands, staves, spellhearts, specific magic weapons, specific magic armor, specific magic shields, worn magic items, and Accessory Runes
+- Special magic-item mode for wands, staves, spellhearts, specific magic weapons, specific magic armor, specific magic shields, worn magic items, held magic items, and Accessory Runes
 - Wands use the PF2e generic wand templates and embed one real spell at a legal base or meaningful heightened rank
 - Staves can either be copied exactly from selected compendia or generated as rulebook-style variant families with inherited lower variants
 - Spellhearts can either be selected as complete predefined PF2e items or generated from validated custom Spellheart profiles with coherent armor/weapon benefits, spell progressions, prices, and themes
@@ -28,11 +28,13 @@ Implemented:
 - Published worn items preserve native PF2e usage, Rule Elements, activations, price, traits, and automation; generated worn items use whole-effect profiles plus rules-text manifests. Fourteen core families cover item levels 1 through 20 across footwear, eyepieces, belts, cloaks, masks, circlets, gloves, bracers, garments, unrestricted jewelry, and headwear
 - Generated worn profiles use `equipment` documents only as generic structural templates; backpack/container schemas are not borrowed by the generic worn generator
 - Worn profiles support an explicit `invested` contract (default `true`), normalize canonical rarity/variant IDs, and treat arcane/divine/occult/primal as sufficient magic markers without redundantly forcing the `magical` trait
+- Held magic items have dedicated `magic.held`, `magic.held.one-hand`, and `magic.held.two-hands` categories plus a public `heldMagicProfiles` registry. Published held items preserve native PF2e data; generated held items use only matching `equipment` templates and rules-text manifests.
+- Five reviewed generated held-item families interleave their variants so automatic strict generation has at least one candidate at every item level from 1 through 20, while explicitly selected families remain strict to their own progression.
 - Accessory Runes are a separate `magic.accessory-rune` composition path with a public `accessoryRunes` registry; the core library contains the Treasure Vault Menacing, Pontoon, Preserving, and Trackless progressions
 - Accessory Rune variants are source-backed by indexed `sourceSlug`, so both host and rune must exist in the selected content sources; result metadata records both content packs and exact rune provenance
 - Accessory Rune host contracts declare document types, worn slots, and magic policy. The four core Treasure Vault families are `mundane-only`, matching the default rule that a magic host is legal only when a rune Usage explicitly permits it
 - Greater Accessory Rune activations are structured as actions/traits/frequency/spell metadata and rendered into localized rules text; custom native Rule Elements are still not guessed
-- Public `specificItemProfiles`, `specificShieldProfiles`, and `wornMagicProfiles` registries for extension modules and campaign content; `getWornSlotCapabilities()` and `getCapabilities().wornSlots` expose actual predefined/generated slot availability
+- Public `specificItemProfiles`, `specificShieldProfiles`, `wornMagicProfiles`, and `heldMagicProfiles` registries for extension modules and campaign content; `getWornSlotCapabilities()` and `getCapabilities().wornSlots` expose actual predefined/generated slot availability
 - Magic themes for fire, cold, electricity, healing, illusion, mental, vitality, void, arcane, divine, occult, primal, and summoning
 - Composed weapons, armor, and shields with fundamental runes
 - Registry-driven property runes with automatic/random/fixed/none modes and compatibility rules
@@ -53,11 +55,12 @@ Implemented:
 - Standalone `ItemForgeApplication` container owning Foundry document creation and preserving `createdByForge` versus `generated` provenance
 - German and English localization
 - Shared generation-result contract for `contentSources`, `templateSource`, and automation level
-- Live Magic diagnostics for predefined and generated magic paths including representative unrestricted, eyepiece, headwear, and footwear worn contracts, strict source-shape checks, pack-index failures, and composed-equipment price preparation
-- 219 automated unit/integration/statistical/contract tests
+- Live Magic diagnostics for predefined and generated magic paths including representative worn and one-/two-handed held contracts, strict source-shape checks, pack-index failures, and composed-equipment price preparation
+- 233 automated unit/integration/statistical/contract tests
 
 Not yet implemented:
 
+- Dedicated generation blocks for grimoires, magical tattoos, assistive items, and apex items. They are intentionally not treated as generic held items.
 - Native PF2e staff-preparation/casting automation for generated custom staff-family manifests (predefined staves preserve their native PF2e data unchanged)
 - Verified native automation builders for generated custom wands/staves/spellhearts/specific items
 - Verified native PF2e Accessory Rune carrier/activation automation (current compositions retain the host's native data and store the added rune as rules text plus a structured manifest)

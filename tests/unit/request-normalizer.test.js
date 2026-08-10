@@ -205,3 +205,23 @@ test("validation accepts the accessory rune magic category", async () => {
   assert.equal(result.request.category, "magic.accessory-rune");
   assert.equal(result.request.magic.accessoryRune, "trackless");
 });
+
+test("normalizeRequest hydrates held magic item settings", () => {
+  const defaults = normalizeRequest({ mode: "magic", category: "magic.held", seed: "x" });
+  assert.equal(defaults.magic.heldMode, "existing");
+  assert.equal(defaults.magic.heldProfile, "automatic");
+  const explicit = normalizeRequest({ mode: "magic", category: "magic.held.two-hands", magic: { heldMode: "generated", heldProfile: "core.stormglass-sphere" }, seed: "x" });
+  assert.equal(explicit.magic.heldMode, "generated");
+  assert.equal(explicit.magic.heldProfile, "core.stormglass-sphere");
+  assert.equal(explicit.category, "magic.held.two-hands");
+});
+
+test("validation accepts held magic root and handedness subcategories", async () => {
+  const { validateRequest } = await import("../../src/engine/request-normalizer.js");
+  const { CategoryRegistry, registerCoreCategories } = await import("../../src/engine/category-registry.js");
+  const categories = registerCoreCategories(new CategoryRegistry());
+  for (const category of ["magic.held", "magic.held.one-hand", "magic.held.two-hands"]) {
+    const result = validateRequest({ mode: "magic", category, level: 8, source: { mode: "system" }, seed: "x" }, { categories, generationModes: ["magic"] });
+    assert.equal(result.valid, true, category);
+  }
+});

@@ -58,7 +58,9 @@
       "SpecificItemProfile": "Specific item profile",
       "WornItemMode": "Generation Type",
       "WornItemProfile": "Worn Item Profile",
-      "AccessoryRune": "Accessory Rune"
+      "AccessoryRune": "Accessory Rune",
+      "HeldItemMode": "Held item generation",
+      "HeldItemProfile": "Held item profile"
     },
     "LevelMode": {
       "Single": "Single level",
@@ -111,7 +113,9 @@
       "SpecificItemRunes": "For generated specific items, property runes come only from the profile. Fundamental runes remain normally upgradeable; additional property runes cannot be freely added.",
       "WornItemMode": "Predefined copies a complete PF2e item from the selected compendia. Generated creates a new invested item from a validated Item Forge profile.",
       "WornItemProfile": "The profile defines worn usage, level progression, price, and special ability as one coherent package.",
-      "AccessoryRune": "Selects a source-backed Accessory Rune and applies it to a compatible host item. Both the host and the published rune must exist in the selected sources; Automatic also respects each rune’s Usage and host-magic policy."
+      "AccessoryRune": "Selects a source-backed Accessory Rune and applies it to a compatible host item. Both the host and the published rune must exist in the selected sources; Automatic also respects each rune’s Usage and host-magic policy.",
+      "HeldItemMode": "Predefined preserves a published PF2e item in full; Generated builds a new held item from an Item Forge profile.",
+      "HeldItemProfile": "The profile defines handedness, level progression, price, and special ability as one package."
     },
     "Preview": {
       "Empty": "Nothing forged yet. Choose parameters and press Generate.",
@@ -177,7 +181,13 @@
       "RuneLevel": "Rune Level",
       "RunePrice": "Rune Price",
       "RuneSource": "Rune source",
-      "Activation": "Activation"
+      "Activation": "Activation",
+      "HeldItemMode": "Held Item Mode",
+      "HeldItemProfile": "Held Item Profile",
+      "HeldHands": "Hands Required",
+      "HeldUsage": "Usage",
+      "HeldItemVariant": "Variant",
+      "HeldEffect": "Special Ability"
     },
     "Notifications": {
       "GenerationFailed": "No item could be generated for these parameters.",
@@ -250,7 +260,10 @@
       "MagicWornFootwear": "Magic Footwear",
       "MagicWornCollar": "Magic Collar",
       "MagicWornOther": "Other Worn Magic Item",
-      "MagicAccessoryRune": "Accessory Rune Item"
+      "MagicAccessoryRune": "Accessory Rune Item",
+      "MagicHeld": "Held Magic Items",
+      "MagicHeldOneHand": "One-Handed Held Items",
+      "MagicHeldTwoHands": "Two-Handed Held Items"
     },
     "GenerationMode": {
       "Existing": "Select a predefined item",
@@ -305,7 +318,13 @@
       "AccessoryRuneBaseInvested": "An item with the invested trait cannot receive an Accessory Rune.",
       "AccessoryRuneAlreadyPresent": "An item can never have more than one Accessory Rune.",
       "AccessoryRuneUsageMismatch": "The loaded base item no longer matches the selected Accessory Rune’s Usage requirement.",
-      "AccessoryRuneBaseMagicNotAllowed": "The selected Accessory Rune can only be applied to a mundane base item unless its Usage explicitly allows a magic host."
+      "AccessoryRuneBaseMagicNotAllowed": "The selected Accessory Rune can only be applied to a mundane base item unless its Usage explicitly allows a magic host.",
+      "NoPredefinedHeldItemCandidate": "No predefined held magic item matches the request.",
+      "NoHeldItemProfileCandidate": "No generated held magic item profile matches the request.",
+      "NoHeldItemTemplate": "No safe PF2e structural template is available for this held item.",
+      "InvalidHeldItemTemplateType": "The resolved held-item template uses an unsafe document type.",
+      "HeldItemTemplateUsageMismatch": "The held-item template usage does not match the selected profile handedness.",
+      "UnknownHeldItemProfile": "The selected held magic item profile is unknown."
     },
     "PropertyRuneMode": {
       "Automatic": "Automatic level-appropriate",
@@ -485,7 +504,8 @@
     "SpecificItemVariants": {
       "Base": "Base",
       "Greater": "Greater",
-      "Major": "Major"
+      "Major": "Major",
+      "Supreme": "Supreme"
     },
     "SpecificItemText": {
       "RetributiveWeaponName": "Retributive {base}",
@@ -673,6 +693,44 @@
     "AccessoryRuneActivationTraits": {
       "Concentrate": "concentrate",
       "Manipulate": "manipulate"
+    },
+    "HeldItemMode": {
+      "Existing": "Predefined",
+      "Generated": "Generated"
+    },
+    "HeldHands": {
+      "One": "1 hand",
+      "Two": "2 hands"
+    },
+    "HeldProfiles": {
+      "Automatic": "Automatic",
+      "WaylightLantern": "Waylight Lantern",
+      "ScholarPrism": "Scholar Prism",
+      "ResonanceBaton": "Resonance Baton",
+      "StormglassSphere": "Stormglass Sphere",
+      "GuardianStandard": "Guardian Standard"
+    },
+    "HeldText": {
+      "OncePerDay": "once per day",
+      "OncePerHour": "once per hour",
+      "OncePerTenMinutes": "once per 10 minutes",
+      "SpecialAbility": "Special Ability:",
+      "AutomationNote": "This generated held item uses rules text and structured Item Forge metadata; no unverified PF2e Rule Elements are created.",
+      "WaylightLanternName": "Waylight Lantern",
+      "WaylightLanternDescription": "A compact lantern whose glass gathers a soft magical radiance.",
+      "WaylightLanternEffect": "{frequency}, you can spend 1 action (concentrate) to sharpen the lantern’s light until the start of your next turn. While held, it sheds bright light in a {radius}-foot radius; during the sharpened light, you gain a +1 circumstance bonus to Seek within that light.",
+      "ScholarPrismName": "Scholar Prism",
+      "ScholarPrismDescription": "A palm-sized crystal prism whose facets arrange magical patterns.",
+      "ScholarPrismEffect": "{frequency}, you can align the prism with 1 action (concentrate). Until the end of your turn, you gain a +{bonus} item bonus to Identify Magic and Recall Knowledge about magical effects.",
+      "ResonanceBatonName": "Resonance Baton",
+      "ResonanceBatonDescription": "This short baton hums softly when tuned to the vitality of a nearby creature.",
+      "ResonanceBatonEffect": "{frequency}, you can spend 1 action (auditory, concentrate) to bolster a willing ally within 30 feet. The ally gains {temp} temporary Hit Points until the end of its next turn.",
+      "StormglassSphereName": "Stormglass Sphere",
+      "StormglassSphereDescription": "Tiny clouds and threads of wind turn inside this two-handed glass sphere.",
+      "StormglassSphereEffect": "{frequency}, you can unleash the sphere with 2 actions (concentrate, manipulate). Until the end of your next turn, you and your allies within {distance} feet gain a +5-foot status bonus to their Speeds.",
+      "GuardianStandardName": "Guardian Standard",
+      "GuardianStandardDescription": "A compact battle standard whose sigil radiates courage and solidarity.",
+      "GuardianStandardEffect": "{frequency}, you can raise the standard with 1 action (concentrate). Until the start of your next turn, allies within 15 feet gain a +{bonus} status bonus to saving throws against fear."
     }
   }
 }

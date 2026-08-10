@@ -45,6 +45,16 @@ export class MagicItemTemplateResolver {
     return this.#preferSystem(entries);
   }
 
+
+  resolveHeldTemplateEntry(hands = null, { allowedTypes = ["equipment"] } = {}) {
+    const category = Number(hands) === 1 ? "magic.held.one-hand" : Number(hands) === 2 ? "magic.held.two-hands" : "magic.held";
+    const types = new Set(Array.isArray(allowedTypes) ? allowedTypes : [allowedTypes]);
+    const entries = this.index.entries
+      .filter((entry) => types.has(entry.type) && entry.categories?.includes?.(category))
+      .sort((a, b) => Number(a.level ?? 0) - Number(b.level ?? 0) || a.uuid.localeCompare(b.uuid));
+    return this.#preferSystem(entries);
+  }
+
   templateMetadata(entryOrTemplate, { kind = null } = {}) {
     if (!entryOrTemplate) return null;
     return {

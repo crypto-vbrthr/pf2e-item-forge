@@ -1,4 +1,5 @@
 import { hasMagicMarkerTraits, parseWornUsage } from "./worn-item-utils.js";
+import { hasHeldMagicMarkerTraits, parseHeldUsage } from "./held-item-utils.js";
 
 function clone(value) {
   if (globalThis.foundry?.utils?.deepClone) return globalThis.foundry.utils.deepClone(value);
@@ -84,6 +85,9 @@ export class MagicItemDiagnostics {
       { id: "specific-armor-generated", request: { mode: "magic", category: "magic.armor", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { specificMode: "generated", specificProfile: "automatic", theme: "automatic" }, seed: "diagnostic-specific-armor-generated" } },
       { id: "specific-shield-existing", request: { mode: "magic", category: "magic.shield", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { specificMode: "existing" }, seed: "diagnostic-specific-shield-existing" } },
       { id: "specific-shield-generated", request: { mode: "magic", category: "magic.shield", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { specificMode: "generated", specificProfile: "automatic", theme: "automatic" }, seed: "diagnostic-specific-shield-generated" } },
+      { id: "held-existing", request: { mode: "magic", category: "magic.held", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { heldMode: "existing", heldProfile: "automatic" }, seed: "diagnostic-held-existing" } },
+      { id: "held-generated-one", expectedHeldHands: 1, request: { mode: "magic", category: "magic.held.one-hand", level: { min: 1, max: 1, target: 1 }, levelPolicy: "strict", source: { mode: "system" }, magic: { heldMode: "generated", heldProfile: "automatic" }, seed: "diagnostic-held-one" } },
+      { id: "held-generated-two", expectedHeldHands: 2, request: { mode: "magic", category: "magic.held.two-hands", level: { min: 4, max: 4, target: 4 }, levelPolicy: "strict", source: { mode: "system" }, magic: { heldMode: "generated", heldProfile: "automatic" }, seed: "diagnostic-held-two" } },
       { id: "worn-existing", request: { mode: "magic", category: "magic.worn", level: { min: 1, max: 20 }, levelPolicy: "strict", source: { mode: "system" }, magic: { wornMode: "existing", wornProfile: "automatic" }, seed: "diagnostic-worn-existing" } },
       { id: "worn-generated-unrestricted", expectedWornSlot: "unrestricted", request: { mode: "magic", category: "magic.worn.unrestricted", level: { min: 1, max: 1, target: 1 }, levelPolicy: "strict", source: { mode: "system" }, magic: { wornMode: "generated", wornProfile: "automatic" }, seed: "diagnostic-worn-unrestricted" } },
       { id: "worn-generated-eyepiece", expectedWornSlot: "eyepiece", request: { mode: "magic", category: "magic.worn.eyepiece", level: { min: 5, max: 5, target: 5 }, levelPolicy: "strict", source: { mode: "system" }, magic: { wornMode: "generated", wornProfile: "automatic" }, seed: "diagnostic-worn-eyepiece" } },
@@ -114,7 +118,7 @@ export class MagicItemDiagnostics {
     };
   }
 
-  async #runScenario({ id, request, priceAudit = false, expectedWornSlot = null }) {
+  async #runScenario({ id, request, priceAudit = false, expectedWornSlot = null, expectedHeldHands = null }) {
     try {
       const result = await this.api.preview(request);
       const source = result?.itemSource;
@@ -137,6 +141,12 @@ export class MagicItemDiagnostics {
       if (id === "specific-shield-generated") {
         const durability = shieldDurability(source);
         if (durability.hardness == null || durability.hp == null || durability.bt == null) issues.push("generated shield durability is incomplete");
+      }
+      if (id === "held-existing" || id.startsWith("held-generated-")) {
+        const usage = source.system?.usage?.value;
+        const parsedUsage = parseHeldUsage(usage);
+        if (!parsedUsage.held) issues.push("held item lacks a recognized held usage");
+        if (expectedHeldHands && parsedUsage.hands !== expectedHeldHands) issues.push(`held usage parsed as ${parsedUsage.hands ?? "none"} hand(s), expected ${expectedHeldHands}`);
       }
       if (id === "worn-existing" || id.startsWith("worn-generated-")) {
         const usage = source.system?.usage?.value;
@@ -162,6 +172,21 @@ export class MagicItemDiagnostics {
         if (id === "accessory-rune-preserving" && source.type !== "backpack" && !/container|basket|bag/i.test(String(source.system?.usage?.value ?? ""))) {
           issues.push("Preserving diagnostic did not resolve a container host");
         }
+      }
+      if (id.startsWith("held-generated-")) {
+        const traits = source.system?.traits?.value ?? [];
+        const expectedInvested = result.metadata?.heldItem?.invested === true;
+        if (expectedInvested && !traits.includes("invested")) issues.push("generated held item lacks required invested trait");
+        if (!expectedInvested && traits.includes("invested")) issues.push("non-invested held profile inherited invested trait");
+        if (!hasHeldMagicMarkerTraits(traits)) issues.push("generated held item lacks a magical or tradition trait");
+        if (source.type !== "equipment") issues.push(`generated held item uses unsafe document type ${source.type}`);
+        if (expectedHeldHands && result.metadata?.heldItem?.hands !== expectedHeldHands) issues.push("generated held metadata hands do not match requested usage family");
+        if (!Array.isArray(source.system?.rules) || source.system.rules.length !== 0) issues.push("generated held item inherited template Rule Elements");
+        if (Array.isArray(source.system?.subitems) && source.system.subitems.length) issues.push("generated held item inherited template subitems");
+        if (Object.hasOwn(source.system ?? {}, "apex")) issues.push("generated held item inherited template apex data");
+        const foreignFlags = Object.keys(source.flags ?? {}).filter((scope) => scope !== "pf2e-item-forge");
+        if (foreignFlags.length) issues.push(`generated held item inherited template flags: ${foreignFlags.join(", ")}`);
+        if (result.metadata?.automation?.level !== "rules-text") issues.push("generated held item is not marked rules-text automation");
       }
       if (id.startsWith("worn-generated-")) {
         const traits = source.system?.traits?.value ?? [];
@@ -197,7 +222,8 @@ export class MagicItemDiagnostics {
         "NO_PREDEFINED_SPELLHEART_CANDIDATE", "NO_SPELLHEART_SPELL_CANDIDATE", "NO_SPELLHEART_TEMPLATE",
         "NO_PREDEFINED_SPECIFIC_ITEM_CANDIDATE", "NO_SPECIFIC_BASE_ITEM", "NO_SPECIFIC_PROFILE_CANDIDATE",
         "NO_PREDEFINED_SPECIFIC_SHIELD_CANDIDATE", "NO_SPECIFIC_SHIELD_BASE_ITEM", "NO_SPECIFIC_SHIELD_PROFILE_CANDIDATE",
-        "NO_PREDEFINED_WORN_ITEM_CANDIDATE", "NO_WORN_ITEM_PROFILE_CANDIDATE", "NO_WORN_ITEM_TEMPLATE", "NO_ACCESSORY_RUNE_CANDIDATE"
+        "NO_PREDEFINED_WORN_ITEM_CANDIDATE", "NO_WORN_ITEM_PROFILE_CANDIDATE", "NO_WORN_ITEM_TEMPLATE",
+        "NO_PREDEFINED_HELD_ITEM_CANDIDATE", "NO_HELD_ITEM_PROFILE_CANDIDATE", "NO_HELD_ITEM_TEMPLATE", "NO_ACCESSORY_RUNE_CANDIDATE"
       ].includes(error?.code);
       return { id, status: skippable ? "skipped" : "failed", code: error?.code ?? null, message: error?.message ?? String(error) };
     }
@@ -223,6 +249,14 @@ export class MagicItemDiagnostics {
       id: "pf2e-spell-cast-actions",
       status: actionShapes.size ? "passed" : "skipped",
       message: actionShapes.size ? `Parsed spell action counts: ${[...actionShapes].sort((a, b) => a - b).join(", ")}` : "No numeric spell action counts were parsed"
+    });
+
+    const heldEntries = (this.api.compendiumIndex?.entries ?? []).filter((entry) => entry.categories?.includes?.("magic.held"));
+    const heldHands = new Set(heldEntries.map((entry) => entry.heldHands).filter((value) => value === 1 || value === 2));
+    checks.push({
+      id: "pf2e-held-usage-schema",
+      status: heldEntries.length ? "passed" : "skipped",
+      message: heldEntries.length ? `Indexed held magic items: ${heldEntries.length}; hand usages: ${[...heldHands].sort().join(", ") || "none parsed"}` : "No indexed held magic items available"
     });
 
     const accessoryFamilies = this.api.accessoryRunes?.getAll?.() ?? [];

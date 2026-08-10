@@ -13,6 +13,7 @@ import { SpecificMagicEquipmentGenerator } from "../src/engine/generators/specif
 import { SpecificMagicShieldGenerator } from "../src/engine/generators/specific-magic-shield-generator.js";
 import { WornMagicItemGenerator } from "../src/engine/generators/worn-magic-item-generator.js";
 import { AccessoryRuneGenerator } from "../src/engine/generators/accessory-rune-generator.js";
+import { HeldMagicItemGenerator } from "../src/engine/generators/held-magic-item-generator.js";
 import { SpellheartProfileRegistry, registerCoreSpellheartProfiles } from "../src/engine/registries/spellheart-profile-registry.js";
 import { WandProfileRegistry, registerCoreWandProfiles } from "../src/engine/registries/wand-profile-registry.js";
 import { StaffProfileRegistry, registerCoreStaffProfiles } from "../src/engine/registries/staff-profile-registry.js";
@@ -20,6 +21,7 @@ import { SpecificItemProfileRegistry, registerCoreSpecificItemProfiles } from ".
 import { SpecificShieldProfileRegistry, registerCoreSpecificShieldProfiles } from "../src/engine/registries/specific-shield-profile-registry.js";
 import { WornMagicProfileRegistry, registerCoreWornMagicProfiles } from "../src/engine/registries/worn-magic-profile-registry.js";
 import { AccessoryRuneRegistry, registerCoreAccessoryRunes } from "../src/engine/registries/accessory-rune-registry.js";
+import { HeldMagicProfileRegistry, registerCoreHeldMagicProfiles } from "../src/engine/registries/held-magic-profile-registry.js";
 import { getSelectableMagicThemes } from "../src/engine/magic-themes.js";
 import { TreasureRegistry } from "../src/engine/registries/treasure-registry.js";
 import { registerCoreTreasureContent } from "../src/engine/treasure/core-treasure-content.js";
@@ -79,6 +81,7 @@ function createApi() {
   const specificShieldProfiles = registerCoreSpecificShieldProfiles(new SpecificShieldProfileRegistry());
   const wornMagicProfiles = registerCoreWornMagicProfiles(new WornMagicProfileRegistry());
   const accessoryRunes = registerCoreAccessoryRunes(new AccessoryRuneRegistry());
+  const heldMagicProfiles = registerCoreHeldMagicProfiles(new HeldMagicProfileRegistry());
   const templateResolver = new MagicItemTemplateResolver({ compendiumIndex });
   generators.register(new TreasureGenerator({ categories, treasure }), { priority: 200, modes: ["treasure"] });
   generators.register(new WandGenerator({ compendiumIndex, wandProfiles, templateResolver }), { priority: 220, modes: ["magic"] });
@@ -87,6 +90,7 @@ function createApi() {
   generators.register(new SpecificMagicEquipmentGenerator({ compendiumIndex, specificItemProfiles, propertyRunes }), { priority: 218, modes: ["magic"] });
   generators.register(new WornMagicItemGenerator({ compendiumIndex, wornMagicProfiles, templateResolver }), { priority: 217, modes: ["magic"] });
   generators.register(new AccessoryRuneGenerator({ compendiumIndex, accessoryRunes }), { priority: 216, modes: ["magic"] });
+  generators.register(new HeldMagicItemGenerator({ compendiumIndex, heldMagicProfiles, templateResolver }), { priority: 214, modes: ["magic"] });
   generators.register(new SpellheartGenerator({ compendiumIndex, spellheartProfiles, templateResolver }), { priority: 215, modes: ["magic"] });
   generators.register(new ScrollGenerator({ compendiumIndex, templateResolver }), { priority: 200, modes: ["existing"] });
   generators.register(new EquipmentGenerator({ compendiumIndex, propertyRunes }), { priority: 150, modes: ["equipment"] });
@@ -108,7 +112,7 @@ function createApi() {
     return application;
   };
 
-  const itemForgeApi = new ItemForgeApi({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes: getSelectableMagicThemes(), wandProfiles, staffProfiles, spellheartProfiles, specificItemProfiles, specificShieldProfiles, wornMagicProfiles, accessoryRunes, openApplication });
+  const itemForgeApi = new ItemForgeApi({ engine, categories, generators, compendiumIndex, treasure, propertyRunes, magicThemes: getSelectableMagicThemes(), wandProfiles, staffProfiles, spellheartProfiles, specificItemProfiles, specificShieldProfiles, wornMagicProfiles, accessoryRunes, heldMagicProfiles, openApplication });
   itemForgeApi.diagnostics = new MagicItemDiagnostics({ api: itemForgeApi });
   return itemForgeApi;
 }

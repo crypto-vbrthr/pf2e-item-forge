@@ -1,4 +1,5 @@
 import { parseWornUsage, wornCategoryForSlot, isMagicWornTraits } from "./worn-item-utils.js";
+import { parseHeldUsage, heldCategoryForHands, hasHeldMagicMarkerTraits } from "./held-item-utils.js";
 
 export const SUPPORTED_ITEM_TYPES = new Set([
   "weapon",
@@ -150,6 +151,7 @@ export class CompendiumIndex {
             group: getProperty(raw, "system.group") ?? null,
             usage: getProperty(raw, "system.usage.value") ?? null,
             wornSlot: this.#wornSlot(raw),
+            heldHands: this.#heldHands(raw),
             armorCategory: getProperty(raw, "system.category") ?? null,
             damageType: getProperty(raw, "system.damage.damageType") ?? null,
             description: getProperty(raw, "system.description.value") ?? "",
@@ -317,6 +319,11 @@ export class CompendiumIndex {
     return parsed.worn ? parsed.slot : null;
   }
 
+  #heldHands(raw) {
+    const parsed = parseHeldUsage(getProperty(raw, "system.usage.value"));
+    return parsed.held ? parsed.hands : null;
+  }
+
   #classify(raw) {
     const type = raw.type;
     if (!SUPPORTED_ITEM_TYPES.has(type)) return [];
@@ -365,6 +372,10 @@ export class CompendiumIndex {
       const worn = parseWornUsage(system.usage?.value);
       if (worn.worn && isMagicWornTraits(equipmentTraits) && !equipmentTraits.includes("spellheart")) {
         categories.push("magic", "magic.worn", wornCategoryForSlot(worn.slot));
+      }
+      const held = parseHeldUsage(system.usage?.value);
+      if (type === "equipment" && held.held && hasHeldMagicMarkerTraits(equipmentTraits) && !equipmentTraits.includes("spellheart")) {
+        categories.push("magic", "magic.held", heldCategoryForHands(held.hands));
       }
     } else if (type === "treasure") {
       categories.push("treasure");
